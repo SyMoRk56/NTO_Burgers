@@ -12,6 +12,7 @@ public class SaveGameManager : MonoBehaviour
     void Awake()
     {
         if (Instance == null) Instance = this;
+
         saveFolder = Path.Combine(Application.persistentDataPath, "Saves");
         autosavePath = Path.Combine(saveFolder, "autosave.json");
 
@@ -23,6 +24,7 @@ public class SaveGameManager : MonoBehaviour
     {
         string json = CreateSaveJson();
         File.WriteAllText(autosavePath, json);
+
         ShowSaveIndicator();
         Debug.Log("Autosave saved -> " + autosavePath);
     }
@@ -49,14 +51,30 @@ public class SaveGameManager : MonoBehaviour
         if (!File.Exists(autosavePath))
         {
             Debug.LogError("No autosave found.");
+            
             return;
         }
 
         LoadFromJson(File.ReadAllText(autosavePath));
     }
-
-    public void LoadManual(string path)
+    public bool HasAutosave()
     {
+        return File.Exists(autosavePath);
+    }
+    public bool HasManual(string name)
+    {
+        string folder = Path.Combine(saveFolder, "manual");
+        Directory.CreateDirectory(folder);
+
+        string path = Path.Combine(folder, name + ".json");
+        return File.Exists(path);
+    }
+    public void LoadManual(string name)
+    {
+        string folder = Path.Combine(saveFolder, "manual");
+        Directory.CreateDirectory(folder);
+
+        string path = Path.Combine(folder, name + ".json");
         if (!File.Exists(path))
         {
             Debug.LogError("Save file not found: " + path);
@@ -66,25 +84,33 @@ public class SaveGameManager : MonoBehaviour
         LoadFromJson(File.ReadAllText(path));
     }
 
+    // ------------ INTERNAL LOGIC ------------
     private string CreateSaveJson()
     {
         GameSaveData data = new GameSaveData();
 
-        // сбор данных от разных систем
-        data.playerData = PlayerSaveSystem.Instance.GetData();
-        data.settingsData = SettingsSaveSystem.Instance.GetData();
+        try
+        {
+            data.playerData = PlayerSaveSystem.Instance.GetData();
+        }
+        catch
+        {
+            data.playerData = null;
+        }
+
+
 
         return JsonUtility.ToJson(data, true);
     }
 
     private void LoadFromJson(string json)
     {
+        Debug.Log(json);
         GameSaveData data = JsonUtility.FromJson<GameSaveData>(json);
 
         PlayerSaveSystem.Instance.LoadData(data.playerData);
-        SettingsSaveSystem.Instance.LoadData(data.settingsData);
 
-        Debug.Log("Save loaded successfully.");
+        Debug.Log("Game save loaded successfully.");
     }
 
     private void SaveScreenshot(string filePath)
@@ -92,16 +118,8 @@ public class SaveGameManager : MonoBehaviour
         ScreenCapture.CaptureScreenshot(filePath);
     }
 
-    // ------------ FEEDBACK ------------
     private void ShowSaveIndicator()
     {
         
-    }
-    IEnumerator Start()
-    {
-        while (true)
-        {
-
-        }
     }
 }

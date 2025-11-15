@@ -1,16 +1,33 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public static GameManager Instance;
+    GameObject player;
+    private void Awake()
     {
-        
+        Instance = this;
+        SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
-    // Update is called once per frame
-    void Update()
+    private void OnSceneLoaded(Scene arg0, LoadSceneMode arg1)
     {
-        
+        if(arg0.name == "Game")
+        {
+            OnStartGame();
+        }
+    }
+
+    public void OnStartGame()
+    {
+        SaveGameManager.Instance.LoadAuto();
+    }
+    public GameObject GetPlayer()
+    {
+        if(player != null) return player;
+        player = GameObject.FindWithTag("Player");
+        return player;
     }
 }
+

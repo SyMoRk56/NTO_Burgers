@@ -31,10 +31,8 @@ public class PauseMenu : MonoBehaviour
 
     public void ReturnToMainMenu()
     {
-        if (GameManager.Instance != null)
-            GameManager.Instance.SaveGame();
-
+        SaveGameManager.Instance.SaveAuto() ;
         Time.timeScale = 1f;
-        SceneManager.LoadScene("menu");
+        SceneManager.LoadScene("Menu");
     }
 }

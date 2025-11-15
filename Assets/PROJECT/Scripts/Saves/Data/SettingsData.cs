@@ -4,25 +4,7 @@ using UnityEngine;
 
 public class SettingsData
 {
-    
-}
-
-public class SettingsSaveSystem
-{
-    public static SettingsSaveSystem Instance;
-
-    void Awake() => Instance = this;
-
-    public SettingsData GetData()
-    {
-        return new SettingsData()
-        {
-
-        };
-    }
-
-    public void LoadData(SettingsData data)
-    {
-        
-    }
+    public float masterVolume;
+    public float musicVolume;
+    public float soundsVolume;
 }
