@@ -16,7 +16,7 @@ public class DialogueUI : MonoBehaviour
 
     void Awake()
     {
-        runner = FindObjectOfType<DialogueRunner>();
+        runner = GetComponentInParent<DialogueRunner>();
         Hide();
     }
 

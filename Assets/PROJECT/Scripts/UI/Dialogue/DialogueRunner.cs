@@ -20,6 +20,7 @@ public class DialogueRunner : MonoBehaviour
     {
         currentDialogueIndex = random ? Random.Range(0, dialogues.Length) : 0;
         currentPhraseIndex = 0;
+        dialogueUI.gameObject.SetActive(true);
         ShowCurrentPhrase();
     }
 
@@ -56,6 +57,7 @@ public class DialogueRunner : MonoBehaviour
         if (next < 0)
         {
             dialogueUI.Hide();
+            isRunning = false;
             return;
         }
 
