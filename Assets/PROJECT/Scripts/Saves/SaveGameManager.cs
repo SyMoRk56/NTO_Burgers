@@ -8,6 +8,7 @@ public class SaveGameManager : MonoBehaviour
 
     private string saveFolder;
     private string autosavePath;
+    public GameObject autosaveIndicator;
 
     void Awake()
     {
@@ -15,16 +16,17 @@ public class SaveGameManager : MonoBehaviour
 
         saveFolder = Path.Combine(Application.persistentDataPath, "Saves");
         autosavePath = Path.Combine(saveFolder, "autosave.json");
-
+        print(saveFolder);
         Directory.CreateDirectory(saveFolder);
     }
 
     // ------------ SAVE ------------
-    public void SaveAuto()
+    public void SaveAuto(bool showIndicator)
     {
         string json = CreateSaveJson();
         File.WriteAllText(autosavePath, json);
 
+        if (showIndicator)
         ShowSaveIndicator();
         Debug.Log("Autosave saved -> " + autosavePath);
     }
@@ -98,7 +100,11 @@ public class SaveGameManager : MonoBehaviour
             data.playerData = null;
         }
 
+        data.saveDate = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
 
+        data.timestamp = System.DateTimeOffset.Now.ToUnixTimeSeconds();
+
+        data.playtime = Time.time;
 
         return JsonUtility.ToJson(data, true);
     }
@@ -120,6 +126,11 @@ public class SaveGameManager : MonoBehaviour
 
     private void ShowSaveIndicator()
     {
-        
+        autosaveIndicator.SetActive(true);
+        Invoke(nameof(DisableIndicator), 5f);
+    }
+    void DisableIndicator()
+    {
+        autosaveIndicator.SetActive(false);
     }
 }
