@@ -2,6 +2,7 @@ using UnityEngine;
 using System;
 using System.Collections.Generic;
 
+[DefaultExecutionOrder(-1)]
 public class LocalizationManager : MonoBehaviour
 {
     public static LocalizationManager Instance;
@@ -21,9 +22,9 @@ public class LocalizationManager : MonoBehaviour
 
         DontDestroyOnLoad(gameObject);
 
-        CurrentLanguage = PlayerPrefs.GetString("Language", defaultLanguage);
-
         LoadCSV();
+
+        LoadLanguageFromSettings();
     }
 
     private void LoadCSV()
@@ -33,14 +34,32 @@ public class LocalizationManager : MonoBehaviour
         if (table == null)
             Debug.LogError("Localization table is NULL!");
     }
+    private void LoadLanguageFromSettings()
+    {
+        print(SettingsSaveSystem.Instance == null);
+        var settings = SettingsSaveSystem.Instance.GetData();
+        print(settings.lang);
+        if (string.IsNullOrEmpty(settings.lang))
+            settings.lang = defaultLanguage;
 
+        SetLanguage(settings.lang);
+
+        Debug.Log("Loaded language: " + CurrentLanguage);
+    }
     public void SetLanguage(string lang)
     {
         CurrentLanguage = lang;
-        PlayerPrefs.SetString("Language", lang);
-        OnLanguageChanged?.Invoke();
-    }
 
+        // Сохраняем в Settings.json
+        var settings = SettingsSaveSystem.Instance.GetData();
+        settings.lang = lang;
+        SettingsSaveSystem.Instance.LoadData(settings);
+        SettingsSaveManager.Instance.SaveSettings();
+
+        OnLanguageChanged?.Invoke();
+
+        Debug.Log("Language changed to: " + lang);
+    }
     public string GetText(string key)
     {
         if (!table.ContainsKey(key))
@@ -57,15 +76,14 @@ public class LocalizationManager : MonoBehaviour
 
         return table[key][CurrentLanguage.ToLower()];
     }
+
+
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.F1))
-        {
             SetLanguage("EN");
-        }
+
         if (Input.GetKeyDown(KeyCode.F2))
-        {
             SetLanguage("RU");
-        }
     }
 }

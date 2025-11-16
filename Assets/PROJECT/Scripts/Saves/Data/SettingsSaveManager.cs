@@ -1,6 +1,7 @@
 using System.IO;
 using UnityEngine;
 
+[DefaultExecutionOrder(-5)]
 public class SettingsSaveManager : MonoBehaviour
 {
     public static SettingsSaveManager Instance;
@@ -16,6 +17,7 @@ public class SettingsSaveManager : MonoBehaviour
         settingsPath = Path.Combine(settingsFolder, "settings.json");
 
         Directory.CreateDirectory(settingsFolder);
+        LoadSettings();
     }
 
     // ----------- SAVE SETTINGS -----------
@@ -24,7 +26,7 @@ public class SettingsSaveManager : MonoBehaviour
         SettingsData data = SettingsSaveSystem.Instance.GetData();
         string json = JsonUtility.ToJson(data, true);
         File.WriteAllText(settingsPath, json);
-
+        print(json);
         Debug.Log("Settings saved -> " + settingsPath);
     }
 
