@@ -13,7 +13,7 @@ public class DialogueRunner : MonoBehaviour
 
     void Start()
     {
-        StartDialogue();
+        
     }
 
     public void StartDialogue()
@@ -65,4 +65,23 @@ public class DialogueRunner : MonoBehaviour
         currentPhraseIndex = 0;
         ShowCurrentPhrase();
     }
+    private bool isRunning;
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            if (!isRunning)
+            {
+                isRunning = true;
+                StartDialogue();
+            }
+            else
+            {
+                isRunning = false;
+                dialogueUI.Hide();
+            }
+        }
+    }
+
 }
