@@ -11,9 +11,11 @@ public class Settings : MonoBehaviour
     public TMP_Dropdown resolutionDropdown;
 
     Resolution[] resolution;
+    public TMP_Dropdown langDropdown;
 
     void Start()
     {
+        langDropdown.SetValueWithoutNotify(LocalizationManager.Instance.CurrentLanguage == "RU" ? 0 : 1);
         resolutionDropdown.ClearOptions();
         List<string> options = new List<string>();
         resolution = Screen.resolutions;
@@ -55,6 +57,10 @@ public class Settings : MonoBehaviour
         else
             resolutionDropdown.value = currentResolutionIndex;
 
+    }
+    public void SetLang()
+    {
+        LocalizationManager.Instance.SetLanguage(langDropdown.value == 0 ? "RU" : "EN");
     }
 }
 

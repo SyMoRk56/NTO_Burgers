@@ -20,7 +20,6 @@ public class SettingsSaveManager : MonoBehaviour
         LoadSettings();
     }
 
-    // ----------- SAVE SETTINGS -----------
     public void SaveSettings()
     {
         SettingsData data = SettingsSaveSystem.Instance.GetData();
@@ -30,7 +29,6 @@ public class SettingsSaveManager : MonoBehaviour
         Debug.Log("Settings saved -> " + settingsPath);
     }
 
-    // ----------- LOAD SETTINGS -----------
     public void LoadSettings()
     {
         if (!File.Exists(settingsPath))
