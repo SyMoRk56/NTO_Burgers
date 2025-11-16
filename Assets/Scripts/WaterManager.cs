@@ -1,25 +1,29 @@
 using UnityEngine;
 
 [RequireComponent(typeof(MeshFilter))]
-[RequireComponent(typeof(MeshRenderer))]
 public class WaterManager : MonoBehaviour
 {
-    private MeshFilter meshFilter;
+    private Mesh mesh;
+    private Vector3[] baseVertices;
 
     private void Awake()
     {
-        meshFilter = GetComponent<MeshFilter>();
+        mesh = GetComponent<MeshFilter>().mesh;
+        baseVertices = mesh.vertices;
     }
 
     private void Update()
     {
-        Vector3[] vertices = meshFilter.mesh.vertices;
+        Vector3[] vertices = new Vector3[baseVertices.Length];
         for (int i = 0; i < vertices.Length; i++)
         {
-            vertices[i].y = WaveManager.instance.GetWaveHeight(transform.position.x + vertices[i].x);
+            Vector3 localPos = baseVertices[i];
+            Vector3 worldPos = transform.TransformPoint(localPos);
+            float height = WaveManager.instance.GetWaveHeight(worldPos);
+            localPos.y = height - transform.position.y;
+            vertices[i] = localPos;
         }
-
-        meshFilter.mesh.vertices = vertices;
-        meshFilter.mesh.RecalculateNormals();
+        mesh.vertices = vertices;
+        mesh.RecalculateNormals();
     }
 }
