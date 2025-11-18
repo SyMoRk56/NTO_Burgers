@@ -9,6 +9,7 @@ public class GameManager : MonoBehaviour
     public bool isGameGoing;
     private void Awake()
     {
+        if (Instance != null) Destroy(gameObject);
         Instance = this;
         SceneManager.sceneLoaded += OnSceneLoaded;
     }
@@ -30,6 +31,7 @@ public class GameManager : MonoBehaviour
     {
         if(player != null) return player;
         player = GameObject.FindWithTag("Player");
+        print("Find with tag: " + (player == null));
         return player;
     }
     public IEnumerator Autosave()
@@ -42,4 +44,7 @@ public class GameManager : MonoBehaviour
         //אגעמסויג
     }
 }
-
+public class GameConfig
+{
+    public const float interactionRange = 3;
+}

@@ -31,6 +31,7 @@ public class PlayerMovement : MonoBehaviour
     private Vector3 targetVelocity;
     private Vector3 currentVelocity;
 
+    public PlayerManager manager;
     void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -47,6 +48,8 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
+        if (!manager.CanMove) return;
+       
         GetInput();
         HandleLook();
 
@@ -59,6 +62,7 @@ public class PlayerMovement : MonoBehaviour
 
     void FixedUpdate()
     {
+        if(!manager.CanMove) return;
         CheckGrounded();
         HandleMovement();
         ApplyFriction();

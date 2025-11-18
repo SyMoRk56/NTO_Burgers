@@ -18,10 +18,22 @@ public class DialogueRunner : MonoBehaviour
 
     public void StartDialogue()
     {
-        currentDialogueIndex = random ? Random.Range(0, dialogues.Length) : 0;
-        currentPhraseIndex = 0;
-        dialogueUI.gameObject.SetActive(true);
-        ShowCurrentPhrase();
+        if (!isRunning)
+        {
+            currentDialogueIndex = random ? Random.Range(0, dialogues.Length) : 0;
+            currentPhraseIndex = 0;
+            dialogueUI.gameObject.SetActive(true);
+            ShowCurrentPhrase();
+            isRunning = true;
+            GameManager.Instance.GetPlayer().GetComponent<PlayerManager>().ShowCursor(true);
+            GameManager.Instance.GetPlayer().GetComponent<PlayerManager>().CanMove = false;
+        }
+        else
+        {
+            isRunning = false;
+            dialogueUI.Hide();
+        }
+        
     }
 
     void ShowCurrentPhrase()
@@ -69,21 +81,6 @@ public class DialogueRunner : MonoBehaviour
     }
     private bool isRunning;
 
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.E))
-        {
-            if (!isRunning)
-            {
-                isRunning = true;
-                StartDialogue();
-            }
-            else
-            {
-                isRunning = false;
-                dialogueUI.Hide();
-            }
-        }
-    }
+   
 
 }

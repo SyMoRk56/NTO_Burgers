@@ -61,7 +61,10 @@ public class DialogueUI : MonoBehaviour
 
     public void Hide()
     {
+        print("Hide dialogue");
         gameObject.SetActive(false);
+        GameManager.Instance.GetPlayer().GetComponent<PlayerManager>().CanMove = true;
+        GameManager.Instance.GetPlayer().GetComponent<PlayerManager>().ShowCursor(false);
     }
 
     void ClearChoices()
