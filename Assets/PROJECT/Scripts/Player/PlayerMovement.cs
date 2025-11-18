@@ -24,8 +24,8 @@ public class PlayerMovement : MonoBehaviour
     private Vector2 lookInput;
     private float xRotation = 0f;
 
-    private bool isGrounded = false;
-    private bool isRunning = false;
+    public bool isGrounded = false;
+    public bool isRunning = false;
     private bool jumpRequested = false; // ��� ���������� ��������� ������
 
     private Vector3 targetVelocity;
