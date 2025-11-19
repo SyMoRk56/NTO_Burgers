@@ -29,6 +29,11 @@ public class PlayerInteraction : MonoBehaviour
                         PickupObject(hit.gameObject);
                         return;
                     }
+                    if(hit.gameObject.TryGetComponent(out MailBox box))
+                    {
+                        box.Interact();
+                        return;
+                    }
                 }
             }
             else
