@@ -92,12 +92,12 @@ public class PlayerMovement : MonoBehaviour
 
     void HandleLook()
     {
-        xRotation -= lookInput.y;
-        xRotation = Mathf.Clamp(xRotation, -maxViewAngle, maxViewAngle);
+        //xRotation -= lookInput.y;
+        //xRotation = Mathf.Clamp(xRotation, -maxViewAngle, maxViewAngle);
 
-        cameraTransform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+        //cameraTransform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
 
-        transform.Rotate(Vector3.up * lookInput.x);
+        //transform.Rotate(Vector3.up * lookInput.x);
     }
 
     void HandleMovement()
