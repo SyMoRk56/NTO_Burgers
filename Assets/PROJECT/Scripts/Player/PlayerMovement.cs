@@ -32,6 +32,8 @@ public class PlayerMovement : MonoBehaviour
     private Vector3 currentVelocity;
 
     public PlayerManager manager;
+
+    public Transform forwardVector;
     void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -102,7 +104,7 @@ public class PlayerMovement : MonoBehaviour
 
     void HandleMovement()
     {
-        Vector3 wishDir = (transform.forward * moveInput.y + transform.right * moveInput.x).normalized;
+        Vector3 wishDir = (forwardVector.forward * moveInput.y + forwardVector.right * moveInput.x).normalized;
 
         float targetSpeed = GetTargetSpeed();
         targetVelocity = wishDir * targetSpeed;
