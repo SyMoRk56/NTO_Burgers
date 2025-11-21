@@ -1397,9 +1397,10 @@ GameObject:
   - component: {fileID: 371087340}
   - component: {fileID: 371087339}
   - component: {fileID: 371087338}
+  - component: {fileID: 371087343}
   m_Layer: 0
   m_Name: water
-  m_TagString: Untagged
+  m_TagString: Water
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1502,6 +1503,27 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1135183768}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &371087343
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 371087337}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 10, y: 2.2204463e-16, z: 10}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &442534926
 GameObject:
   m_ObjectHideFlags: 0
@@ -6997,7 +7019,6 @@ GameObject:
   - component: {fileID: 2055504036}
   - component: {fileID: 2055504033}
   - component: {fileID: 2055504032}
-  - component: {fileID: 2055504037}
   - component: {fileID: 2055504038}
   - component: {fileID: 2055504039}
   - component: {fileID: 2055504040}
@@ -7005,6 +7026,7 @@ GameObject:
   - component: {fileID: 2055504043}
   - component: {fileID: 2055504044}
   - component: {fileID: 2055504045}
+  - component: {fileID: 2055504046}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -7079,24 +7101,6 @@ Transform:
   - {fileID: 736915004}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2055504037
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2055504031}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d6aeeb6ccd6e5f04a8247300780dc6fa, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Floater
-  rigidbody: {fileID: 2055504032}
-  depthBeforeSubmerged: 1
-  displacementAmount: 3
-  floaterCount: 1
-  waterDrag: 0.99
-  waterAngularDrag: 0.5
 --- !u!114 &2055504038
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7302,6 +7306,22 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &2055504046
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2055504031}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 42286c368e6b93644854bbeeb3e16140, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RespawnPlayer
+  respawnDelay: 1
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 64
 --- !u!1 &2075896875
 GameObject:
   m_ObjectHideFlags: 0
