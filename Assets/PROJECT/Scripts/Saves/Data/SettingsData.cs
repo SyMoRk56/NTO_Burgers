@@ -6,7 +6,6 @@ public class SettingsData
 {
     public string lang;
 
-    public float masterVolume;
-    public float musicVolume;
-    public float soundsVolume;
+    public float masterVolume = 1;
+    public int resolution;
 }

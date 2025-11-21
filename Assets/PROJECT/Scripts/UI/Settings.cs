@@ -12,7 +12,7 @@ public class Settings : MonoBehaviour
 
     Resolution[] resolution;
     public TMP_Dropdown langDropdown;
-
+    public Slider volumeSlider;
     void Start()
     {
         langDropdown.SetValueWithoutNotify(LocalizationManager.Instance.CurrentLanguage == "RU" ? 0 : 1);
@@ -47,15 +47,18 @@ public class Settings : MonoBehaviour
     
     public void SaveSettings()
     {
-        PlayerPrefs.SetInt("Resolution", resolutionDropdown.value);
+        //PlayerPrefs.SetInt("Resolution", resolutionDropdown.value);
+        var data = SettingsSaveSystem.Instance.GetData();
+        data.resolution = resolutionDropdown.value;
+        data.masterVolume = volumeSlider.value;
+        SettingsSaveSystem.Instance.LoadData(data);
     }
 
     public void LoadSettings(int currentResolutionIndex)
     {
-        if (PlayerPrefs.HasKey("Resolution"))
-            resolutionDropdown.value = PlayerPrefs.GetInt("Resolution");
-        else
-            resolutionDropdown.value = currentResolutionIndex;
+        var data = SettingsSaveSystem.Instance.GetData();
+        resolutionDropdown.SetValueWithoutNotify(data.resolution);
+        volumeSlider.SetValueWithoutNotify(data.masterVolume);
 
     }
     public void SetLang()
