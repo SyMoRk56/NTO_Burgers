@@ -1,9 +1,14 @@
 fileFormatVersion: 2
-guid: 0c865698be56bc84c83683dde68e3f37
+guid: 4ada1568c18350647beaa17162932597
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Bridge
+    second: {fileID: 2100000, guid: 56e8a7ccd68144546860e074ae4d03fe, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
