@@ -19,6 +19,7 @@ public class DialogueRunner : MonoBehaviour
 
     public void StartDialogue(bool letter)
     {
+        if (defaultDialogues.Length == 0 && letterDialogues.Length == 0) return;
         if (!isRunning)
         {
             isLetter = letter;

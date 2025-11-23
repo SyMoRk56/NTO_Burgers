@@ -6,7 +6,7 @@ public class TaskManager : MonoBehaviour
 {
     public GameObject letterPrefab;
     public static TaskManager Instance;
-    public Queue<Task> tasks;
+    public Queue<Task> tasks = new();
     private void Awake()
     {
         Instance = this;
@@ -18,7 +18,8 @@ public class TaskManager : MonoBehaviour
     }
     public void NextTask()
     {
-        TaskUI.Instance.SetTask(new("",""));
+        if (tasks.Count == 0) return;
+        TaskUI.Instance.SetTask(new("",""), -1);
         var task = tasks.Dequeue();
         StartCoroutine(GetPlayerNextLetter(task));
     }
@@ -29,7 +30,7 @@ public class TaskManager : MonoBehaviour
         var letter = letterGO.GetComponent<Letter>();
         letter.recieverName = task.recieverName;
         GameManager.Instance.GetPlayer().GetComponent<PlayerInteraction>().pickupedLetter = letter;
-        TaskUI.Instance.SetTask(task);
+        TaskUI.Instance.SetTask(task, tasks.Count);
     }
 }
 public struct Task

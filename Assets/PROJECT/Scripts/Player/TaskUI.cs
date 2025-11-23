@@ -7,12 +7,13 @@ public class TaskUI : MonoBehaviour
     public GameObject task;
     public TMP_Text reciever;
     public TMP_Text adress;
+    public TMP_Text countText;
 
     private void Awake()
     {
         Instance = this;
     }
-    public void SetTask(Task task)
+    public void SetTask(Task task, int count)
     {
         this.task.SetActive(true);
         if(task.recieverName == "" || task.adress == "")
