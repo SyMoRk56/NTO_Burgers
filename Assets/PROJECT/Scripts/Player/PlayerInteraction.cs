@@ -8,7 +8,7 @@ public class PlayerInteraction : MonoBehaviour
     {
         if(pickupedLetter != null)
         {
-            pickupedLetter.transform.position = transform.position + transform.forward;
+            pickupedLetter.transform.position = transform.position + transform.GetChild(0).forward;
         }
         if (Input.GetKeyDown(KeyCode.E))
         {
