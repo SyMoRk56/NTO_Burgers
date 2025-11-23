@@ -1,37 +1,49 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class PlayerInteraction : MonoBehaviour
 {
     public Letter pickupedLetter;
     public PlayerManager manager;
+
     private void Update()
     {
-        if(pickupedLetter != null)
+        if (pickupedLetter != null)
         {
-            pickupedLetter.transform.position = transform.position + transform.GetChild(0).forward;
+            pickupedLetter.transform.position = transform.position + transform.forward;
         }
+
         if (Input.GetKeyDown(KeyCode.E))
         {
-            if(pickupedLetter == null)
+            if (pickupedLetter == null)
             {
                 Collider[] hits = Physics.OverlapSphere(transform.position, GameConfig.interactionRange);
+
                 foreach (var hit in hits)
                 {
                     print("Hit: " + hit.name + " " + hit.tag);
+
                     if (hit.CompareTag("Dialog"))
                     {
-                        print("StartDialogue");
                         hit.GetComponent<DialogueRunner>().StartDialogue(false);
                         return;
                     }
+
                     if (hit.CompareTag("Pickup"))
                     {
                         PickupObject(hit.gameObject);
                         return;
                     }
-                    if(hit.gameObject.TryGetComponent(out MailBox box))
+
+                    if (hit.TryGetComponent(out MailBox box))
                     {
                         box.Interact();
+                        return;
+                    }
+
+                    // ✅ ВХОД В ДОМ
+                    if (hit.TryGetComponent(out EnterToHouse enter))
+                    {
+                        enter.Interact();
                         return;
                     }
                 }
@@ -39,9 +51,11 @@ public class PlayerInteraction : MonoBehaviour
             else
             {
                 Collider[] hits = Physics.OverlapSphere(transform.position, GameConfig.interactionRange);
+
                 foreach (var hit in hits)
                 {
                     print("Hit: " + hit.name + " " + hit.tag);
+
                     if (hit.CompareTag("Dialog"))
                     {
                         var dialog = hit.GetComponent<DialogueRunner>();
@@ -54,18 +68,20 @@ public class PlayerInteraction : MonoBehaviour
                         return;
                     }
                 }
+
                 ReleaseObject();
             }
-            
         }
     }
+
     public void ReleaseObject()
     {
         pickupedLetter = null;
     }
+
     public void PickupObject(GameObject go)
     {
-        print("PIckup");
+        print("Pickup");
         pickupedLetter = go.GetComponent<Letter>();
     }
 }

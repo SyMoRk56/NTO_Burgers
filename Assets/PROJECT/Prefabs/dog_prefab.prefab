@@ -13,7 +13,6 @@ GameObject:
   - component: {fileID: 8824037366075351905}
   - component: {fileID: 3983709652382397962}
   - component: {fileID: 3319410759517388343}
-  - component: {fileID: 4632616991241871102}
   m_Layer: 0
   m_Name: dog_prefab
   m_TagString: Dialog
@@ -52,8 +51,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DialogueRunner
   ownerName: 
-  defaultDialogues: []
-  letterDialogues: []
+  defaultDialogues:
+  - {fileID: 11400000, guid: c3220bcf82a10fe4da5fd37f2c4fedce, type: 2}
+  - {fileID: 11400000, guid: 53bbb675874d8054ea59816745af34db, type: 2}
+  - {fileID: 11400000, guid: 0444925fa4fc643488df9d62f49f39b5, type: 2}
+  letterDialogues:
+  - {fileID: 11400000, guid: 53bbb675874d8054ea59816745af34db, type: 2}
   random: 0
   dialogueUI: {fileID: 799909868272497751}
 --- !u!136 &8824037366075351905
@@ -134,33 +137,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1174058656270132492}
   m_Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
---- !u!54 &4632616991241871102
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1174058656270132492}
-  serializedVersion: 5
-  m_Mass: 1
-  m_LinearDamping: 0
-  m_AngularDamping: 0.05
-  m_CenterOfMass: {x: 0, y: 0, z: 0}
-  m_InertiaTensor: {x: 1, y: 1, z: 1}
-  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ImplicitCom: 1
-  m_ImplicitTensor: 1
-  m_UseGravity: 1
-  m_IsKinematic: 0
-  m_Interpolate: 0
-  m_Constraints: 112
-  m_CollisionDetection: 0
 --- !u!1 &2478540755773517920
 GameObject:
   m_ObjectHideFlags: 0
@@ -626,6 +602,7 @@ MonoBehaviour:
   phraseText: {fileID: 164267541385444004}
   choicesParent: {fileID: 2361516269304067822}
   choiceButtonPrefab: {fileID: 8078306955795122749, guid: 1579b0d3b787a0a449daffe0d30d7d82, type: 3}
+  hideOnAwake: 1
 --- !u!1 &7300689000577072402
 GameObject:
   m_ObjectHideFlags: 0
@@ -1008,6 +985,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::InteractionUI
   popup: {fileID: 2478540755773517920}
   trigger: {fileID: 773028984157775482}
+  deskInteraction: {fileID: 0}
 --- !u!1001 &8054112848739896934
 PrefabInstance:
   m_ObjectHideFlags: 0

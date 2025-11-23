@@ -17,7 +17,7 @@ public class EnterToHouse : MonoBehaviour
         blackScreen.DOFade(1, 1);
         yield return new WaitForSeconds(1);
         GameManager.Instance.GetPlayer().transform.position = teleportTo.position;
-        yield return new WaitForSeconds(.1f);
+        yield return new WaitForSeconds(1);
         blackScreen.DOFade(0, 1);
         GameManager.Instance.GetPlayer().GetComponent<PlayerManager>().CanMove = true;
     }
