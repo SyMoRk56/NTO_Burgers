@@ -5,46 +5,89 @@ using UnityEngine.SceneManagement;
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
-    GameObject player;
-    public bool isGameGoing;
+
+    private GameObject player;
+
+    public bool isGameGoing = false;
+    private Coroutine autosaveRoutine;
+
+    // Flags for saves
+    public string pendingManualLoad = null;
+    public bool loadAutoOnStart = true;
+
     private void Awake()
     {
-        if (Instance != null) Destroy(gameObject);
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
         Instance = this;
+        DontDestroyOnLoad(gameObject);
+
         SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
-    private void OnSceneLoaded(Scene arg0, LoadSceneMode arg1)
+    private void OnDestroy()
     {
-        if(arg0.name == "Game")
-        {
-            OnStartGame();
-        }
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (scene.name == "Game")
+            StartCoroutine(DelayedGameStart());
+    }
+
+    IEnumerator DelayedGameStart()
+    {
+        yield return null;
+        OnStartGame();
     }
 
     public void OnStartGame()
     {
-        SaveGameManager.Instance.LoadAuto();
-        StartCoroutine(Autosave());
+        isGameGoing = true;
+
+        player = GetPlayer();
+
+        // Load MANUAL save if selected
+        if (pendingManualLoad != null)
+        {
+            SaveGameManager.Instance.LoadManual(pendingManualLoad);
+            pendingManualLoad = null;
+        }
+        // Or load AUTOSAVE by default
+        else if (loadAutoOnStart)
+        {
+            SaveGameManager.Instance.LoadAuto();
+        }
+
+        if (autosaveRoutine != null)
+            StopCoroutine(autosaveRoutine);
+
+        autosaveRoutine = StartCoroutine(Autosave());
     }
+
     public GameObject GetPlayer()
     {
-        if(player != null) return player;
+        if (player != null) return player;
+
         player = GameObject.FindWithTag("Player");
-        print("Find with tag: " + (player == null));
+
+        if (player == null)
+            Debug.LogWarning("Player not found! Add 'Player' tag to player object.");
+
         return player;
     }
-    public IEnumerator Autosave()
+
+    private IEnumerator Autosave()
     {
         while (isGameGoing)
         {
-            yield return new WaitForSeconds(30);
+            yield return new WaitForSeconds(30f);
             SaveGameManager.Instance.SaveAuto(true);
         }
-        //אגעמסויג
     }
-}
-public class GameConfig
-{
-    public const float interactionRange = 3;
 }

@@ -1,4 +1,3 @@
-using System.Collections;
 using System.IO;
 using UnityEngine;
 
@@ -12,23 +11,28 @@ public class SaveGameManager : MonoBehaviour
 
     void Awake()
     {
-        if (Instance == null) Instance = this;
+        Instance = this;
 
         saveFolder = Path.Combine(Application.persistentDataPath, "Saves");
         autosavePath = Path.Combine(saveFolder, "autosave.json");
-        print(saveFolder);
+
         Directory.CreateDirectory(saveFolder);
     }
 
-    // ------------ SAVE ------------
+    // ---------------- SAVE ----------------
     public void SaveAuto(bool showIndicator)
     {
         string json = CreateSaveJson();
-        File.WriteAllText(autosavePath, json);
 
-        if (showIndicator)
-        ShowSaveIndicator();
-        Debug.Log("Autosave saved -> " + autosavePath);
+        try
+        {
+            File.WriteAllText(autosavePath, json);
+            if (showIndicator) ShowSaveIndicator();
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError("Autosave failed: " + e.Message);
+        }
     }
 
     public void SaveManual(string saveName)
@@ -41,28 +45,26 @@ public class SaveGameManager : MonoBehaviour
         string json = CreateSaveJson();
         File.WriteAllText(filePath, json);
 
-        SaveScreenshot(Path.Combine(folder, saveName + ".png"));
+        ScreenCapture.CaptureScreenshot(Path.Combine(folder, saveName + ".png"));
 
         ShowSaveIndicator();
         Debug.Log("Manual save created -> " + filePath);
     }
 
-    // ------------ LOAD ------------
+    // ---------------- LOAD ----------------
     public void LoadAuto()
     {
         if (!File.Exists(autosavePath))
         {
-            Debug.LogError("No autosave found.");
-            
+            Debug.LogWarning("No autosave found.");
             return;
         }
 
         LoadFromJson(File.ReadAllText(autosavePath));
     }
-    public bool HasAutosave()
-    {
-        return File.Exists(autosavePath);
-    }
+
+    public bool HasAutosave() => File.Exists(autosavePath);
+
     public bool HasManual(string name)
     {
         string folder = Path.Combine(saveFolder, "manual");
@@ -71,22 +73,24 @@ public class SaveGameManager : MonoBehaviour
         string path = Path.Combine(folder, name + ".json");
         return File.Exists(path);
     }
+
     public void LoadManual(string name)
     {
         string folder = Path.Combine(saveFolder, "manual");
         Directory.CreateDirectory(folder);
 
         string path = Path.Combine(folder, name + ".json");
+
         if (!File.Exists(path))
         {
             Debug.LogError("Save file not found: " + path);
             return;
         }
-        print(name);
+
         LoadFromJson(File.ReadAllText(path));
     }
 
-    // ------------ INTERNAL LOGIC ------------
+    // ---------------- INTERNAL ----------------
     private string CreateSaveJson()
     {
         GameSaveData data = new GameSaveData();
@@ -95,15 +99,16 @@ public class SaveGameManager : MonoBehaviour
         {
             data.playerData = PlayerSaveSystem.Instance.GetData();
         }
-        catch
+        catch { data.playerData = null; }
+
+        try
         {
-            data.playerData = null;
+            data.settingsData = SettingsSaveSystem.Instance.GetData();
         }
+        catch { data.settingsData = null; }
 
         data.saveDate = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-
         data.timestamp = System.DateTimeOffset.Now.ToUnixTimeSeconds();
-
         data.playtime = Time.time;
 
         return JsonUtility.ToJson(data, true);
@@ -111,26 +116,24 @@ public class SaveGameManager : MonoBehaviour
 
     private void LoadFromJson(string json)
     {
-        Debug.Log(json);
         GameSaveData data = JsonUtility.FromJson<GameSaveData>(json);
 
         PlayerSaveSystem.Instance.LoadData(data.playerData);
 
-        Debug.Log("Game save loaded successfully.");
-    }
-
-    private void SaveScreenshot(string filePath)
-    {
-        ScreenCapture.CaptureScreenshot(filePath);
+        Debug.Log("Save loaded successfully");
     }
 
     private void ShowSaveIndicator()
     {
+        if (autosaveIndicator == null) return;
+
         autosaveIndicator.SetActive(true);
-        Invoke(nameof(DisableIndicator), 5f);
+        Invoke(nameof(DisableIndicator), 2.5f);
     }
-    void DisableIndicator()
+
+    private void DisableIndicator()
     {
-        autosaveIndicator.SetActive(false);
+        if (autosaveIndicator != null)
+            autosaveIndicator.SetActive(false);
     }
 }

@@ -1,0 +1,1 @@
+public class GameConfig { public const float interactionRange = 3; }

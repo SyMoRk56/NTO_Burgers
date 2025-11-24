@@ -1,4 +1,5 @@
 using System.IO;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -6,6 +7,7 @@ public class MainMenuSaves : MonoBehaviour
 {
     public SavePanel[] saves;
     private string manualFolder;
+
     private void Start()
     {
         manualFolder = Path.Combine(Application.persistentDataPath, "Saves/manual");
@@ -16,7 +18,9 @@ public class MainMenuSaves : MonoBehaviour
             return;
         }
 
-        string[] jsonFiles = Directory.GetFiles(manualFolder, "*.json");
+        string[] jsonFiles = Directory.GetFiles(manualFolder, "*.json")
+            .OrderBy(f => f)
+            .ToArray();
 
         for (int i = 0; i < saves.Length; i++)
         {
@@ -33,22 +37,17 @@ public class MainMenuSaves : MonoBehaviour
 
                 FillPanel(panel);
             }
-            else
-            {
-
-            }
         }
     }
+
     private void FillPanel(SavePanel panel)
     {
-        // Загружаем JSON и вытаскиваем дату
         string json = File.ReadAllText(panel.savePath);
         GameSaveData data = JsonUtility.FromJson<GameSaveData>(json);
 
         panel.dateText.text = data.saveDate;
 
         LoadScreenshot(panel);
-
     }
 
     private void LoadScreenshot(SavePanel panel)
@@ -66,15 +65,23 @@ public class MainMenuSaves : MonoBehaviour
 
         panel.screenshot.texture = tex;
     }
+
     public void LoadSave(int num)
     {
-        bool success = SaveGameManager.Instance.HasManual(num.ToString());
-        if (!success)
+        string saveName = num.ToString();
+
+        if (!SaveGameManager.Instance.HasManual(saveName))
         {
-            SaveGameManager.Instance.SaveManual(num.ToString());
+            Debug.LogWarning("Save not found: " + saveName);
+            return;
         }
+
+        GameManager.Instance.pendingManualLoad = saveName;
+        GameManager.Instance.loadAutoOnStart = false;
+
         SceneManager.LoadScene("Game");
     }
+
     public void Close()
     {
         transform.parent.Find("MainMenu").gameObject.SetActive(true);

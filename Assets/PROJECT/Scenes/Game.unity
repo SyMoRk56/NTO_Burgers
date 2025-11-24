@@ -2745,6 +2745,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Pause
       objectReference: {fileID: 0}
+    - target: {fileID: 1827957037660734366, guid: 49635eb43451f6b40b7d38f2e8b707d6, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2191360867551183121, guid: 49635eb43451f6b40b7d38f2e8b707d6, type: 3}
       propertyPath: m_Pivot.x
       value: 0
@@ -2823,6 +2827,14 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2191360867551183121, guid: 49635eb43451f6b40b7d38f2e8b707d6, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3797822403482298265, guid: 49635eb43451f6b40b7d38f2e8b707d6, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_Arguments.m_BoolArgument
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7414312865077423228, guid: 49635eb43451f6b40b7d38f2e8b707d6, type: 3}
+      propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
