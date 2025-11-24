@@ -82,7 +82,7 @@ public class SaveGameManager : MonoBehaviour
             Debug.LogError("Save file not found: " + path);
             return;
         }
-
+        print(name);
         LoadFromJson(File.ReadAllText(path));
     }
 

@@ -22,6 +22,8 @@ public class PlayerSaveSystem : MonoBehaviour
 
     public void LoadData(PlayerData data)
     {
+        if (data == null) return;
+        print(data.position);
         player = GameManager.Instance.GetPlayer().transform;
         player.position = new Vector3(data.position[0], data.position[1], data.position[2]);
     }
