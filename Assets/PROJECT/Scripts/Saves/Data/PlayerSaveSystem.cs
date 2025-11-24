@@ -49,13 +49,19 @@ public class PlayerSaveSystem : MonoBehaviour
             return;
         }
         print("Set player position " + data.position.Length);
-        if(data.position.Length == 3)
+        if(data.position.Length == 3) StartCoroutine(SetPlayerPosDelay(data.position));
+       
+    }
+    IEnumerator SetPlayerPosDelay(float[] pos)
+    {
+        
+        yield return new WaitForSeconds(.5f);
         player.position = new Vector3(
-            data.position[0],
-            data.position[1],
-            data.position[2]);
-        print(data.position[0]);
-        print(data.position[2]);
+           pos[0],
+           pos[1],
+           pos[2]);
+        print(pos[0]);
+        print(pos[2]);
         print(player.position);
     }
 }
