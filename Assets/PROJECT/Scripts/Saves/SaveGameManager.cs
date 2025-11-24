@@ -28,6 +28,7 @@ public class SaveGameManager : MonoBehaviour
         {
             File.WriteAllText(autosavePath, json);
             if (showIndicator) ShowSaveIndicator();
+            print("Save auto");
         }
         catch (System.Exception e)
         {
@@ -87,8 +88,12 @@ public class SaveGameManager : MonoBehaviour
             return;
         }
 
+        // фиксируем активный слот
+        GameManager.Instance.currentManualSlot = name;
+
         LoadFromJson(File.ReadAllText(path));
     }
+
 
     // ---------------- INTERNAL ----------------
     private string CreateSaveJson()
@@ -116,11 +121,13 @@ public class SaveGameManager : MonoBehaviour
 
     private void LoadFromJson(string json)
     {
+
+        Debug.LogWarning("LOAD FROM JSON");
         GameSaveData data = JsonUtility.FromJson<GameSaveData>(json);
 
         PlayerSaveSystem.Instance.LoadData(data.playerData);
 
-        Debug.Log("Save loaded successfully");
+        Debug.Log("Save loaded successfully" + json);
     }
 
     private void ShowSaveIndicator()

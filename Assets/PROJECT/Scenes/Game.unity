@@ -4882,7 +4882,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CameraSwitcher
   firstPersonCamera: {fileID: 337723709}
   thirdPersonCamera: {fileID: 395224125}
-  rot: {fileID: 0}
+  rot: {fileID: 1947084329}
 --- !u!4 &1356915381
 Transform:
   m_ObjectHideFlags: 0
@@ -6107,6 +6107,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 584364964628528539, guid: e93f0847cd46ef74f8224d7740f98656, type: 3}
+      propertyPath: m_RaycastTarget
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5336771360101140992, guid: e93f0847cd46ef74f8224d7740f98656, type: 3}
       propertyPath: m_Name
       value: Canvas
@@ -7252,6 +7256,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isGameGoing: 0
+  pendingManualLoad: 
+  loadAutoOnStart: 1
 --- !u!4 &1855626526
 Transform:
   m_ObjectHideFlags: 0
@@ -7883,6 +7889,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4529970360314419911, guid: 13970f587beac524d9e5ed5c119892b0, type: 3}
   m_PrefabInstance: {fileID: 1947084327}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1947084329 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1273078358249207857, guid: 13970f587beac524d9e5ed5c119892b0, type: 3}
+  m_PrefabInstance: {fileID: 1947084327}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: de8d18a68f5303c4588a8d6b734c86a6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CinemachinePlayerRotation
 --- !u!1001 &1982170461
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -18,6 +18,8 @@ public class PauseMenu : MonoBehaviour
     public void Resume()
     {
         pauseGameMenu.SetActive(false);
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
         Time.timeScale = 1f;
         PauseGame = false;
     }
@@ -25,14 +27,14 @@ public class PauseMenu : MonoBehaviour
     public void Pause()
     {
         pauseGameMenu.SetActive(true);
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
         Time.timeScale = 0f;
         PauseGame = true;
     }
 
     public void ReturnToMainMenu()
     {
-        SaveGameManager.Instance.SaveAuto(false) ;
-        Time.timeScale = 1f;
-        SceneManager.LoadScene("Menu");
+        GameManager.Instance.ExitToMenu();
     }
 }

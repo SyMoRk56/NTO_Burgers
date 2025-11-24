@@ -70,17 +70,21 @@ public class MainMenuSaves : MonoBehaviour
     {
         string saveName = num.ToString();
 
+        // Если сейва нет — создаём пустой
         if (!SaveGameManager.Instance.HasManual(saveName))
         {
-            Debug.LogWarning("Save not found: " + saveName);
-            return;
+            Debug.Log("Save not found, creating a new empty save: " + saveName);
+            SaveGameManager.Instance.SaveManual(saveName);
         }
 
+        // Указываем GameManager какой сейв загружать
         GameManager.Instance.pendingManualLoad = saveName;
         GameManager.Instance.loadAutoOnStart = false;
 
+        // Загружаем сцену игры
         SceneManager.LoadScene("Game");
     }
+
 
     public void Close()
     {

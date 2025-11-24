@@ -11,8 +11,8 @@ public class GameManager : MonoBehaviour
     public bool isGameGoing = false;
     private Coroutine autosaveRoutine;
 
-    // Flags for saves
     public string pendingManualLoad = null;
+    public string currentManualSlot = null;
     public bool loadAutoOnStart = true;
 
     private void Awake()
@@ -49,25 +49,26 @@ public class GameManager : MonoBehaviour
     public void OnStartGame()
     {
         isGameGoing = true;
-
         player = GetPlayer();
 
-        // Load MANUAL save if selected
         if (pendingManualLoad != null)
         {
             SaveGameManager.Instance.LoadManual(pendingManualLoad);
+            currentManualSlot = pendingManualLoad;
             pendingManualLoad = null;
         }
-        // Or load AUTOSAVE by default
         else if (loadAutoOnStart)
         {
             SaveGameManager.Instance.LoadAuto();
+            currentManualSlot = null;
         }
 
         if (autosaveRoutine != null)
             StopCoroutine(autosaveRoutine);
 
         autosaveRoutine = StartCoroutine(Autosave());
+
+        Time.timeScale = 1;
     }
 
     public GameObject GetPlayer()
@@ -76,8 +77,7 @@ public class GameManager : MonoBehaviour
 
         player = GameObject.FindWithTag("Player");
 
-        if (player == null)
-            Debug.LogWarning("Player not found! Add 'Player' tag to player object.");
+       
 
         return player;
     }
@@ -89,5 +89,29 @@ public class GameManager : MonoBehaviour
             yield return new WaitForSeconds(30f);
             SaveGameManager.Instance.SaveAuto(true);
         }
+    }
+
+    public void ExitToMenu()
+    {
+        SaveGameManager.Instance.SaveAuto(false);
+
+        if (!string.IsNullOrEmpty(currentManualSlot))
+        {
+            SaveGameManager.Instance.SaveManual(currentManualSlot);
+        }
+
+        isGameGoing = false;
+
+        if (autosaveRoutine != null)
+        {
+            StopCoroutine(autosaveRoutine);
+            autosaveRoutine = null;
+        }
+
+        pendingManualLoad = null;
+        loadAutoOnStart = true;
+        currentManualSlot = null;
+
+        SceneManager.LoadScene(0);
     }
 }

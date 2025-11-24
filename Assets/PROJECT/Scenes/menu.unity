@@ -3985,7 +3985,7 @@ MonoBehaviour:
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 1
+          m_IntArgument: 2
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
@@ -4595,7 +4595,7 @@ MonoBehaviour:
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 1
+          m_IntArgument: 3
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
@@ -7055,6 +7055,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isGameGoing: 0
+  pendingManualLoad: 
+  currentManualSlot: 
+  loadAutoOnStart: 1
 --- !u!224 &7062544209600707827
 RectTransform:
   m_ObjectHideFlags: 0
