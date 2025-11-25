@@ -50,7 +50,12 @@ public class PlayerSaveSystem : MonoBehaviour
         }
         print("Set player position " + data.position.Length);
         if(data.position.Length == 3) StartCoroutine(SetPlayerPosDelay(data.position));
-       
+        else
+        {
+            player.GetComponent<PlayerMovement>().enabled = true;
+
+        }
+
     }
     IEnumerator SetPlayerPosDelay(float[] pos)
     {

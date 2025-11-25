@@ -147,7 +147,12 @@ public class SaveGameManager : MonoBehaviour
 
         LoadFromJson(json);
     }
-
+    public bool Valide(GameSaveData data)
+    {
+        if (data.playerData.position.Length != 3) return false;
+        if (data.playerData == null) return false;
+        return false;
+    }
     // ======================= INTERNAL =======================
     private string CreateSaveJson()
     {
