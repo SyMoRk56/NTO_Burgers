@@ -1,4 +1,6 @@
 using System.IO;
+using System.Security.Cryptography;
+using System.Text;
 using UnityEngine;
 
 [System.Serializable]
@@ -26,22 +28,30 @@ public class SaveGameManager : MonoBehaviour
         Directory.CreateDirectory(Path.Combine(saveFolder, "manual"));
     }
 
-    // ------------------------ AUTOSAVE ------------------------
+    // ======================= HASH =======================
+    private string ComputeHash(string content)
+    {
+        using (SHA256 sha = SHA256.Create())
+        {
+            byte[] bytes = Encoding.UTF8.GetBytes(content);
+            byte[] hash = sha.ComputeHash(bytes);
+            return System.BitConverter.ToString(hash).Replace("-", "");
+        }
+    }
+
+    // ======================= AUTOSAVE =======================
     public void SaveAuto(bool showIndicator)
     {
         string slot = GameManager.Instance.currentManualSlot;
 
-        // Если нет активного слота — не автосейвим
         if (string.IsNullOrEmpty(slot))
         {
             Debug.LogWarning("No manual slot selected, autosave skipped!");
             return;
         }
 
-        // 1. Сохраняем настоящее содержимое в мануальный слот
         SaveManual(slot, showIndicator: false);
 
-        // 2. В autosave.json пишем только имя слота
         AutoSaveSlot data = new AutoSaveSlot() { slotName = slot };
         File.WriteAllText(autosavePath, JsonUtility.ToJson(data, true));
 
@@ -50,23 +60,31 @@ public class SaveGameManager : MonoBehaviour
         Debug.Log("Autosave saved slot name: " + slot);
     }
 
-    // ------------------------ MANUAL SAVE ------------------------
+    // ======================= MANUAL SAVE =======================
     public void SaveManual(string saveName, bool showIndicator = true)
     {
         string folder = Path.Combine(saveFolder, "manual");
         Directory.CreateDirectory(folder);
 
-        string filePath = Path.Combine(folder, saveName + ".json");
+        string jsonPath = Path.Combine(folder, saveName + ".json");
+        string hashPath = Path.Combine(folder, saveName + ".hash");
+
         string json = CreateSaveJson();
 
-        File.WriteAllText(filePath, json);
+        File.WriteAllText(jsonPath, json);
+
+        // ---- Create hash file ----
+        string hash = ComputeHash(json);
+        File.WriteAllText(hashPath, hash);
+
+        // Screenshot
         ScreenCapture.CaptureScreenshot(Path.Combine(folder, saveName + ".png"));
 
         if (showIndicator) ShowSaveIndicator();
-        Debug.Log("Manual save created -> " + filePath);
+        Debug.Log("Manual save created -> " + jsonPath + " (HASH updated)");
     }
 
-    // ------------------------ LOAD ------------------------
+    // ======================= LOAD =======================
     public void LoadAuto()
     {
         if (!File.Exists(autosavePath))
@@ -96,21 +114,41 @@ public class SaveGameManager : MonoBehaviour
 
     public void LoadManual(string name)
     {
-        string path = Path.Combine(saveFolder, "manual", name + ".json");
+        string folder = Path.Combine(saveFolder, "manual");
+        string jsonPath = Path.Combine(folder, name + ".json");
+        string hashPath = Path.Combine(folder, name + ".hash");
 
-        if (!File.Exists(path))
+        if (!File.Exists(jsonPath))
         {
-            Debug.LogError("Save file not found: " + path);
+            Debug.LogError("Save file not found: " + jsonPath);
             return;
         }
 
-        // фиксируем активный слот
+        if (!File.Exists(hashPath))
+        {
+            Debug.LogError("Hash file missing! Save may be modified externally!");
+            return;
+        }
+
+        string json = File.ReadAllText(jsonPath);
+        string savedHash = File.ReadAllText(hashPath);
+        string actualHash = ComputeHash(json);
+
+        // --- Validate hash ---
+        if (savedHash != actualHash)
+        {
+            Debug.LogError("SAVE INTEGRITY ERROR! External modification detected! Slot: " + name);
+            return;
+        }
+
+        Debug.Log("Save integrity OK.");
+
         GameManager.Instance.currentManualSlot = name;
 
-        LoadFromJson(File.ReadAllText(path));
+        LoadFromJson(json);
     }
 
-    // ---------------- INTERNAL ----------------
+    // ======================= INTERNAL =======================
     private string CreateSaveJson()
     {
         GameSaveData data = new GameSaveData();
@@ -123,7 +161,6 @@ public class SaveGameManager : MonoBehaviour
 
         try { data.mailData = MailManager.Instance.GetSaveData(); }
         catch { data.mailData = null; }
-
 
         data.saveDate = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
         data.timestamp = System.DateTimeOffset.Now.ToUnixTimeSeconds();
@@ -142,11 +179,18 @@ public class SaveGameManager : MonoBehaviour
             MailManager.Instance.LoadSaveData(data.mailData);
 
         Debug.Log("Save loaded successfully");
+
         var floatArray = PlayerSaveSystem.Instance.GetData().position;
-        GameManager.Instance.GetPlayer().GetComponent<Rigidbody>().MovePosition(new Vector3(floatArray[0], floatArray[1], floatArray[2]));
-        print(GameManager.Instance.GetPlayer().transform.position);
+        GameObject player = GameManager.Instance.GetPlayer();
+
+        if (player != null)
+        {
+            player.GetComponent<Rigidbody>()
+                  .MovePosition(new Vector3(floatArray[0], floatArray[1], floatArray[2]));
+        }
     }
 
+    // ======================= UI =======================
     private void ShowSaveIndicator()
     {
         if (autosaveIndicator == null) return;
@@ -160,6 +204,4 @@ public class SaveGameManager : MonoBehaviour
         if (autosaveIndicator != null)
             autosaveIndicator.SetActive(false);
     }
-    
-
 }
