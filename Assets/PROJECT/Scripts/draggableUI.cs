@@ -12,13 +12,16 @@ public class DraggableUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
 
     public string recipient;
     public string address;
-    public float zoomScale = 1.7f; // На сколько увеличивать (70% = 1.7x)
-    public float zoomDuration = 0.2f; // Длительность анимации увеличения
+    public float zoomScale = 1.7f;
+    public float zoomDuration = 0.2f;
 
     private bool isZoomed = false;
     private Vector3 originalScale;
     private int originalSiblingIndex;
     private bool isDragging = false;
+
+    [Header("Button Reference")]
+    public Button actionButton; // Ссылка на дочернюю кнопку
 
     void OnEnable()
     {
@@ -32,6 +35,20 @@ public class DraggableUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         // Сохраняем оригинальные значения
         originalScale = transform.localScale;
         originalSiblingIndex = transform.GetSiblingIndex();
+
+        // Находим кнопку если не установлена в инспекторе
+        if (actionButton == null)
+            actionButton = GetComponentInChildren<Button>();
+
+        // Делаем кнопку неактивной по умолчанию
+        if (actionButton != null)
+        {
+            actionButton.gameObject.SetActive(false);
+
+            // Добавляем обработчик нажатия на кнопку
+            actionButton.onClick.RemoveAllListeners();
+            actionButton.onClick.AddListener(OnActionButtonClick);
+        }
 
         CalculateDragBounds();
     }
@@ -58,10 +75,7 @@ public class DraggableUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     public void OnBeginDrag(PointerEventData eventData)
     {
         isDragging = true;
-
-        // При начале перетаскивания ставим поверх всех
         transform.SetAsLastSibling();
-
         canvasGroup.alpha = 0.6f;
         canvasGroup.blocksRaycasts = false;
     }
@@ -85,12 +99,9 @@ public class DraggableUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         canvasGroup.blocksRaycasts = true;
     }
 
-    // Обработка клика для увеличения/уменьшения
     public void OnPointerClick(PointerEventData eventData)
     {
-        // Игнорируем клик если был драг
         if (isDragging) return;
-
         ToggleZoom();
     }
 
@@ -98,19 +109,36 @@ public class DraggableUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     {
         if (isZoomed)
         {
-            // Уменьшаем
+            // Уменьшаем и деактивируем кнопку
             transform.localScale = originalScale;
             transform.SetSiblingIndex(originalSiblingIndex);
             isZoomed = false;
-            StartCoroutine(TaskManager.Instance.GetPlayerNextLetter(new Task(recipient, address)));
+
+            if (actionButton != null)
+                actionButton.gameObject.SetActive(false);
         }
         else
         {
-            // Увеличиваем
+            // Увеличиваем и активируем кнопку
             transform.localScale = originalScale * zoomScale;
-            transform.SetAsLastSibling(); // Ставим поверх других
+            transform.SetAsLastSibling();
             isZoomed = true;
+
+            if (actionButton != null)
+                actionButton.gameObject.SetActive(true);
         }
+    }
+
+    // Обработчик нажатия на кнопку
+    private void OnActionButtonClick()
+    {
+        // Создаем задачу и передаем в TaskUI
+        Task newTask = new Task(recipient, address);
+        TaskUI.Instance.SetTask(newTask);
+
+        // Можно также автоматически закрыть зум после нажатия
+        if (isZoomed)
+            ToggleZoom();
     }
 
     // Дополнительные методы для управления зумом из других скриптов

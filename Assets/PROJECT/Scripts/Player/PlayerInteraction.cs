@@ -62,6 +62,7 @@ public class PlayerInteraction : MonoBehaviour
                         if (dialog.ownerName == pickupedLetter.recieverName)
                         {
                             dialog.StartDialogue(true);
+                            MailManager.Instance.SetDelivered(pickupedLetter.id, true);
                             TaskManager.Instance.NextTask();
                             Destroy(pickupedLetter.gameObject);
                         }
