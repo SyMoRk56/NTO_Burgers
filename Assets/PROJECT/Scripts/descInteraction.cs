@@ -7,12 +7,26 @@ public class DeskInteraction : MonoBehaviour
     public Canvas deskCanvas;
     public List<GameObject> randomImages;
 
+    [Header("Camera Settings")]
+    public Transform mainCamera;
+    public Vector3 cameraOffset = new Vector3(0, 3, 0);
+    public Vector3 cameraRotation = new Vector3(90, 0, 0);
+
     [Header("Player References")]
     public PlayerMovement playerMovement;
     public MonoBehaviour playerCameraScript;
 
+    [Header("Interaction UI Reference")]
+    public InteractionUI interactionUI;
+
     private bool playerInRange = false;
     private bool isCanvasOpen = false;
+    private Vector3 originalCameraPosition;
+    private Quaternion originalCameraRotation;
+    private Transform originalCameraParent;
+
+    // Свойство для проверки, открыт ли канвас
+    public bool IsCanvasOpen => isCanvasOpen;
 
     void Start()
     {
@@ -40,10 +54,28 @@ public class DeskInteraction : MonoBehaviour
     {
         isCanvasOpen = true;
 
+        // Скрываем popup при открытии UI панели
+        if (interactionUI != null)
+        {
+            interactionUI.HidePopup();
+        }
+
+        // Сохраняем оригинальные позицию и поворот камеры
+        if (mainCamera != null)
+        {
+            originalCameraPosition = mainCamera.position;
+            originalCameraRotation = mainCamera.rotation;
+            originalCameraParent = mainCamera.parent;
+
+            // Перемещаем камеру к столу
+            mainCamera.SetParent(transform);
+            mainCamera.localPosition = cameraOffset;
+            mainCamera.localRotation = Quaternion.Euler(cameraRotation);
+        }
+
         if (deskCanvas != null)
         {
             deskCanvas.gameObject.SetActive(true);
-            //Canvas.ForceUpdateCanvases();
             ShowRandomImages();
         }
 
@@ -61,6 +93,14 @@ public class DeskInteraction : MonoBehaviour
     {
         isCanvasOpen = false;
 
+        // Возвращаем камеру на место
+        if (mainCamera != null)
+        {
+            mainCamera.SetParent(originalCameraParent);
+            mainCamera.position = originalCameraPosition;
+            mainCamera.rotation = originalCameraRotation;
+        }
+
         if (deskCanvas != null)
         {
             deskCanvas.gameObject.SetActive(false);
@@ -74,6 +114,12 @@ public class DeskInteraction : MonoBehaviour
             playerCameraScript.enabled = true;
 
         StartCoroutine(LockCursorNextFrame());
+
+        // Показываем popup при закрытии UI панели (если игрок в зоне)
+        if (interactionUI != null)
+        {
+            interactionUI.ShowPopup();
+        }
     }
 
     System.Collections.IEnumerator LockCursorNextFrame()
