@@ -3,9 +3,10 @@ using System.Collections.Generic;
 
 public class DeskInteraction : MonoBehaviour
 {
+    public GameObject letterPrefab;
     [Header("Canvas Settings")]
     public Canvas deskCanvas;
-    public List<GameObject> randomImages;
+    public List<GameObject> randomImages = new();
 
     [Header("Camera Settings")]
     public Transform mainCamera;
@@ -128,7 +129,13 @@ public class DeskInteraction : MonoBehaviour
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
     }
-
+    private void OnEnable()
+    {
+        for(int i = 0; i < 4; i++)
+        {
+            SpawnLetter();
+        }
+    }
     void ShowRandomImages()
     {
         HideAllImages();
@@ -157,6 +164,18 @@ public class DeskInteraction : MonoBehaviour
 
             available.RemoveAt(id);
         }
+    }
+    public void SpawnLetter()
+    {
+        var letter = Instantiate(letterPrefab, transform.GetChild(0).GetChild(0));
+        letter.transform.position = new Vector3();
+        var drag = letter.GetComponent<DraggableUI>();
+        print(MailManager.Instance == null);
+        var a = MailManager.Instance.GetNextUndelivered();
+        drag.recipient = a.reciever;
+        drag.id = a.id;
+        drag.address = a.adress;
+        randomImages.Add(letter);
     }
 
     Vector2 GetSafeScreenPosition(RectTransform rectTransform)

@@ -11,14 +11,14 @@ public class TaskManager : MonoBehaviour
     {
         Instance = this;
     }
-    public void AddTask(string recieverName, string adress)
+    public void AddTask(string recieverName, string adress, string id)
     {
-        tasks.Enqueue(new Task(recieverName, adress));
+        tasks.Enqueue(new Task(recieverName, adress, id));
         StartCoroutine(GetPlayerNextLetter(tasks.Peek()));
     }
     public void NextTask()
     {
-        TaskUI.Instance.SetTask(new("",""));
+        TaskUI.Instance.SetTask(new("","", ""));
         var task = tasks.Dequeue();
         StartCoroutine(GetPlayerNextLetter(task));
     }
@@ -36,9 +36,11 @@ public struct Task
 {
     public string recieverName;
     public string adress;
-    public Task(string recieverName, string adress)
+    public string id;
+    public Task(string recieverName, string adress, string id)
     {
         this.recieverName = recieverName;
         this.adress = adress;
+        this.id = id;
     }
 }

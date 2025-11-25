@@ -119,11 +119,6 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!224 &4964169 stripped
-RectTransform:
-  m_CorrespondingSourceObject: {fileID: 4742635359026342469, guid: 5dbb841e5c6aa5c4395689f3f1d26334, type: 3}
-  m_PrefabInstance: {fileID: 1674378831}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &8266146
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -556,7 +551,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1577240889}
-  m_Father: {fileID: 1269157434}
+  m_Father: {fileID: 1419030155}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -3688,7 +3683,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 26696f69217d8574a88d515e614f41fc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MailManager
-  catalog: {fileID: 11400000, guid: f3c73065e6a3a6043aaad7873a772ea3, type: 2}
+  catalog: {fileID: 11400000, guid: 3da2b13c45bf6ac44b5e8d8db0b68f07, type: 2}
 --- !u!4 &791420726
 Transform:
   m_ObjectHideFlags: 0
@@ -5060,11 +5055,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1255933918}
   m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
---- !u!224 &1269157434 stripped
-RectTransform:
-  m_CorrespondingSourceObject: {fileID: 8161522950476979454, guid: 5dbb841e5c6aa5c4395689f3f1d26334, type: 3}
-  m_PrefabInstance: {fileID: 1674378831}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1312127970
 GameObject:
   m_ObjectHideFlags: 0
@@ -7254,6 +7244,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1431082668}
     - target: {fileID: 7974554331565175206, guid: 5dbb841e5c6aa5c4395689f3f1d26334, type: 3}
+      propertyPath: letterPrefab
+      value: 
+      objectReference: {fileID: 8771368665007675212, guid: 9e81894adb64eb540a2ceda297036b1c, type: 3}
+    - target: {fileID: 7974554331565175206, guid: 5dbb841e5c6aa5c4395689f3f1d26334, type: 3}
       propertyPath: interactionUI
       value: 
       objectReference: {fileID: 1674378832}
@@ -7327,10 +7321,10 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8877368660457329624, guid: 5dbb841e5c6aa5c4395689f3f1d26334, type: 3}
       insertIndex: 15
       addedObject: {fileID: 311224839}
-    - targetCorrespondingSourceObject: {fileID: 8161522950476979454, guid: 5dbb841e5c6aa5c4395689f3f1d26334, type: 3}
+    - targetCorrespondingSourceObject: {fileID: 8877368660457329624, guid: 5dbb841e5c6aa5c4395689f3f1d26334, type: 3}
       insertIndex: -1
       addedObject: {fileID: 57599019}
-    - targetCorrespondingSourceObject: {fileID: 4742635359026342469, guid: 5dbb841e5c6aa5c4395689f3f1d26334, type: 3}
+    - targetCorrespondingSourceObject: {fileID: 8877368660457329624, guid: 5dbb841e5c6aa5c4395689f3f1d26334, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2038732707}
     m_AddedComponents: []
@@ -8654,7 +8648,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 727178627}
-  m_Father: {fileID: 4964169}
+  m_Father: {fileID: 1419030155}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}

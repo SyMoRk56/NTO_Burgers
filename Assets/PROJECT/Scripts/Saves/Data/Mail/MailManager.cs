@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
+[DefaultExecutionOrder(-10)]
 public class MailManager : MonoBehaviour
 {
     public static MailManager Instance;
@@ -14,11 +15,12 @@ public class MailManager : MonoBehaviour
     private void Awake()
     {
         Instance = this;
-
+        catalog = Resources.LoadAll<MailCatalog>("")[0];
         if(catalog != null )
         // Инициализация — все письма недоставлены
         foreach (var mail in catalog.mails)
             state[mail.id] = false;
+        
     }
 
 

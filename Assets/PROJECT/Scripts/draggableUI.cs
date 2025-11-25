@@ -12,6 +12,7 @@ public class DraggableUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
 
     public string recipient;
     public string address;
+    public string id;
     public float zoomScale = 1.7f;
     public float zoomDuration = 0.2f;
 
@@ -133,7 +134,7 @@ public class DraggableUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     private void OnActionButtonClick()
     {
         // Создаем задачу и передаем в TaskUI
-        Task newTask = new Task(recipient, address);
+        Task newTask = new Task(recipient, address, id);
         TaskUI.Instance.SetTask(newTask);
 
         // Можно также автоматически закрыть зум после нажатия
