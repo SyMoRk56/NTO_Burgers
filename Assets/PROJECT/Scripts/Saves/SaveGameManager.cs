@@ -121,6 +121,10 @@ public class SaveGameManager : MonoBehaviour
         try { data.settingsData = SettingsSaveSystem.Instance.GetData(); }
         catch { data.settingsData = null; }
 
+        try { data.mailData = MailManager.Instance.GetSaveData(); }
+        catch { data.mailData = null; }
+
+
         data.saveDate = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
         data.timestamp = System.DateTimeOffset.Now.ToUnixTimeSeconds();
         data.playtime = Time.time;
@@ -134,6 +138,8 @@ public class SaveGameManager : MonoBehaviour
         GameSaveData data = JsonUtility.FromJson<GameSaveData>(json);
 
         PlayerSaveSystem.Instance.LoadData(data.playerData);
+        if (data.mailData != null)
+            MailManager.Instance.LoadSaveData(data.mailData);
 
         Debug.Log("Save loaded successfully");
     }
