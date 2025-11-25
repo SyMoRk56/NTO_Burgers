@@ -142,6 +142,9 @@ public class SaveGameManager : MonoBehaviour
             MailManager.Instance.LoadSaveData(data.mailData);
 
         Debug.Log("Save loaded successfully");
+        var floatArray = PlayerSaveSystem.Instance.GetData().position;
+        GameManager.Instance.GetPlayer().GetComponent<Rigidbody>().MovePosition(new Vector3(floatArray[0], floatArray[1], floatArray[2]));
+        print(GameManager.Instance.GetPlayer().transform.position);
     }
 
     private void ShowSaveIndicator()

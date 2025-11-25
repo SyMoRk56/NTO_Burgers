@@ -64,7 +64,7 @@ public class PlayerMovement : MonoBehaviour
 
     void FixedUpdate()
     {
-        if(!manager.CanMove) return;
+        if(!manager.CanMove || !GameManager.Instance.isGameGoing) return;
         CheckGrounded();
         HandleMovement();
         ApplyFriction();
@@ -104,6 +104,9 @@ public class PlayerMovement : MonoBehaviour
 
     void HandleMovement()
     {
+        print("Handle movement: " + transform.position);
+        return;
+
         Vector3 wishDir = (forwardVector.forward * moveInput.y + forwardVector.right * moveInput.x).normalized;
 
         float targetSpeed = GetTargetSpeed();
@@ -117,8 +120,8 @@ public class PlayerMovement : MonoBehaviour
         currentVelocity = Vector3.Lerp(currentVelocity, targetVelocity, acceleration * Time.fixedDeltaTime);
 
         currentVelocity.y = rb.linearVelocity.y; // ���������� rb.velocity ������ linearVelocity ��� �������������
-
         rb.linearVelocity = currentVelocity;
+        print(transform.position);
     }
 
     void ApplyFriction()

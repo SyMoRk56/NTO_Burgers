@@ -44,6 +44,14 @@ public class GameManager : MonoBehaviour
     IEnumerator DelayedGameStart()
     {
         yield return null;
+        while (GetPlayer() == null)
+            yield return null;
+        while (PlayerSaveSystem.Instance == null)
+            yield return null;
+        while (PlayerSaveSystem.Instance.GetData().position[1] == 0) yield return null;
+        yield return new WaitForEndOfFrame();
+
+        // Теперь мы точно можем загружать сейв
         OnStartGame();
     }
 

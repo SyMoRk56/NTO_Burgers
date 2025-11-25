@@ -55,7 +55,6 @@ public class PlayerSaveSystem : MonoBehaviour
     IEnumerator SetPlayerPosDelay(float[] pos)
     {
         
-        yield return new WaitForSeconds(.5f);
         player.position = new Vector3(
            pos[0],
            pos[1],
@@ -63,5 +62,11 @@ public class PlayerSaveSystem : MonoBehaviour
         print(pos[0]);
         print(pos[2]);
         print(player.position);
+        for(int i = 0; i < 100; i++)
+        {
+            print(player.position);
+            yield return null;
+        }
+        yield break;
     }
 }

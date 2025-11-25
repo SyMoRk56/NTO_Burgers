@@ -15,6 +15,7 @@ public class MailManager : MonoBehaviour
     {
         Instance = this;
 
+        if(catalog != null )
         // Инициализация — все письма недоставлены
         foreach (var mail in catalog.mails)
             state[mail.id] = false;
