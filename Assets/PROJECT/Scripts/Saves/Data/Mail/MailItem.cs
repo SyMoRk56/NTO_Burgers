@@ -8,13 +8,6 @@ public class MailItem
     public string reciever;
     public string adress;
 }
-
-[CreateAssetMenu(menuName = "Mail/Mail Catalog")]
-public class MailCatalog : ScriptableObject
-{
-    [Tooltip("Список писем в нужном порядке")]
-    public List<MailItem> mails = new();
-}
 [System.Serializable]
 public class MailState
 {
