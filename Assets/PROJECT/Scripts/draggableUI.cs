@@ -127,6 +127,8 @@ public class DraggableUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
 
             if (actionButton != null)
                 actionButton.gameObject.SetActive(true);
+            //OnActionButtonClick();
+
         }
     }
 
@@ -135,8 +137,8 @@ public class DraggableUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     {
         // Создаем задачу и передаем в TaskUI
         Task newTask = new Task(recipient, address, id);
-        TaskUI.Instance.SetTask(newTask);
-
+        TaskManager.Instance.AddTask(recipient,address,id);
+        Destroy(gameObject);
         // Можно также автоматически закрыть зум после нажатия
         if (isZoomed)
             ToggleZoom();

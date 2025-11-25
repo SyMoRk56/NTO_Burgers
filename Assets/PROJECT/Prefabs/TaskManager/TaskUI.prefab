@@ -45,9 +45,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: be4f2655034a8d342a397b04a8a84c79, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TaskUI
-  task: {fileID: 4739839878783072840}
+  taskCanvas: {fileID: 0}
+  taskPanel: {fileID: 0}
   reciever: {fileID: 6472988021689848657}
   adress: {fileID: 2068732522671882259}
+  countText: {fileID: 411204388245764776}
 --- !u!1 &3211373937576221213
 GameObject:
   m_ObjectHideFlags: 0

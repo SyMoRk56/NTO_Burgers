@@ -178,6 +178,7 @@ public class DeskInteraction : MonoBehaviour
     public void SpawnLetters(int count)
     {
         var ls = MailManager.Instance.GetNextXUndelivered(count);
+        ls.Reverse();
         print("LS " + ls.Count);
         foreach (var l in ls)
         {
