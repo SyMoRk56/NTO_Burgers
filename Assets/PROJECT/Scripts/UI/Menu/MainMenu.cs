@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using System.IO;
 public class MainMenu : MonoBehaviour
 {
     public GameObject savesPanel;
@@ -24,10 +25,50 @@ public class MainMenu : MonoBehaviour
     }
     public void PlayAutosave()
     {
-        bool success = SaveGameManager.Instance.HasAutosave();
-        if (success)
-        {
-            SceneManager.LoadScene("Game");
-        }
+        LoadAutoSave();
     }
+    public void LoadAutoSave()
+    {
+        // Проверяем, существует ли автосейв
+        if (!SaveGameManager.Instance.HasAutosave())
+        {
+            Debug.LogWarning("No autosave found!");
+            return;
+        }
+
+        // Читаем autosave.json
+        string autosavePath = Path.Combine(
+            Application.persistentDataPath,
+            "Saves",
+            "autosave.json"
+        );
+
+        string json = File.ReadAllText(autosavePath);
+        AutoSaveSlot data = JsonUtility.FromJson<AutoSaveSlot>(json);
+
+        if (string.IsNullOrEmpty(data.slotName))
+        {
+            Debug.LogError("Autosave is corrupted — slot name missing!");
+            return;
+        }
+
+        string slotName = data.slotName;
+
+        // Проверяем, что сохранённый слот существует
+        if (!SaveGameManager.Instance.HasManual(slotName))
+        {
+            Debug.LogWarning("Autosave points to missing slot, creating new one: " + slotName);
+            SaveGameManager.Instance.SaveManual(slotName);
+        }
+
+        // Говорим GameManager какой слот грузить
+        GameManager.Instance.pendingManualLoad = slotName;
+        GameManager.Instance.loadAutoOnStart = false; // т.к. мы загружаем вручную
+
+        // Загружаем сцену игры
+        UnityEngine.SceneManagement.SceneManager.LoadScene("Game");
+
+        Debug.Log("Loading autosave slot: " + slotName);
+    }
+
 }

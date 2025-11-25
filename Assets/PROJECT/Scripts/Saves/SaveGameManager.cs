@@ -1,6 +1,12 @@
 using System.IO;
 using UnityEngine;
 
+[System.Serializable]
+public class AutoSaveSlot
+{
+    public string slotName;
+}
+
 public class SaveGameManager : MonoBehaviour
 {
     public static SaveGameManager Instance;
@@ -17,42 +23,50 @@ public class SaveGameManager : MonoBehaviour
         autosavePath = Path.Combine(saveFolder, "autosave.json");
 
         Directory.CreateDirectory(saveFolder);
+        Directory.CreateDirectory(Path.Combine(saveFolder, "manual"));
     }
 
-    // ---------------- SAVE ----------------
+    // ------------------------ AUTOSAVE ------------------------
     public void SaveAuto(bool showIndicator)
     {
-        string json = CreateSaveJson();
+        string slot = GameManager.Instance.currentManualSlot;
 
-        try
+        // Если нет активного слота — не автосейвим
+        if (string.IsNullOrEmpty(slot))
         {
-            File.WriteAllText(autosavePath, json);
-            if (showIndicator) ShowSaveIndicator();
-            print("Save auto");
+            Debug.LogWarning("No manual slot selected, autosave skipped!");
+            return;
         }
-        catch (System.Exception e)
-        {
-            Debug.LogError("Autosave failed: " + e.Message);
-        }
+
+        // 1. Сохраняем настоящее содержимое в мануальный слот
+        SaveManual(slot, showIndicator: false);
+
+        // 2. В autosave.json пишем только имя слота
+        AutoSaveSlot data = new AutoSaveSlot() { slotName = slot };
+        File.WriteAllText(autosavePath, JsonUtility.ToJson(data, true));
+
+        if (showIndicator) ShowSaveIndicator();
+
+        Debug.Log("Autosave saved slot name: " + slot);
     }
 
-    public void SaveManual(string saveName)
+    // ------------------------ MANUAL SAVE ------------------------
+    public void SaveManual(string saveName, bool showIndicator = true)
     {
         string folder = Path.Combine(saveFolder, "manual");
         Directory.CreateDirectory(folder);
 
         string filePath = Path.Combine(folder, saveName + ".json");
-
         string json = CreateSaveJson();
-        File.WriteAllText(filePath, json);
 
+        File.WriteAllText(filePath, json);
         ScreenCapture.CaptureScreenshot(Path.Combine(folder, saveName + ".png"));
 
-        ShowSaveIndicator();
+        if (showIndicator) ShowSaveIndicator();
         Debug.Log("Manual save created -> " + filePath);
     }
 
-    // ---------------- LOAD ----------------
+    // ------------------------ LOAD ------------------------
     public void LoadAuto()
     {
         if (!File.Exists(autosavePath))
@@ -61,26 +75,28 @@ public class SaveGameManager : MonoBehaviour
             return;
         }
 
-        LoadFromJson(File.ReadAllText(autosavePath));
+        AutoSaveSlot slot = JsonUtility.FromJson<AutoSaveSlot>(File.ReadAllText(autosavePath));
+
+        if (string.IsNullOrEmpty(slot.slotName))
+        {
+            Debug.LogWarning("Autosave file empty or invalid.");
+            return;
+        }
+
+        LoadManual(slot.slotName);
     }
 
     public bool HasAutosave() => File.Exists(autosavePath);
 
     public bool HasManual(string name)
     {
-        string folder = Path.Combine(saveFolder, "manual");
-        Directory.CreateDirectory(folder);
-
-        string path = Path.Combine(folder, name + ".json");
+        string path = Path.Combine(saveFolder, "manual", name + ".json");
         return File.Exists(path);
     }
 
     public void LoadManual(string name)
     {
-        string folder = Path.Combine(saveFolder, "manual");
-        Directory.CreateDirectory(folder);
-
-        string path = Path.Combine(folder, name + ".json");
+        string path = Path.Combine(saveFolder, "manual", name + ".json");
 
         if (!File.Exists(path))
         {
@@ -94,22 +110,15 @@ public class SaveGameManager : MonoBehaviour
         LoadFromJson(File.ReadAllText(path));
     }
 
-
     // ---------------- INTERNAL ----------------
     private string CreateSaveJson()
     {
         GameSaveData data = new GameSaveData();
 
-        try
-        {
-            data.playerData = PlayerSaveSystem.Instance.GetData();
-        }
+        try { data.playerData = PlayerSaveSystem.Instance.GetData(); }
         catch { data.playerData = null; }
 
-        try
-        {
-            data.settingsData = SettingsSaveSystem.Instance.GetData();
-        }
+        try { data.settingsData = SettingsSaveSystem.Instance.GetData(); }
         catch { data.settingsData = null; }
 
         data.saveDate = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
@@ -121,13 +130,12 @@ public class SaveGameManager : MonoBehaviour
 
     private void LoadFromJson(string json)
     {
-
-        Debug.LogWarning("LOAD FROM JSON");
+        Debug.LogWarning("LOAD FROM JSON " + json);
         GameSaveData data = JsonUtility.FromJson<GameSaveData>(json);
 
         PlayerSaveSystem.Instance.LoadData(data.playerData);
 
-        Debug.Log("Save loaded successfully" + json);
+        Debug.Log("Save loaded successfully");
     }
 
     private void ShowSaveIndicator()
@@ -143,4 +151,6 @@ public class SaveGameManager : MonoBehaviour
         if (autosaveIndicator != null)
             autosaveIndicator.SetActive(false);
     }
+    
+
 }

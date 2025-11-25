@@ -1,4 +1,5 @@
 using System.Collections;
+using System.IO;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -93,25 +94,46 @@ public class GameManager : MonoBehaviour
 
     public void ExitToMenu()
     {
-        SaveGameManager.Instance.SaveAuto(false);
+        SaveAndGoToMenu();
+    }
+    public void SaveAndGoToMenu()
+    {
+        string slot = currentManualSlot;
 
-        if (!string.IsNullOrEmpty(currentManualSlot))
+        if (string.IsNullOrEmpty(slot))
         {
-            SaveGameManager.Instance.SaveManual(currentManualSlot);
+            Debug.LogWarning("Cannot exit to menu — no manual slot selected!");
+            return;
         }
 
-        isGameGoing = false;
+        // 1. Сохраняем данные в слот
+        SaveGameManager.Instance.SaveManual(slot);
 
+        // 2. Обновляем autosave.json (записываем только имя слота)
+        AutoSaveSlot auto = new AutoSaveSlot { slotName = slot };
+        string autosavePath = Path.Combine(
+            Application.persistentDataPath,
+            "Saves",
+            "autosave.json"
+        );
+        File.WriteAllText(autosavePath, JsonUtility.ToJson(auto, true));
+
+        Debug.Log("Saved slot + autosave. Returning to menu...");
+
+        // 3. Останавливаем игру и корутины
+        isGameGoing = false;
         if (autosaveRoutine != null)
         {
             StopCoroutine(autosaveRoutine);
             autosaveRoutine = null;
         }
 
+        // 4. Сбрасываем параметры загрузки
         pendingManualLoad = null;
         loadAutoOnStart = true;
-        currentManualSlot = null;
 
+        // 5. Загружаем главное меню
         SceneManager.LoadScene(0);
     }
+
 }
