@@ -77,7 +77,8 @@ public class DeskInteraction : MonoBehaviour
         if (deskCanvas != null)
         {
             deskCanvas.gameObject.SetActive(true);
-            ShowRandomImages();
+            SpawnLetters(4);
+            //ShowRandomImages();
         }
 
         if (playerMovement != null)
@@ -131,40 +132,37 @@ public class DeskInteraction : MonoBehaviour
     }
     private void OnEnable()
     {
-        for(int i = 0; i < 4; i++)
-        {
-            SpawnLetter();
-        }
+        
     }
-    void ShowRandomImages()
-    {
-        HideAllImages();
+    //void ShowRandomImages()
+    //{
+    //    HideAllImages();
 
-        if (randomImages == null || randomImages.Count == 0)
-            return;
+    //    if (randomImages == null || randomImages.Count == 0)
+    //        return;
 
-        int imagesToShow = Random.Range(1, Mathf.Min(4, randomImages.Count + 1));
-        List<GameObject> available = new List<GameObject>(randomImages);
+    //    int imagesToShow = Random.Range(1, Mathf.Min(4, randomImages.Count + 1));
+    //    List<GameObject> available = new List<GameObject>(randomImages);
 
-        for (int i = 0; i < imagesToShow; i++)
-        {
-            if (available.Count == 0)
-                break;
+    //    for (int i = 0; i < imagesToShow; i++)
+    //    {
+    //        if (available.Count == 0)
+    //            break;
 
-            int id = Random.Range(0, available.Count);
-            GameObject img = available[id];
+    //        int id = Random.Range(0, available.Count);
+    //        GameObject img = available[id];
 
-            img.SetActive(true);
+    //        img.SetActive(true);
 
-            RectTransform rt = img.GetComponent<RectTransform>();
-            if (rt != null)
-            {
-                rt.anchoredPosition = GetSafeScreenPosition(rt);
-            }
+    //        RectTransform rt = img.GetComponent<RectTransform>();
+    //        if (rt != null)
+    //        {
+    //            rt.anchoredPosition = GetSafeScreenPosition(rt);
+    //        }
 
-            available.RemoveAt(id);
-        }
-    }
+    //        available.RemoveAt(id);
+    //    }
+    //}
     public void SpawnLetter()
     {
         var letter = Instantiate(letterPrefab, transform.GetChild(0).GetChild(0));
@@ -177,7 +175,23 @@ public class DeskInteraction : MonoBehaviour
         drag.address = a.adress;
         randomImages.Add(letter);
     }
-
+    public void SpawnLetters(int count)
+    {
+        var ls = MailManager.Instance.GetNextXUndelivered(count);
+        print("LS " + ls.Count);
+        foreach (var l in ls)
+        {
+            var letter = Instantiate(letterPrefab, transform.GetChild(0).GetChild(0));
+            letter.transform.position = new Vector3();
+            var drag = letter.GetComponent<DraggableUI>();
+            print(MailManager.Instance == null);
+            var a = l;
+            drag.recipient = a.reciever;
+            drag.id = a.id;
+            drag.address = a.adress;
+            randomImages.Add(letter);
+        }
+    }
     Vector2 GetSafeScreenPosition(RectTransform rectTransform)
     {
         RectTransform canvasRect = deskCanvas.GetComponent<RectTransform>();
