@@ -104,8 +104,7 @@ public class PlayerMovement : MonoBehaviour
 
     void HandleMovement()
     {
-        print("Handle movement: " + transform.position);
-        return;
+        
 
         Vector3 wishDir = (forwardVector.forward * moveInput.y + forwardVector.right * moveInput.x).normalized;
 
@@ -121,7 +120,6 @@ public class PlayerMovement : MonoBehaviour
 
         currentVelocity.y = rb.linearVelocity.y; // ���������� rb.velocity ������ linearVelocity ��� �������������
         rb.linearVelocity = currentVelocity;
-        print(transform.position);
     }
 
     void ApplyFriction()
