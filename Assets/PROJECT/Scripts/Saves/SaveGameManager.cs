@@ -1,6 +1,13 @@
-using System.Collections;
 using System.IO;
+using System.Security.Cryptography;
+using System.Text;
 using UnityEngine;
+
+[System.Serializable]
+public class AutoSaveSlot
+{
+    public string slotName;
+}
 
 public class SaveGameManager : MonoBehaviour
 {
@@ -10,100 +17,230 @@ public class SaveGameManager : MonoBehaviour
     private string autosavePath;
     public GameObject autosaveIndicator;
 
+    public bool CheckSave(string saveName)
+    {
+        string folder = Path.Combine(saveFolder, "manual");
+        string jsonPath = Path.Combine(folder, saveName + ".json");
+        string hashPath = Path.Combine(folder, saveName + ".hash");
+
+        // Проверяем существование файлов
+        if (!File.Exists(jsonPath))
+        {
+            Debug.LogWarning($"Save file not found: {jsonPath}");
+            return false;
+        }
+
+        if (!File.Exists(hashPath))
+        {
+            Debug.LogWarning($"Hash file not found: {hashPath}");
+            return false;
+        }
+
+        try
+        {
+            // Читаем содержимое файлов
+            string json = File.ReadAllText(jsonPath);
+            string savedHash = File.ReadAllText(hashPath);
+
+            // Вычисляем текущий хеш
+            string actualHash = ComputeHash(json);
+
+            // Сравниваем хеши
+            bool isValid = savedHash == actualHash;
+
+            if (isValid)
+            {
+                Debug.Log($"Save integrity check passed for: {saveName}");
+            }
+            else
+            {
+                Debug.LogError($"Save integrity check failed for: {saveName}");
+                Debug.LogError($"Expected: {savedHash}");
+                Debug.LogError($"Actual: {actualHash}");
+            }
+
+            return isValid;
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"Error during save integrity check for {saveName}: {ex.Message}");
+            return false;
+        }
+    }
+    public bool CheckAutoSave()
+    {
+        if (!File.Exists(autosavePath))
+        {
+            Debug.LogWarning("No autosave found to check.");
+            return false;
+        }
+
+        try
+        {
+            AutoSaveSlot slot = JsonUtility.FromJson<AutoSaveSlot>(File.ReadAllText(autosavePath));
+
+            if (string.IsNullOrEmpty(slot.slotName))
+            {
+                Debug.LogWarning("Autosave file empty or invalid.");
+                return false;
+            }
+
+            // Проверяем соответствующее ручное сохранение
+            return CheckSave(slot.slotName);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"Error during autosave check: {ex.Message}");
+            return false;
+        }
+    }
     void Awake()
     {
-        if (Instance == null) Instance = this;
+        Instance = this;
 
         saveFolder = Path.Combine(Application.persistentDataPath, "Saves");
         autosavePath = Path.Combine(saveFolder, "autosave.json");
-        print(saveFolder);
+
         Directory.CreateDirectory(saveFolder);
+        Directory.CreateDirectory(Path.Combine(saveFolder, "manual"));
     }
 
-    // ------------ SAVE ------------
+    // ======================= HASH =======================
+    private string ComputeHash(string content)
+    {
+        using (SHA256 sha = SHA256.Create())
+        {
+            byte[] bytes = Encoding.UTF8.GetBytes(content);
+            byte[] hash = sha.ComputeHash(bytes);
+            return System.BitConverter.ToString(hash).Replace("-", "");
+        }
+    }
+
+    // ======================= AUTOSAVE =======================
     public void SaveAuto(bool showIndicator)
     {
-        string json = CreateSaveJson();
-        File.WriteAllText(autosavePath, json);
+        string slot = GameManager.Instance.currentManualSlot;
 
-        if (showIndicator)
-        ShowSaveIndicator();
-        Debug.Log("Autosave saved -> " + autosavePath);
+        if (string.IsNullOrEmpty(slot))
+        {
+            Debug.LogWarning("No manual slot selected, autosave skipped!");
+            return;
+        }
+
+        SaveManual(slot, showIndicator: false);
+
+        AutoSaveSlot data = new AutoSaveSlot() { slotName = slot };
+        File.WriteAllText(autosavePath, JsonUtility.ToJson(data, true));
+
+        if (showIndicator) ShowSaveIndicator();
+
+        Debug.Log("Autosave saved slot name: " + slot);
     }
 
-    public void SaveManual(string saveName)
+    // ======================= MANUAL SAVE =======================
+    public void SaveManual(string saveName, bool showIndicator = true)
     {
         string folder = Path.Combine(saveFolder, "manual");
         Directory.CreateDirectory(folder);
 
-        string filePath = Path.Combine(folder, saveName + ".json");
+        string jsonPath = Path.Combine(folder, saveName + ".json");
+        string hashPath = Path.Combine(folder, saveName + ".hash");
 
         string json = CreateSaveJson();
-        File.WriteAllText(filePath, json);
 
-        SaveScreenshot(Path.Combine(folder, saveName + ".png"));
+        File.WriteAllText(jsonPath, json);
 
-        ShowSaveIndicator();
-        Debug.Log("Manual save created -> " + filePath);
+        // ---- Create hash file ----
+        string hash = ComputeHash(json);
+        File.WriteAllText(hashPath, hash);
+
+        // Screenshot
+        ScreenCapture.CaptureScreenshot(Path.Combine(folder, saveName + ".png"));
+
+        if (showIndicator) ShowSaveIndicator();
+        Debug.Log("Manual save created -> " + jsonPath + " (HASH updated)");
     }
 
-    // ------------ LOAD ------------
+    // ======================= LOAD =======================
     public void LoadAuto()
     {
         if (!File.Exists(autosavePath))
         {
-            Debug.LogError("No autosave found.");
-            
+            Debug.LogWarning("No autosave found.");
             return;
         }
 
-        LoadFromJson(File.ReadAllText(autosavePath));
+        AutoSaveSlot slot = JsonUtility.FromJson<AutoSaveSlot>(File.ReadAllText(autosavePath));
+
+        if (string.IsNullOrEmpty(slot.slotName))
+        {
+            Debug.LogWarning("Autosave file empty or invalid.");
+            return;
+        }
+
+        LoadManual(slot.slotName);
     }
-    public bool HasAutosave()
-    {
-        return File.Exists(autosavePath);
-    }
+
+    public bool HasAutosave() => File.Exists(autosavePath);
+
     public bool HasManual(string name)
     {
-        string folder = Path.Combine(saveFolder, "manual");
-        Directory.CreateDirectory(folder);
-
-        string path = Path.Combine(folder, name + ".json");
+        string path = Path.Combine(saveFolder, "manual", name + ".json");
         return File.Exists(path);
     }
+
     public void LoadManual(string name)
     {
         string folder = Path.Combine(saveFolder, "manual");
-        Directory.CreateDirectory(folder);
+        string jsonPath = Path.Combine(folder, name + ".json");
+        string hashPath = Path.Combine(folder, name + ".hash");
 
-        string path = Path.Combine(folder, name + ".json");
-        if (!File.Exists(path))
+        if (!File.Exists(jsonPath))
         {
-            Debug.LogError("Save file not found: " + path);
+            Debug.LogError("Save file not found: " + jsonPath);
             return;
         }
 
-        LoadFromJson(File.ReadAllText(path));
+        if (!File.Exists(hashPath))
+        {
+            Debug.LogError("Hash file missing! Save may be modified externally!");
+            return;
+        }
+
+        string json = File.ReadAllText(jsonPath);
+        string savedHash = File.ReadAllText(hashPath);
+        string actualHash = ComputeHash(json);
+
+        // --- Validate hash ---
+        if (savedHash != actualHash)
+        {
+            Debug.LogError("SAVE INTEGRITY ERROR! External modification detected! Slot: " + name);
+            return;
+        }
+
+        Debug.Log("Save integrity OK.");
+
+        GameManager.Instance.currentManualSlot = name;
+
+        LoadFromJson(json);
     }
 
-    // ------------ INTERNAL LOGIC ------------
+    // ======================= INTERNAL =======================
     private string CreateSaveJson()
     {
         GameSaveData data = new GameSaveData();
 
-        try
-        {
-            data.playerData = PlayerSaveSystem.Instance.GetData();
-        }
-        catch
-        {
-            data.playerData = null;
-        }
+        try { data.playerData = PlayerSaveSystem.Instance.GetData(); }
+        catch { data.playerData = null; }
+
+        try { data.settingsData = SettingsSaveSystem.Instance.GetData(); }
+        catch { data.settingsData = null; }
+
+        try { data.mailData = MailManager.Instance.GetSaveData(); }
+        catch { data.mailData = null; }
 
         data.saveDate = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-
         data.timestamp = System.DateTimeOffset.Now.ToUnixTimeSeconds();
-
         data.playtime = Time.time;
 
         return JsonUtility.ToJson(data, true);
@@ -111,26 +248,37 @@ public class SaveGameManager : MonoBehaviour
 
     private void LoadFromJson(string json)
     {
-        Debug.Log(json);
+        Debug.LogWarning("LOAD FROM JSON " + json);
         GameSaveData data = JsonUtility.FromJson<GameSaveData>(json);
 
         PlayerSaveSystem.Instance.LoadData(data.playerData);
+        if (data.mailData != null)
+            MailManager.Instance.LoadSaveData(data.mailData);
 
-        Debug.Log("Game save loaded successfully.");
+        Debug.Log("Save loaded successfully");
+
+        var floatArray = PlayerSaveSystem.Instance.GetData().position;
+        GameObject player = GameManager.Instance.GetPlayer();
+
+        if (player != null)
+        {
+            player.GetComponent<Rigidbody>()
+                  .MovePosition(new Vector3(floatArray[0], floatArray[1], floatArray[2]));
+        }
     }
 
-    private void SaveScreenshot(string filePath)
-    {
-        ScreenCapture.CaptureScreenshot(filePath);
-    }
-
+    // ======================= UI =======================
     private void ShowSaveIndicator()
     {
+        if (autosaveIndicator == null) return;
+
         autosaveIndicator.SetActive(true);
-        Invoke(nameof(DisableIndicator), 5f);
+        Invoke(nameof(DisableIndicator), 2.5f);
     }
-    void DisableIndicator()
+
+    private void DisableIndicator()
     {
-        autosaveIndicator.SetActive(false);
+        if (autosaveIndicator != null)
+            autosaveIndicator.SetActive(false);
     }
 }

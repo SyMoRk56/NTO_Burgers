@@ -11,10 +11,14 @@ public class Jumps : MonoBehaviour
     private Rigidbody rb;
     private bool isGrounded = false;
 
+    public playerAnimations animScript;
+
+
     void Start()
     {
         rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true;
+        animScript = GetComponent<playerAnimations>();
     }
 
     void Update()
@@ -31,6 +35,7 @@ public class Jumps : MonoBehaviour
 
     private void DoJump()
     {
+        animScript.HeroJumpAnim();
         rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
         rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
         isGrounded = false; // сразу сбросим, чтобы не прыгать в воздухе

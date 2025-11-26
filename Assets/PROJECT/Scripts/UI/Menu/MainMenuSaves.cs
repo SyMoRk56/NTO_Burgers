@@ -1,11 +1,16 @@
 using System.IO;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class MainMenuSaves : MonoBehaviour
 {
     public SavePanel[] saves;
     private string manualFolder;
+
+    public GameObject warningPanel, autosaveButton;
+
     private void Start()
     {
         manualFolder = Path.Combine(Application.persistentDataPath, "Saves/manual");
@@ -16,7 +21,9 @@ public class MainMenuSaves : MonoBehaviour
             return;
         }
 
-        string[] jsonFiles = Directory.GetFiles(manualFolder, "*.json");
+        string[] jsonFiles = Directory.GetFiles(manualFolder, "*.json")
+            .OrderBy(f => f)
+            .ToArray();
 
         for (int i = 0; i < saves.Length; i++)
         {
@@ -33,22 +40,40 @@ public class MainMenuSaves : MonoBehaviour
 
                 FillPanel(panel);
             }
-            else
-            {
-
-            }
         }
+        
     }
+    private void Awake()
+    {
+        bool p = false;
+        
+        if (!SaveGameManager.Instance.CheckSave("1") && SaveGameManager.Instance.HasManual("1"))
+        {
+            p = true;
+            saves[0].GetComponent<Button>().interactable = false;
+        }
+        if (!SaveGameManager.Instance.CheckSave("2") && SaveGameManager.Instance.HasManual("2"))
+        {
+            p = true;
+            saves[1].GetComponent<Button>().interactable = false;
+        }
+        if (!SaveGameManager.Instance.CheckSave("3") && SaveGameManager.Instance.HasManual("3"))
+        {
+            saves[2].GetComponent<Button>().interactable = false;
+            p = true;
+        }
+        if (p)
+            warningPanel.SetActive(true);
+    }
+
     private void FillPanel(SavePanel panel)
     {
-        // Загружаем JSON и вытаскиваем дату
         string json = File.ReadAllText(panel.savePath);
         GameSaveData data = JsonUtility.FromJson<GameSaveData>(json);
 
         panel.dateText.text = data.saveDate;
 
         LoadScreenshot(panel);
-
     }
 
     private void LoadScreenshot(SavePanel panel)
@@ -66,15 +91,27 @@ public class MainMenuSaves : MonoBehaviour
 
         panel.screenshot.texture = tex;
     }
+
     public void LoadSave(int num)
     {
-        bool success = SaveGameManager.Instance.HasManual(num.ToString());
-        if (!success)
+        string saveName = num.ToString();
+
+        // Если сейва нет — создаём пустой
+        if (!SaveGameManager.Instance.HasManual(saveName))
         {
-            SaveGameManager.Instance.SaveManual(num.ToString());
+            Debug.Log("Save not found, creating a new empty save: " + saveName);
+            SaveGameManager.Instance.SaveManual(saveName);
         }
+
+        // Указываем GameManager какой сейв загружать
+        GameManager.Instance.pendingManualLoad = saveName;
+        GameManager.Instance.loadAutoOnStart = false;
+
+        // Загружаем сцену игры
         SceneManager.LoadScene("Game");
     }
+
+
     public void Close()
     {
         transform.parent.Find("MainMenu").gameObject.SetActive(true);

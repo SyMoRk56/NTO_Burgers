@@ -1,3 +1,5 @@
+using System.IO;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -6,6 +8,10 @@ public class PauseMenu : MonoBehaviour
     public bool PauseGame;
     public GameObject pauseGameMenu;
 
+    private void Start()
+    {
+        Setup();
+    }
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Escape))
@@ -18,6 +24,8 @@ public class PauseMenu : MonoBehaviour
     public void Resume()
     {
         pauseGameMenu.SetActive(false);
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
         Time.timeScale = 1f;
         PauseGame = false;
     }
@@ -25,14 +33,102 @@ public class PauseMenu : MonoBehaviour
     public void Pause()
     {
         pauseGameMenu.SetActive(true);
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
         Time.timeScale = 0f;
         PauseGame = true;
     }
 
     public void ReturnToMainMenu()
     {
-        SaveGameManager.Instance.SaveAuto(false) ;
-        Time.timeScale = 1f;
-        SceneManager.LoadScene("Menu");
+        GameManager.Instance.ExitToMenu();
+    }
+    public void SaveToSlot(string slotName)
+    {
+        if (string.IsNullOrEmpty(slotName))
+        {
+            Debug.LogWarning("SaveToSlot: slotName is null or empty!");
+            return;
+        }
+
+        // Проверяем, существует ли слот
+        bool exists = SaveGameManager.Instance.HasManual(slotName);
+
+        // Если слота нет — создаём новый
+        if (!exists)
+        {
+            Debug.Log("SaveToSlot: Slot does not exist, creating -> " + slotName);
+        }
+
+        // Выставляем активный слот
+        GameManager.Instance.currentManualSlot = slotName;
+
+        // Сохраняем (создаст новый файл)
+        SaveGameManager.Instance.SaveManual(slotName);
+
+        Debug.Log("PauseMenu: Saved to slot -> " + slotName);
+        Setup();
+    }
+    public GameObject saveMenu;
+    public void ToggleSaveMenu()
+    {
+        saveMenu.SetActive(!saveMenu.activeSelf);
+    }
+    public SavePanel[] saves;
+
+    void Setup()
+    {
+        var manualFolder = Path.Combine(Application.persistentDataPath, "Saves/manual");
+
+        if (!Directory.Exists(manualFolder))
+        {
+            Debug.Log("Manual save folder not found.");
+            return;
+        }
+
+        string[] jsonFiles = Directory.GetFiles(manualFolder, "*.json")
+            .OrderBy(f => f)
+            .ToArray();
+        for (int i = 0; i < saves.Length; i++)
+        {
+            SavePanel panel = saves[i];
+
+            if (i < jsonFiles.Length)
+            {
+                string jsonPath = jsonFiles[i];
+                string nameNoExt = Path.GetFileNameWithoutExtension(jsonPath);
+                string screenshotPath = Path.Combine(manualFolder, nameNoExt + ".png");
+
+                panel.savePath = jsonPath;
+                panel.screenshotPath = screenshotPath;
+
+                FillPanel(panel);
+            }
+        }
+    }
+    private void FillPanel(SavePanel panel)
+    {
+        string json = File.ReadAllText(panel.savePath);
+        GameSaveData data = JsonUtility.FromJson<GameSaveData>(json);
+
+        panel.dateText.text = data.saveDate;
+
+        LoadScreenshot(panel);
+    }
+
+    private void LoadScreenshot(SavePanel panel)
+    {
+        if (!File.Exists(panel.screenshotPath))
+        {
+            panel.screenshot.texture = null;
+            return;
+        }
+
+        byte[] bytes = File.ReadAllBytes(panel.screenshotPath);
+
+        Texture2D tex = new Texture2D(2, 2);
+        tex.LoadImage(bytes);
+
+        panel.screenshot.texture = tex;
     }
 }

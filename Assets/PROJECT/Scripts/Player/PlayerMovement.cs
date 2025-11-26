@@ -16,7 +16,14 @@ public class PlayerMovement : MonoBehaviour
     public float mouseSensitivity = 2f;
     public Transform cameraTransform;
     public float maxViewAngle = 85f;
-    public LayerMask groundLayer; // �������� ��� � ����������, �������� Terrain � ������ ���� ��� �����
+    public LayerMask groundLayer;
+
+    public playerAnimations animScript;
+
+
+    public float idleTimeThreshold = 60f; // 1 минута
+    public ParticleSystem idleVFX; // Ссылка на VFX компонент
+    public Transform vfxSpawnPoint; // Точка появления VFX (опционально)
 
     private Rigidbody rb;
     private CapsuleCollider col;
@@ -26,7 +33,7 @@ public class PlayerMovement : MonoBehaviour
 
     public bool isGrounded = false;
     public bool isRunning = false;
-    private bool jumpRequested = false; // ��� ���������� ��������� ������
+    private bool jumpRequested = false;
 
     private Vector3 targetVelocity;
     private Vector3 currentVelocity;
@@ -34,42 +41,67 @@ public class PlayerMovement : MonoBehaviour
     public PlayerManager manager;
 
     public Transform forwardVector;
+
+    // Переменные для отслеживания бездействия
+    private float idleTimer = 0f;
+    private bool isIdleVFXActive = false;
+    private Vector3 lastPosition;
+    private Vector2 lastLookInput;
+
     void Start()
     {
         rb = GetComponent<Rigidbody>();
         col = GetComponent<CapsuleCollider>();
+        animScript = GetComponent<playerAnimations>();
 
         rb.mass = mass;
-        rb.interpolation = RigidbodyInterpolation.Interpolate; // ��������� ��� �������� ��������
+        rb.interpolation = RigidbodyInterpolation.Interpolate;
 
         Cursor.lockState = CursorLockMode.Locked;
 
         if (cameraTransform == null)
             cameraTransform = Camera.main.transform;
+
+        // Инициализация отслеживания бездействия
+        lastPosition = transform.position;
+        lastLookInput = Vector2.zero;
+
+        // Выключаем VFX на старте
+        if (idleVFX != null && idleVFX.isPlaying)
+            idleVFX.Stop();
     }
 
     void Update()
     {
-        if (!manager.CanMove) return;
-       
+        if (!manager.CanMove)
+        {
+            animScript.HeroWalkAnim();
+            ResetIdleTimer();
+            return;
+        }
+
         GetInput();
         HandleLook();
+        UpdateIdleTimer();
 
-        // ���������� ��������� ������ - ��������� � Update()
         if (isGrounded && Keyboard.current.spaceKey.wasPressedThisFrame)
         {
             jumpRequested = true;
+            ResetIdleTimer(); // Сброс таймера при прыжке
         }
     }
 
     void FixedUpdate()
     {
-        if(!manager.CanMove) return;
+        if (!manager.CanMove || !GameManager.Instance.isGameGoing)
+        {
+            ResetIdleTimer();
+            return;
+        }
         CheckGrounded();
         HandleMovement();
         ApplyFriction();
 
-        // ��������� ������ � FixedUpdate() ����� �������� �����
         if (jumpRequested && isGrounded)
         {
             ExecuteJump();
@@ -80,10 +112,27 @@ public class PlayerMovement : MonoBehaviour
     void GetInput()
     {
         moveInput = Vector2.zero;
-        if (Keyboard.current.wKey.isPressed) moveInput.y += 1;
-        if (Keyboard.current.sKey.isPressed) moveInput.y -= 1;
-        if (Keyboard.current.aKey.isPressed) moveInput.x -= 1;
-        if (Keyboard.current.dKey.isPressed) moveInput.x += 1;
+        if (Keyboard.current.wKey.isPressed)
+        {
+            moveInput.y += 1;
+            animScript.HeroWalkAnim();
+        }
+        if (Keyboard.current.sKey.isPressed)
+        {
+            moveInput.y -= 1;
+            animScript.HeroWalkAnim();
+        }
+        if (Keyboard.current.aKey.isPressed)
+        {
+            moveInput.x -= 1;
+            animScript.HeroWalkAnim();
+        }
+
+        if (Keyboard.current.dKey.isPressed) 
+        {
+            moveInput.x += 1; 
+            animScript.HeroWalkAnim();
+        }
 
         moveInput = Vector2.ClampMagnitude(moveInput, 1f);
 
@@ -104,6 +153,8 @@ public class PlayerMovement : MonoBehaviour
 
     void HandleMovement()
     {
+
+
         Vector3 wishDir = (forwardVector.forward * moveInput.y + forwardVector.right * moveInput.x).normalized;
 
         float targetSpeed = GetTargetSpeed();
@@ -113,11 +164,9 @@ public class PlayerMovement : MonoBehaviour
 
         float massFactor = Mathf.Clamp(100f / mass, 0.5f, 2f);
         acceleration *= massFactor;
-
         currentVelocity = Vector3.Lerp(currentVelocity, targetVelocity, acceleration * Time.fixedDeltaTime);
 
-        currentVelocity.y = rb.linearVelocity.y; // ���������� rb.velocity ������ linearVelocity ��� �������������
-
+        currentVelocity.y = rb.linearVelocity.y;
         rb.linearVelocity = currentVelocity;
     }
 
@@ -134,14 +183,11 @@ public class PlayerMovement : MonoBehaviour
 
     void CheckGrounded()
     {
-        // ���������� �������� ����� ��� terrain
-        float rayLength = col.height * 0.6f + 0.2f; // ����������� ����� ��� terrain
+        float rayLength = col.height * 0.6f + 0.2f;
         Vector3 rayStart = transform.position + Vector3.up * (col.height * 0.5f - col.radius);
 
-        // ���������� ���� ��� ����� ������� �����������
         isGrounded = Physics.Raycast(rayStart, Vector3.down, rayLength, groundLayer);
 
-        // �������������� ���� ��� ���������� �� �������� terrain
         if (!isGrounded)
         {
             Vector3 offset = transform.right * col.radius * 0.8f;
@@ -149,7 +195,6 @@ public class PlayerMovement : MonoBehaviour
                         Physics.Raycast(rayStart - offset, Vector3.down, rayLength, groundLayer);
         }
 
-        // ���� ��� ��� �� �� �����, ��������� ������
         if (!isGrounded)
         {
             RaycastHit hit;
@@ -163,7 +208,7 @@ public class PlayerMovement : MonoBehaviour
     void ExecuteJump()
     {
         float jumpPower = jumpForce * Mathf.Sqrt(mass / 70f);
-        rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z); // ���������� ������������ �������� ����� �������
+        rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
         rb.AddForce(Vector3.up * jumpPower, ForceMode.Impulse);
     }
 
@@ -177,6 +222,75 @@ public class PlayerMovement : MonoBehaviour
             baseSpeed = runSpeed;
 
         return baseSpeed * massSpeedFactor;
+    }
+
+    // Методы для отслеживания бездействия и управления VFX
+    void UpdateIdleTimer()
+    {
+        // Проверяем движение и вращение
+        bool isMoving = moveInput != Vector2.zero ||
+                       transform.position != lastPosition ||
+                       lookInput != Vector2.zero;
+
+        if (isMoving)
+        {
+            ResetIdleTimer();
+        }
+        else
+        {
+            idleTimer += Time.deltaTime;
+
+            animScript.HeroIdleAnim();
+
+            if (idleTimer >= idleTimeThreshold && !isIdleVFXActive)
+            {
+                ActivateIdleVFX();
+            }
+        }
+
+        // Сохраняем текущие значения для следующего кадра
+        lastPosition = transform.position;
+        lastLookInput = lookInput;
+    }
+
+    void ResetIdleTimer()
+    {
+        idleTimer = 0f;
+
+        if (isIdleVFXActive)
+        {
+            DeactivateIdleVFX();
+        }
+    }
+
+    void ActivateIdleVFX()
+    {
+        if (idleVFX != null)
+        {
+            // Устанавливаем позицию VFX если указана точка спавна
+            if (vfxSpawnPoint != null)
+            {
+                idleVFX.transform.position = vfxSpawnPoint.position;
+            }
+            else
+            {
+                idleVFX.transform.position = transform.position + Vector3.up * 0.5f;
+            }
+
+            idleVFX.Play();
+            isIdleVFXActive = true;
+
+            Debug.Log("Idle VFX activated - player has been inactive for " + idleTimeThreshold + " seconds");
+        }
+    }
+
+    void DeactivateIdleVFX()
+    {
+        if (idleVFX != null && idleVFX.isPlaying)
+        {
+            idleVFX.Stop();
+            isIdleVFXActive = false;
+        }
     }
 
     public void SetMass(float newMass)
@@ -199,7 +313,6 @@ public class PlayerMovement : MonoBehaviour
             Vector3 rayStart = transform.position + Vector3.up * (col.height * 0.5f - col.radius);
             Gizmos.DrawLine(rayStart, rayStart + Vector3.down * rayLength);
 
-            // ������ �������������� ����
             Vector3 offset = transform.right * col.radius * 0.8f;
             Gizmos.DrawLine(rayStart + offset, (rayStart + offset) + Vector3.down * rayLength);
             Gizmos.DrawLine(rayStart - offset, (rayStart - offset) + Vector3.down * rayLength);

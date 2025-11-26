@@ -3,7 +3,17 @@ guid: f3a5b3d1d922e0c49b440506fc1e9c54
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: hamster
+    second: {fileID: 2100000, guid: e9524e31b355b2941adb043c1a09ae1f, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: hamster.face
+    second: {fileID: 2100000, guid: 43f74c3700ac89747aaa932e94d6261f, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

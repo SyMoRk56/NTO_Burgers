@@ -14,9 +14,12 @@ public class DialogueUI : MonoBehaviour
     Coroutine typeCoroutine;
     float typeSpeed = 0.03f;
 
+    public bool hideOnAwake = true;
+
     void Awake()
     {
         runner = GetComponentInParent<DialogueRunner>();
+        if(hideOnAwake)
         Hide();
     }
 

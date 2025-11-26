@@ -1,14 +1,30 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 
 public class PlayerSaveSystem : MonoBehaviour
 {
     public static PlayerSaveSystem Instance;
     private Transform player;
 
-    void Awake() => Instance = this;
+    IEnumerator Start()
+    {
+        Instance = this;
+        while (GameManager.Instance.GetPlayer() == null)yield return null;
+        player = GameManager.Instance.GetPlayer()?.transform;
+    }
 
     public PlayerData GetData()
     {
+        if (player == null)
+            player = GameManager.Instance.GetPlayer()?.transform;
+
+        if (player == null)
+        {
+            Debug.LogWarning("Player not found during saving!");
+            return null;
+        }
+        print("PlayerSaveSystem:  get data" + player.transform.position);
+
         return new PlayerData
         {
             position = new float[]
@@ -22,8 +38,37 @@ public class PlayerSaveSystem : MonoBehaviour
 
     public void LoadData(PlayerData data)
     {
-        player = GameManager.Instance.GetPlayer().transform;
-        player.position = new Vector3(data.position[0], data.position[1], data.position[2]);
+        if (data == null) return;
+
+        if (player == null)
+            player = GameManager.Instance.GetPlayer()?.transform;
+
+        if (player == null)
+        {
+            Debug.LogError("Player cannot be assigned during load!");
+            return;
+        }
+        print("Set player position " + data.position.Length);
+        if(data.position.Length == 3) StartCoroutine(SetPlayerPosDelay(data.position));
+
+        else
+        {
+            player.GetComponent<PlayerMovement>().enabled = true;
+
+        }
+
+    }
+    IEnumerator SetPlayerPosDelay(float[] pos)
+    {
+        player.position = new Vector3(
+           pos[0],
+           pos[1],
+           pos[2]);
+        print(pos[0]);
+        print(pos[2]);
+        print(player.position);
+        yield return new WaitForSeconds(.3f);
+        player.GetComponent<PlayerMovement>().enabled = true;
+        yield break;
     }
 }
-
