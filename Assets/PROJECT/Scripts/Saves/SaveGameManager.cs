@@ -17,6 +17,83 @@ public class SaveGameManager : MonoBehaviour
     private string autosavePath;
     public GameObject autosaveIndicator;
 
+    public bool CheckSave(string saveName)
+    {
+        string folder = Path.Combine(saveFolder, "manual");
+        string jsonPath = Path.Combine(folder, saveName + ".json");
+        string hashPath = Path.Combine(folder, saveName + ".hash");
+
+        // Проверяем существование файлов
+        if (!File.Exists(jsonPath))
+        {
+            Debug.LogWarning($"Save file not found: {jsonPath}");
+            return false;
+        }
+
+        if (!File.Exists(hashPath))
+        {
+            Debug.LogWarning($"Hash file not found: {hashPath}");
+            return false;
+        }
+
+        try
+        {
+            // Читаем содержимое файлов
+            string json = File.ReadAllText(jsonPath);
+            string savedHash = File.ReadAllText(hashPath);
+
+            // Вычисляем текущий хеш
+            string actualHash = ComputeHash(json);
+
+            // Сравниваем хеши
+            bool isValid = savedHash == actualHash;
+
+            if (isValid)
+            {
+                Debug.Log($"Save integrity check passed for: {saveName}");
+            }
+            else
+            {
+                Debug.LogError($"Save integrity check failed for: {saveName}");
+                Debug.LogError($"Expected: {savedHash}");
+                Debug.LogError($"Actual: {actualHash}");
+            }
+
+            return isValid;
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"Error during save integrity check for {saveName}: {ex.Message}");
+            return false;
+        }
+    }
+    public bool CheckAutoSave()
+    {
+        if (!File.Exists(autosavePath))
+        {
+            Debug.LogWarning("No autosave found to check.");
+            return false;
+        }
+
+        try
+        {
+            AutoSaveSlot slot = JsonUtility.FromJson<AutoSaveSlot>(File.ReadAllText(autosavePath));
+
+            if (string.IsNullOrEmpty(slot.slotName))
+            {
+                Debug.LogWarning("Autosave file empty or invalid.");
+                return false;
+            }
+
+            // Проверяем соответствующее ручное сохранение
+            return CheckSave(slot.slotName);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"Error during autosave check: {ex.Message}");
+            return false;
+        }
+    }
     void Awake()
     {
         Instance = this;

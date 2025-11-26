@@ -2,11 +2,14 @@ using System.IO;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class MainMenuSaves : MonoBehaviour
 {
     public SavePanel[] saves;
     private string manualFolder;
+
+    public GameObject warningPanel, autosaveButton;
 
     private void Start()
     {
@@ -37,6 +40,22 @@ public class MainMenuSaves : MonoBehaviour
 
                 FillPanel(panel);
             }
+        }
+        if (!SaveGameManager.Instance.CheckAutoSave())
+        {
+            autosaveButton.GetComponent<Button>().interactable = false;
+        }
+        if (!SaveGameManager.Instance.CheckSave("1") && SaveGameManager.Instance.HasManual("1"))
+        {
+            saves[0].GetComponent<Button>().interactable = false;
+        }
+        if (!SaveGameManager.Instance.CheckSave("2") && SaveGameManager.Instance.HasManual("2"))
+        {
+            saves[1].GetComponent<Button>().interactable = false;
+        }
+        if (!SaveGameManager.Instance.CheckSave("3") && SaveGameManager.Instance.HasManual("3"))
+        {
+            saves[2].GetComponent<Button>().interactable = false;
         }
     }
 
