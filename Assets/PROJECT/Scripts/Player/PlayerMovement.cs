@@ -18,7 +18,9 @@ public class PlayerMovement : MonoBehaviour
     public float maxViewAngle = 85f;
     public LayerMask groundLayer;
 
-    [Header("Idle VFX Settings")]
+    public playerAnimations animScript;
+
+
     public float idleTimeThreshold = 60f; // 1 минута
     public ParticleSystem idleVFX; // Ссылка на VFX компонент
     public Transform vfxSpawnPoint; // Точка появления VFX (опционально)
@@ -50,6 +52,7 @@ public class PlayerMovement : MonoBehaviour
     {
         rb = GetComponent<Rigidbody>();
         col = GetComponent<CapsuleCollider>();
+        animScript = GetComponent<playerAnimations>();
 
         rb.mass = mass;
         rb.interpolation = RigidbodyInterpolation.Interpolate;
@@ -72,6 +75,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (!manager.CanMove)
         {
+            animScript.HeroWalkAnim();
             ResetIdleTimer();
             return;
         }
@@ -108,10 +112,27 @@ public class PlayerMovement : MonoBehaviour
     void GetInput()
     {
         moveInput = Vector2.zero;
-        if (Keyboard.current.wKey.isPressed) moveInput.y += 1;
-        if (Keyboard.current.sKey.isPressed) moveInput.y -= 1;
-        if (Keyboard.current.aKey.isPressed) moveInput.x -= 1;
-        if (Keyboard.current.dKey.isPressed) moveInput.x += 1;
+        if (Keyboard.current.wKey.isPressed)
+        {
+            moveInput.y += 1;
+            animScript.HeroWalkAnim();
+        }
+        if (Keyboard.current.sKey.isPressed)
+        {
+            moveInput.y -= 1;
+            animScript.HeroWalkAnim();
+        }
+        if (Keyboard.current.aKey.isPressed)
+        {
+            moveInput.x -= 1;
+            animScript.HeroWalkAnim();
+        }
+
+        if (Keyboard.current.dKey.isPressed) 
+        {
+            moveInput.x += 1; 
+            animScript.HeroWalkAnim();
+        }
 
         moveInput = Vector2.ClampMagnitude(moveInput, 1f);
 
@@ -132,6 +153,8 @@ public class PlayerMovement : MonoBehaviour
 
     void HandleMovement()
     {
+
+
         Vector3 wishDir = (forwardVector.forward * moveInput.y + forwardVector.right * moveInput.x).normalized;
 
         float targetSpeed = GetTargetSpeed();
@@ -141,7 +164,6 @@ public class PlayerMovement : MonoBehaviour
 
         float massFactor = Mathf.Clamp(100f / mass, 0.5f, 2f);
         acceleration *= massFactor;
-
         currentVelocity = Vector3.Lerp(currentVelocity, targetVelocity, acceleration * Time.fixedDeltaTime);
 
         currentVelocity.y = rb.linearVelocity.y;
@@ -217,6 +239,8 @@ public class PlayerMovement : MonoBehaviour
         else
         {
             idleTimer += Time.deltaTime;
+
+            animScript.HeroIdleAnim();
 
             if (idleTimer >= idleTimeThreshold && !isIdleVFXActive)
             {
