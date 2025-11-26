@@ -11,6 +11,13 @@ public class MainMenu : MonoBehaviour
     public GameObject autosaveButton;
     void Start()
     {
+        if (!SaveGameManager.Instance.CheckAutoSave())
+        {
+
+            autosaveButton.GetComponent<Button>().interactable = false;
+            FindFirstObjectByType<MainMenuSaves>().warningPanel.SetActive(true);
+            return;
+        }
         autosaveButton.GetComponent<Button>().interactable = SaveGameManager.Instance.HasAutosave();
     }
     public void PlayGame()
@@ -29,6 +36,7 @@ public class MainMenu : MonoBehaviour
     }
     public void LoadAutoSave()
     {
+        
         // Проверяем, существует ли автосейв
         if (!SaveGameManager.Instance.HasAutosave())
         {

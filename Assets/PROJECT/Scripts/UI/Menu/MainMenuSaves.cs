@@ -41,22 +41,29 @@ public class MainMenuSaves : MonoBehaviour
                 FillPanel(panel);
             }
         }
-        if (!SaveGameManager.Instance.CheckAutoSave())
-        {
-            autosaveButton.GetComponent<Button>().interactable = false;
-        }
+        
+    }
+    private void Awake()
+    {
+        bool p = false;
+        
         if (!SaveGameManager.Instance.CheckSave("1") && SaveGameManager.Instance.HasManual("1"))
         {
+            p = true;
             saves[0].GetComponent<Button>().interactable = false;
         }
         if (!SaveGameManager.Instance.CheckSave("2") && SaveGameManager.Instance.HasManual("2"))
         {
+            p = true;
             saves[1].GetComponent<Button>().interactable = false;
         }
         if (!SaveGameManager.Instance.CheckSave("3") && SaveGameManager.Instance.HasManual("3"))
         {
             saves[2].GetComponent<Button>().interactable = false;
+            p = true;
         }
+        if (p)
+            warningPanel.SetActive(true);
     }
 
     private void FillPanel(SavePanel panel)
