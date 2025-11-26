@@ -4016,6 +4016,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5449092576662713555, guid: 894ced3cc3deb714a9bc514d9a87cc55, type: 3}
+      propertyPath: countText
+      value: 
+      objectReference: {fileID: 1843215398}
+    - target: {fileID: 5449092576662713555, guid: 894ced3cc3deb714a9bc514d9a87cc55, type: 3}
       propertyPath: taskPanel
       value: 
       objectReference: {fileID: 1423562797}
@@ -8129,6 +8133,17 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 0.5
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &1843215398 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 411204388245764776, guid: 894ced3cc3deb714a9bc514d9a87cc55, type: 3}
+  m_PrefabInstance: {fileID: 995434123}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
 --- !u!1 &1848025427
 GameObject:
   m_ObjectHideFlags: 0

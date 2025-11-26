@@ -32,6 +32,7 @@ public class TaskManager : MonoBehaviour
     {
         TaskUI.Instance.SetTask(new("", "", ""), 0);
 
+        if (tasks.Count == 0) return;
         var task = tasks[0]; // ������ Queue.Dequeue()
         tasks.RemoveAt(0);
 
