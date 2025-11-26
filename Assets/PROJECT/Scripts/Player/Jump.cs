@@ -11,16 +11,21 @@ public class Jumps : MonoBehaviour
     private Rigidbody rb;
     private bool isGrounded = false;
 
+    public playerAnimations animScript;
+
+
     void Start()
     {
         rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true;
+        animScript = GetComponent<playerAnimations>();
     }
 
     void Update()
     {
         if (Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame && isGrounded)
         {
+            animScript.HeroJumpAnim();
             DoJump();
         }
         else if (Input.GetKeyDown(KeyCode.Space) && isGrounded) // fallback
