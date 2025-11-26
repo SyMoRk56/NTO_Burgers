@@ -25,7 +25,6 @@ public class Jumps : MonoBehaviour
     {
         if (Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame && isGrounded)
         {
-            animScript.HeroJumpAnim();
             DoJump();
         }
         else if (Input.GetKeyDown(KeyCode.Space) && isGrounded) // fallback
@@ -36,6 +35,7 @@ public class Jumps : MonoBehaviour
 
     private void DoJump()
     {
+        animScript.HeroJumpAnim();
         rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
         rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
         isGrounded = false; // сразу сбросим, чтобы не прыгать в воздухе
