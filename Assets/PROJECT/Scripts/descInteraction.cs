@@ -1,11 +1,12 @@
-using UnityEngine;
+п»їusing UnityEngine;
 using System.Collections.Generic;
 
 public class DeskInteraction : MonoBehaviour
 {
+    public GameObject letterPrefab;
     [Header("Canvas Settings")]
     public Canvas deskCanvas;
-    public List<GameObject> randomImages;
+    public List<GameObject> randomImages = new();
 
     [Header("Camera Settings")]
     public Transform mainCamera;
@@ -25,7 +26,7 @@ public class DeskInteraction : MonoBehaviour
     private Quaternion originalCameraRotation;
     private Transform originalCameraParent;
 
-    // Свойство для проверки, открыт ли канвас
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
     public bool IsCanvasOpen => isCanvasOpen;
 
     void Start()
@@ -54,20 +55,20 @@ public class DeskInteraction : MonoBehaviour
     {
         isCanvasOpen = true;
 
-        // Скрываем popup при открытии UI панели
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ popup пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ UI пїЅпїЅпїЅпїЅпїЅпїЅ
         if (interactionUI != null)
         {
             interactionUI.HidePopup();
         }
 
-        // Сохраняем оригинальные позицию и поворот камеры
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
         if (mainCamera != null)
         {
             originalCameraPosition = mainCamera.position;
             originalCameraRotation = mainCamera.rotation;
             originalCameraParent = mainCamera.parent;
 
-            // Перемещаем камеру к столу
+            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ
             mainCamera.SetParent(transform);
             mainCamera.localPosition = cameraOffset;
             mainCamera.localRotation = Quaternion.Euler(cameraRotation);
@@ -76,7 +77,8 @@ public class DeskInteraction : MonoBehaviour
         if (deskCanvas != null)
         {
             deskCanvas.gameObject.SetActive(true);
-            ShowRandomImages();
+            SpawnLetters(4);
+            //ShowRandomImages();
         }
 
         if (playerMovement != null)
@@ -93,7 +95,7 @@ public class DeskInteraction : MonoBehaviour
     {
         isCanvasOpen = false;
 
-        // Возвращаем камеру на место
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
         if (mainCamera != null)
         {
             mainCamera.SetParent(originalCameraParent);
@@ -115,7 +117,7 @@ public class DeskInteraction : MonoBehaviour
 
         StartCoroutine(LockCursorNextFrame());
 
-        // Показываем popup при закрытии UI панели (если игрок в зоне)
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ popup пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ UI пїЅпїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅ)
         if (interactionUI != null)
         {
             interactionUI.ShowPopup();
@@ -128,37 +130,69 @@ public class DeskInteraction : MonoBehaviour
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
     }
-
-    void ShowRandomImages()
+    private void OnEnable()
     {
-        HideAllImages();
 
-        if (randomImages == null || randomImages.Count == 0)
-            return;
+    }
+    //void ShowRandomImages()
+    //{
+    //    HideAllImages();
 
-        int imagesToShow = Random.Range(1, Mathf.Min(4, randomImages.Count + 1));
-        List<GameObject> available = new List<GameObject>(randomImages);
+    //    if (randomImages == null || randomImages.Count == 0)
+    //        return;
 
-        for (int i = 0; i < imagesToShow; i++)
+    //    int imagesToShow = Random.Range(1, Mathf.Min(4, randomImages.Count + 1));
+    //    List<GameObject> available = new List<GameObject>(randomImages);
+
+    //    for (int i = 0; i < imagesToShow; i++)
+    //    {
+    //        if (available.Count == 0)
+    //            break;
+
+    //        int id = Random.Range(0, available.Count);
+    //        GameObject img = available[id];
+
+    //        img.SetActive(true);
+
+    //        RectTransform rt = img.GetComponent<RectTransform>();
+    //        if (rt != null)
+    //        {
+    //            rt.anchoredPosition = GetSafeScreenPosition(rt);
+    //        }
+
+    //        available.RemoveAt(id);
+    //    }
+    //}
+    public void SpawnLetter()
+    {
+        var letter = Instantiate(letterPrefab, transform.GetChild(0).GetChild(0));
+        letter.transform.position = new Vector3();
+        var drag = letter.GetComponent<DraggableUI>();
+        print(MailManager.Instance == null);
+        var a = MailManager.Instance.GetNextUndelivered();
+        drag.recipient = a.reciever;
+        drag.id = a.id;
+        drag.address = a.adress;
+        randomImages.Add(letter);
+    }
+    public void SpawnLetters(int count)
+    {
+        var ls = MailManager.Instance.GetNextXUndelivered(count);
+        ls.Reverse();
+        print("LS " + ls.Count);
+        foreach (var l in ls)
         {
-            if (available.Count == 0)
-                break;
-
-            int id = Random.Range(0, available.Count);
-            GameObject img = available[id];
-
-            img.SetActive(true);
-
-            RectTransform rt = img.GetComponent<RectTransform>();
-            if (rt != null)
-            {
-                rt.anchoredPosition = GetSafeScreenPosition(rt);
-            }
-
-            available.RemoveAt(id);
+            var letter = Instantiate(letterPrefab, transform.GetChild(0).GetChild(0));
+            letter.transform.position = new Vector3();
+            var drag = letter.GetComponent<DraggableUI>();
+            print(MailManager.Instance == null);
+            var a = l;
+            drag.recipient = a.reciever;
+            drag.id = a.id;
+            drag.address = a.adress;
+            randomImages.Add(letter);
         }
     }
-
     Vector2 GetSafeScreenPosition(RectTransform rectTransform)
     {
         RectTransform canvasRect = deskCanvas.GetComponent<RectTransform>();
