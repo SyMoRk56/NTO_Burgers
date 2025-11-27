@@ -221,6 +221,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1294066916}
   - component: {fileID: 1294066915}
+  - component: {fileID: 1294066917}
   m_Layer: 0
   m_Name: Directional Light
   m_TagString: Untagged
@@ -308,6 +309,35 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+--- !u!114 &1294066917
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1294066914}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
+  m_UsePipelineSettings: 1
+  m_AdditionalLightsShadowResolutionTier: 2
+  m_CustomShadowLayers: 0
+  m_LightCookieSize: {x: 1, y: 1}
+  m_LightCookieOffset: {x: 0, y: 0}
+  m_SoftShadowQuality: 0
+  m_RenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_ShadowRenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_Version: 4
+  m_LightLayerMask: 1
+  m_ShadowLayerMask: 1
+  m_RenderingLayers: 1
+  m_ShadowRenderingLayers: 1
 --- !u!1 &1813970477
 GameObject:
   m_ObjectHideFlags: 0
@@ -363,12 +393,12 @@ MonoBehaviour:
   instruments:
   - {fileID: 11400000, guid: d4de3beeed8478942965314d58415e9d, type: 2}
   melodyPattern: 0
-  bpm: 20
+  bpm: 34
   bars: 50
   restChance: 0.4
   pitchRange: {x: 1, y: 1}
   scaleType: 0
-  rootNote: 45
+  rootNote: 44
   progression:
     name: 
     degrees: 000000000200000004000000020000000400000006000000010000000300000005000000030000000500000006000000
