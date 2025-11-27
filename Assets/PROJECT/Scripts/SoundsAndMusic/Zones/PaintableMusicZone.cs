@@ -7,6 +7,7 @@ public class PaintableMusicZone : MonoBehaviour
 
     public List<Vector3> points = new List<Vector3>();
     public AudioClip music;
+    public MusicMixer mixer;
 
     private void OnEnable() => allZones.Add(this);
     private void OnDisable() => allZones.Remove(this);
@@ -23,7 +24,7 @@ public class PaintableMusicZone : MonoBehaviour
         {
             if (zone.IsPointInsidePolygon(playerPos))
             {
-                MusicManager.Instance.PlayMusic(zone.music);
+                MusicManager.Instance.PlayMusic(zone.music, zone.mixer);
                 insideAnyZone = true;
                 break;
             }
