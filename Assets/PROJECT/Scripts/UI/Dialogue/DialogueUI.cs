@@ -27,10 +27,10 @@ public class DialogueUI : MonoBehaviour
     {
         ClearChoices();
         gameObject.SetActive(true);
-        nameText.text = name;
+        nameText.text = LocalizationManager.Instance.Get(name);
 
         if (typeCoroutine != null) StopCoroutine(typeCoroutine);
-        typeCoroutine = StartCoroutine(TypeText(text));
+        typeCoroutine = StartCoroutine(TypeText(LocalizationManager.Instance.Get(text)));
     }
 
     IEnumerator TypeText(string text)
@@ -55,7 +55,7 @@ public class DialogueUI : MonoBehaviour
             var btn = obj.GetComponent<Button>();
             var txt = obj.GetComponentInChildren<TextMeshProUGUI>();
 
-            txt.text = choices[i].text;
+            txt.text = LocalizationManager.Instance.Get(choices[i].text);
             int index = i;
             btn.onClick.AddListener(() => runner.Choose(index));
         }

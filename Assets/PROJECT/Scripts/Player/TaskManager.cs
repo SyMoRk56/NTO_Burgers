@@ -18,43 +18,58 @@ public class TaskManager : MonoBehaviour
     public void AddTask(string recieverName, string adress, string id)
     {
         tasks.Add(new Task(recieverName, adress, id));
-        bool b = GameManager.Instance.GetPlayer().GetComponent<PlayerInteraction>().pickupedLetter == null;
-        print("add task: " + b);
-        if (b)
-            StartCoroutine(GetPlayerNextLetter(tasks[0])); // ������ Queue.Peek()
+        bool hasNoLetter = GameManager.Instance.GetPlayer().GetComponent<PlayerInteraction>().pickupedLetter == null;
+        print("add task: " + hasNoLetter);
+        if (hasNoLetter)
+            StartCoroutine(GetPlayerNextLetter(tasks[0]));
         else
         {
-            TaskUI.Instance.SetTask(tasks[0], tasks.Count - 1);
+            // Исправлено: передаем корректное количество оставшихся писем
+            TaskUI.Instance.SetTask(tasks[0], Mathf.Max(0, tasks.Count - 1));
         }
     }
 
     public void NextTask()
     {
-        TaskUI.Instance.SetTask(new("", "", ""), 0);
+        // Удаляем выполненную задачу
+        if (tasks.Count > 0)
+        {
+            tasks.RemoveAt(0);
+        }
 
-        if (tasks.Count == 0) return;
-        var task = tasks[0]; // ������ Queue.Dequeue()
-        tasks.RemoveAt(0);
-
-        StartCoroutine(GetPlayerNextLetter(task));
+        // Показываем следующую задачу или скрываем UI если задач нет
+        if (tasks.Count > 0)
+        {
+            StartCoroutine(GetPlayerNextLetter(tasks[0]));
+        }
+        else
+        {
+            TaskUI.Instance.HideTask();
+        }
     }
 
     public IEnumerator GetPlayerNextLetter(Task task)
     {
         yield return new WaitForSeconds(3);
 
-        var letterGO = Instantiate(letterPrefab);
-        var letter = letterGO.GetComponent<Letter>();
+        // Проверяем, что у игрока все еще нет письма
+        if (GameManager.Instance.GetPlayer().GetComponent<PlayerInteraction>().pickupedLetter == null)
+        {
+            var letterGO = Instantiate(letterPrefab);
+            var letter = letterGO.GetComponent<Letter>();
 
-        letter.recieverName = task.recieverName;
-        letter.id = task.id;
-        GameManager.Instance.GetPlayer()
-            .GetComponent<PlayerInteraction>()
-            .pickupedLetter = letter;
+            letter.recieverName = task.recieverName;
+            letter.id = task.id;
+            GameManager.Instance.GetPlayer()
+                .GetComponent<PlayerInteraction>()
+                .pickupedLetter = letter;
+        }
 
-        TaskUI.Instance.SetTask(task, tasks.Count - 1);
+        // Показываем задачу с корректным количеством оставшихся писем
+        TaskUI.Instance.SetTask(task, Mathf.Max(0, tasks.Count - 1));
     }
 }
+
 [Serializable]
 public struct Task
 {
