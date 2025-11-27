@@ -8421,7 +8421,6 @@ GameObject:
   - component: {fileID: 2586755408980686900}
   - component: {fileID: 5038335163597078139}
   - component: {fileID: 497480837974670431}
-  - component: {fileID: 3306208814022628167}
   - component: {fileID: 292208797563756352}
   m_Layer: 0
   m_Name: house12
@@ -8502,27 +8501,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &3306208814022628167
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7475828865069876795}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!65 &292208797563756352
 BoxCollider:
   m_ObjectHideFlags: 0
