@@ -7,7 +7,6 @@ public class LocalizationManager : MonoBehaviour
 {
     public static LocalizationManager Instance;
 
-    [Tooltip("Default language code (e.g. RU, EN)")]
     public string defaultLanguage = "RU";
 
     public event Action OnLanguageChanged;
@@ -19,11 +18,7 @@ public class LocalizationManager : MonoBehaviour
     private void Awake()
     {
         if (Instance == null) Instance = this;
-        else
-        {
-            Destroy(gameObject);
-            return;
-        }
+        else Destroy(gameObject);
 
         DontDestroyOnLoad(gameObject);
 
@@ -38,31 +33,12 @@ public class LocalizationManager : MonoBehaviour
 
         if (table == null)
             Debug.LogError("Localization table is NULL!");
-        else
-            Debug.Log($"Localization loaded: {table.Count} keys");
     }
-
     private void LoadLanguageFromSettings()
     {
-        // Если SettingsSaveSystem ещё не готов — подстрахуемся.
-        if (SettingsSaveSystem.Instance == null)
-        {
-            // Установим дефолт (без сохранения) и выйдем — другой код может вызвать SetLanguage позже.
-            CurrentLanguage = defaultLanguage;
-            Debug.LogWarning("SettingsSaveSystem not ready — using default language: " + CurrentLanguage);
-            return;
-        }
-
+        print(SettingsSaveSystem.Instance == null);
         var settings = SettingsSaveSystem.Instance.GetData();
-
-        // Если в settings еще нет языка — положим дефолт
-        if (settings == null)
-        {
-            CurrentLanguage = defaultLanguage;
-            Debug.LogWarning("Settings data is null — using default language: " + CurrentLanguage);
-            return;
-        }
-
+        print(settings.lang);
         if (string.IsNullOrEmpty(settings.lang))
             settings.lang = defaultLanguage;
 
@@ -70,85 +46,40 @@ public class LocalizationManager : MonoBehaviour
 
         Debug.Log("Loaded language: " + CurrentLanguage);
     }
-
-    /// <summary>
-    /// Установить текущий язык. Сохраняет выбор в Settings через SettingsSaveManager.
-    /// Вызывает OnLanguageChanged.
-    /// </summary>
     public void SetLanguage(string lang)
     {
-        if (string.IsNullOrEmpty(lang))
-        {
-            Debug.LogWarning("Attempt to set empty language, ignoring.");
-            return;
-        }
-
         CurrentLanguage = lang;
 
-        // Попробуем сохранить в settings (если доступно)
-        if (SettingsSaveSystem.Instance != null)
-        {
-            var settings = SettingsSaveSystem.Instance.GetData() ?? new SettingsData();
-            settings.lang = lang;
-            SettingsSaveSystem.Instance.LoadData(settings);
-
-            if (SettingsSaveManager.Instance != null)
-            {
-                SettingsSaveManager.Instance.SaveSettings();
-            }
-            else
-            {
-                Debug.LogWarning("SettingsSaveManager.Instance is null — language not persisted to disk.");
-            }
-        }
-        else
-        {
-            Debug.LogWarning("SettingsSaveSystem.Instance is null — language not persisted to settings.");
-        }
+        // Сохраняем в Settings.json
+        var settings = SettingsSaveSystem.Instance.GetData();
+        settings.lang = lang;
+        SettingsSaveSystem.Instance.LoadData(settings);
+        SettingsSaveManager.Instance.SaveSettings();
 
         OnLanguageChanged?.Invoke();
 
         Debug.Log("Language changed to: " + lang);
     }
-
-    /// <summary>
-    /// Возвращает перевод по ключу; если ключ или перевод отсутствуют, возвращает ключ и лог предупреждения.
-    /// </summary>
     public string GetText(string key)
     {
-        if (string.IsNullOrEmpty(key))
-            return "";
-
-        if (table == null)
-        {
-            Debug.LogWarning("Localization table is null. Key: " + key);
-            return key;
-        }
-
         if (!table.ContainsKey(key))
         {
             Debug.LogWarning("Missing localization key: " + key);
             return key;
         }
 
-        // Нормализуем язык в нижний регистр - в CSV заголовки обычно en/ru
-        string langCode = (CurrentLanguage ?? defaultLanguage).ToLower();
-
-        if (!table[key].ContainsKey(langCode))
+        if (!table[key].ContainsKey(CurrentLanguage.ToLower()))
         {
-            Debug.LogWarning($"Missing translation for {key} in language {CurrentLanguage} (looking for '{langCode}').");
+            Debug.LogWarning($"Missing translation for {key} in language {CurrentLanguage}");
             return key;
         }
 
-        return table[key][langCode];
+        return table[key][CurrentLanguage.ToLower()];
     }
 
-    /// <summary> Алиас для совместимости с кодом, который раньше вызывал Get(...) </summary>
-    public string Get(string key) => GetText(key);
 
     private void Update()
     {
-        // Горячие клавиши для теста локализации во время разработки
         if (Input.GetKeyDown(KeyCode.F1))
             SetLanguage("EN");
 

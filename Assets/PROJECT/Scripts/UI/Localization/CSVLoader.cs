@@ -10,14 +10,15 @@ public static class CSVLoader
         if (csvData == null)
         {
             Debug.LogError("CSV file not found at Resources/" + path);
-            return new Dictionary<string, Dictionary<string, string>>();
+            return null;
         }
 
         var result = new Dictionary<string, Dictionary<string, string>>();
 
         string[] lines = csvData.text.Split('\n');
 
-        string[] headers = lines[0].Trim('\ufeff').Trim().Split(';');
+        string[] headers = lines[0].Trim().Split(';');
+        Debug.LogError("Lines count: " + lines.Length);
 
         for (int i = 1; i < lines.Length; i++)
         {
@@ -26,13 +27,14 @@ public static class CSVLoader
 
             string[] fields = line.Split(';');
 
-            string key = fields[0].Trim();
+            string key = fields[0];
             var dict = new Dictionary<string, string>();
 
             for (int h = 1; h < headers.Length; h++)
             {
                 string lang = headers[h];
                 string text = fields.Length > h ? fields[h] : "";
+
                 dict[lang] = text;
             }
 
