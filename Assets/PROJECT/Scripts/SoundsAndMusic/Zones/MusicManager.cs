@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 public class MusicManager : MonoBehaviour
 {
@@ -11,13 +12,14 @@ public class MusicManager : MonoBehaviour
 
     public float fadeTime = 1.5f;
 
+    private MusicMixer activeMixer;
+
     private void Awake()
     {
         Instance = this;
         audioSource = gameObject.AddComponent<AudioSource>();
         audioSource.loop = true;
 
-        // Запускаем дефолтную музыку при старте
         if (defaultMusic != null)
         {
             audioSource.clip = defaultMusic;
@@ -25,38 +27,55 @@ public class MusicManager : MonoBehaviour
         }
     }
 
-    public void PlayMusic(AudioClip clip)
+    public void PlayMusic(AudioClip clip, MusicMixer mixer)
     {
-        if (clip == null) return;
-        if (audioSource.clip == clip) return;
+        if (mixer == null)
+        {
+            if (clip == null) return;
+            if (audioSource.clip == clip && activeMixer == null) return;
+        }
 
         if (fadeRoutine != null)
             StopCoroutine(fadeRoutine);
 
-        fadeRoutine = StartCoroutine(FadeMusic(clip));
+        fadeRoutine = StartCoroutine(FadeSwitch(clip, mixer));
     }
 
     public void PlayDefault()
     {
         if (defaultMusic == null) return;
-        PlayMusic(defaultMusic);
+        PlayMusic(defaultMusic, null);
     }
 
-    private System.Collections.IEnumerator FadeMusic(AudioClip newClip)
+    private IEnumerator FadeSwitch(AudioClip newClip, MusicMixer newMixer)
     {
         float startVolume = audioSource.volume;
 
-        // fade out
         for (float t = 0; t < fadeTime; t += Time.deltaTime)
         {
             audioSource.volume = Mathf.Lerp(startVolume, 0, t / fadeTime);
             yield return null;
         }
 
-        audioSource.clip = newClip;
-        audioSource.Play();
+        if (activeMixer != null)
+        {
+            activeMixer.StopAll();
+            activeMixer = null;
+        }
 
-        // fade in
+        if (newMixer != null)
+        {
+            audioSource.Stop();
+            audioSource.clip = null;
+            activeMixer = newMixer;
+            newMixer.Play();
+        }
+        else
+        {
+            audioSource.clip = newClip;
+            audioSource.Play();
+        }
+
         for (float t = 0; t < fadeTime; t += Time.deltaTime)
         {
             audioSource.volume = Mathf.Lerp(0, startVolume, t / fadeTime);
