@@ -32,6 +32,7 @@ public class NPCBehaviour : MonoBehaviour
                 switch (act.actionType)
                 {
                     case NPCActionType.Walk:
+                        print("Walk to target");
                         yield return WalkToTarget(act.walkTarget, act.waitAfterWalk);
                         break;
 
@@ -53,15 +54,18 @@ public class NPCBehaviour : MonoBehaviour
         agent.isStopped = false;
         agent.SetDestination(target.position);
         animator.SetBool(moveAnimParameter, true);
-
-        while (Vector3.Distance(transform.position, target.position) > agent.stoppingDistance)
+        print("Move");
+        while (Vector3.Distance(new Vector3(transform.position.x, 0, transform.position.z), new Vector3(target.position.x, 0, target.position.z)) > agent.stoppingDistance)
         {
+            print("m");
             yield return null;
         }
 
         animator.SetBool(moveAnimParameter, false);
-
-        yield return new WaitForSeconds(Random.Range(waitRange.x, waitRange.y));
+        print("EndMoving");
+        var r = Random.Range(waitRange.x, waitRange.y);
+        print(r);
+        yield return new WaitForSeconds(r);
     }
 
     // -------------------------------------------
