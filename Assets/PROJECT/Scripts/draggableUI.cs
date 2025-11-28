@@ -22,7 +22,7 @@ public class DraggableUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     private bool isDragging = false;
 
     [Header("Button Reference")]
-    public Button actionButton; // ������ �� �������� ������
+    public Button actionButton;
 
     void OnEnable()
     {
@@ -33,20 +33,15 @@ public class DraggableUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         if (canvasGroup == null)
             canvasGroup = gameObject.AddComponent<CanvasGroup>();
 
-        // ��������� ������������ ��������
         originalScale = transform.localScale;
         originalSiblingIndex = transform.GetSiblingIndex();
 
-        // ������� ������ ���� �� ����������� � ����������
         if (actionButton == null)
             actionButton = GetComponentInChildren<Button>();
 
-        // ������ ������ ���������� �� ���������
         if (actionButton != null)
         {
             actionButton.gameObject.SetActive(false);
-
-            // ��������� ���������� ������� �� ������
             actionButton.onClick.RemoveAllListeners();
             actionButton.onClick.AddListener(OnActionButtonClick);
         }
@@ -110,7 +105,6 @@ public class DraggableUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     {
         if (isZoomed)
         {
-            // ��������� � ������������ ������
             transform.localScale = originalScale;
             transform.SetSiblingIndex(originalSiblingIndex);
             isZoomed = false;
@@ -120,31 +114,32 @@ public class DraggableUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         }
         else
         {
-            // ����������� � ���������� ������
             transform.localScale = originalScale * zoomScale;
             transform.SetAsLastSibling();
             isZoomed = true;
 
             if (actionButton != null)
                 actionButton.gameObject.SetActive(true);
-            //OnActionButtonClick();
-
         }
     }
 
-    // ���������� ������� �� ������
     private void OnActionButtonClick()
     {
-        // ������� ������ � �������� � TaskUI
-        Task newTask = new Task(recipient, address, id);
-        TaskManager.Instance.AddTask(recipient, address, id);
-        Destroy(gameObject);
-        // ����� ����� ������������� ������� ��� ����� �������
+        // Берем письмо в инвентарь
+        if (PlayerMailInventory.Instance != null)
+        {
+            // СОЗДАЕМ структуру Task вместо класса
+            Task newTask = new Task(recipient, address, id);
+            PlayerMailInventory.Instance.AddMailToInventory(newTask);
+
+            // Уничтожаем UI элемент письма
+            Destroy(gameObject);
+        }
+
         if (isZoomed)
             ToggleZoom();
     }
 
-    // �������������� ������ ��� ���������� ����� �� ������ ��������
     public void ZoomIn()
     {
         if (!isZoomed)
