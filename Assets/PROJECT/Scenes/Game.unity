@@ -2428,6 +2428,67 @@ MonoBehaviour:
   mouseSensitivity: 2
   minVerticalAngle: -30
   maxVerticalAngle: 60
+--- !u!1001 &342836377
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: 9ea64f9c4e8e757478b8d3bf53a969ed, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 108.61
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 9ea64f9c4e8e757478b8d3bf53a969ed, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 5.331779
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 9ea64f9c4e8e757478b8d3bf53a969ed, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 112.46
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 9ea64f9c4e8e757478b8d3bf53a969ed, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 9ea64f9c4e8e757478b8d3bf53a969ed, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 9ea64f9c4e8e757478b8d3bf53a969ed, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.7072302
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 9ea64f9c4e8e757478b8d3bf53a969ed, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.7069834
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 9ea64f9c4e8e757478b8d3bf53a969ed, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: -89.98
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 9ea64f9c4e8e757478b8d3bf53a969ed, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 180
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 9ea64f9c4e8e757478b8d3bf53a969ed, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 9ea64f9c4e8e757478b8d3bf53a969ed, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 149ac4fb92735154aa0fd09916d7187e, type: 2}
+    - target: {fileID: 919132149155446097, guid: 9ea64f9c4e8e757478b8d3bf53a969ed, type: 3}
+      propertyPath: m_Name
+      value: Tablet
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 9ea64f9c4e8e757478b8d3bf53a969ed, type: 3}
 --- !u!1001 &370626521
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -27124,3 +27185,4 @@ SceneRoots:
   - {fileID: 2032010144}
   - {fileID: 724754104}
   - {fileID: 1549686241}
+  - {fileID: 342836377}
