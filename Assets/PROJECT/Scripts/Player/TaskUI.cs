@@ -37,11 +37,10 @@ public class TaskUI : MonoBehaviour
         reciever.text = task.recieverName;
         adress.text = task.adress;
 
-        // Исправлено: показываем количество только если есть дополнительные письма
         if (remainingCount > 0)
             countText.text = remainingCount.ToString();
         else
-            countText.text = ""; // Пустая строка вместо 0 или отрицательных чисел
+            countText.text = "";
     }
 
     public void HideTask()

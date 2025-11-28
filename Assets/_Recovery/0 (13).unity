@@ -291,7 +291,7 @@ MonoBehaviour:
   m_Container: {fileID: 24108860}
   m_ItemsToInstantiate:
   - prefab: {fileID: 0}
-    Prefab: {fileID: 919132149155446097, guid: ed29106eb116b124ba0d5d6dcf840e93, type: 3}
+    Prefab: {fileID: 1659688967622941236, guid: 75d372aa861b301438da8bdaed756b78, type: 3}
     probability: 0
     Probability: 0
   m_Method: 1
@@ -5778,7 +5778,7 @@ MonoBehaviour:
   m_Container: {fileID: 1198045512}
   m_ItemsToInstantiate:
   - prefab: {fileID: 0}
-    Prefab: {fileID: 919132149155446097, guid: ed29106eb116b124ba0d5d6dcf840e93, type: 3}
+    Prefab: {fileID: 1659688967622941236, guid: 75d372aa861b301438da8bdaed756b78, type: 3}
     probability: 0
     Probability: 0
   m_Method: 1
@@ -14128,7 +14128,7 @@ MonoBehaviour:
   m_Container: {fileID: 1386727004}
   m_ItemsToInstantiate:
   - prefab: {fileID: 0}
-    Prefab: {fileID: 919132149155446097, guid: ed29106eb116b124ba0d5d6dcf840e93, type: 3}
+    Prefab: {fileID: 1659688967622941236, guid: 75d372aa861b301438da8bdaed756b78, type: 3}
     probability: 0
     Probability: 0
   m_Method: 1
@@ -23792,7 +23792,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &2135349726
 Transform:
   m_ObjectHideFlags: 0
@@ -23809,6 +23809,7 @@ Transform:
   - {fileID: 7503544467758748695}
   - {fileID: 2586755407681005438}
   - {fileID: 4022264306232116553}
+  - {fileID: 5146922999265354370}
   - {fileID: 1947006608}
   - {fileID: 845211611}
   - {fileID: 17672634}
@@ -24119,7 +24120,7 @@ MonoBehaviour:
   m_Container: {fileID: 3217659095316213526}
   m_ItemsToInstantiate:
   - prefab: {fileID: 0}
-    Prefab: {fileID: 919132149155446097, guid: 5d3c1dd5d86d63242ba188eab6696a3c, type: 3}
+    Prefab: {fileID: 3398313798313697072, guid: cb724408e66a96f45b929be4a81a86c3, type: 3}
     probability: 0
     Probability: 0
   m_Method: 1
@@ -24554,7 +24555,7 @@ MonoBehaviour:
   m_Container: {fileID: 3102846174551109878}
   m_ItemsToInstantiate:
   - prefab: {fileID: 0}
-    Prefab: {fileID: 919132149155446097, guid: 5d3c1dd5d86d63242ba188eab6696a3c, type: 3}
+    Prefab: {fileID: 3398313798313697072, guid: cb724408e66a96f45b929be4a81a86c3, type: 3}
     probability: 0
     Probability: 0
   m_Method: 1
@@ -24633,7 +24634,7 @@ MonoBehaviour:
   m_Container: {fileID: 2879404811421250629}
   m_ItemsToInstantiate:
   - prefab: {fileID: 0}
-    Prefab: {fileID: 919132149155446097, guid: 5d3c1dd5d86d63242ba188eab6696a3c, type: 3}
+    Prefab: {fileID: 3398313798313697072, guid: cb724408e66a96f45b929be4a81a86c3, type: 3}
     probability: 0
     Probability: 0
   m_Method: 1
@@ -24711,7 +24712,7 @@ MonoBehaviour:
   m_Container: {fileID: 5696041025370029410}
   m_ItemsToInstantiate:
   - prefab: {fileID: 0}
-    Prefab: {fileID: 919132149155446097, guid: 5d3c1dd5d86d63242ba188eab6696a3c, type: 3}
+    Prefab: {fileID: 3398313798313697072, guid: cb724408e66a96f45b929be4a81a86c3, type: 3}
     probability: 0
     Probability: 0
   m_Method: 1
@@ -25726,7 +25727,7 @@ MonoBehaviour:
   m_Container: {fileID: 8772915914166974122}
   m_ItemsToInstantiate:
   - prefab: {fileID: 0}
-    Prefab: {fileID: 919132149155446097, guid: 5d3c1dd5d86d63242ba188eab6696a3c, type: 3}
+    Prefab: {fileID: 3398313798313697072, guid: cb724408e66a96f45b929be4a81a86c3, type: 3}
     probability: 0
     Probability: 0
   m_Method: 1
@@ -25864,7 +25865,7 @@ MonoBehaviour:
   m_Container: {fileID: 5474730211242373264}
   m_ItemsToInstantiate:
   - prefab: {fileID: 0}
-    Prefab: {fileID: 919132149155446097, guid: 5d3c1dd5d86d63242ba188eab6696a3c, type: 3}
+    Prefab: {fileID: 3398313798313697072, guid: cb724408e66a96f45b929be4a81a86c3, type: 3}
     probability: 0
     Probability: 0
   m_Method: 1
@@ -25961,6 +25962,11 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!4 &5146922999265354370 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6698476623898158929, guid: b20f87627dd5f5a4b9037b4e556746ab, type: 3}
+  m_PrefabInstance: {fileID: 5570827556700531587}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &5253301957321616764
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -25976,7 +25982,7 @@ MonoBehaviour:
   m_Container: {fileID: 986270052468608847}
   m_ItemsToInstantiate:
   - prefab: {fileID: 0}
-    Prefab: {fileID: 919132149155446097, guid: 5d3c1dd5d86d63242ba188eab6696a3c, type: 3}
+    Prefab: {fileID: 3398313798313697072, guid: cb724408e66a96f45b929be4a81a86c3, type: 3}
     probability: 0
     Probability: 0
   m_Method: 1
@@ -26159,7 +26165,7 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 0}
+    m_TransformParent: {fileID: 2135349726}
     m_Modifications:
     - target: {fileID: 165186678171481463, guid: b20f87627dd5f5a4b9037b4e556746ab, type: 3}
       propertyPath: teleportTo
@@ -26175,15 +26181,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6698476623898158929, guid: b20f87627dd5f5a4b9037b4e556746ab, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 63.9
+      value: -18.150002
       objectReference: {fileID: 0}
     - target: {fileID: 6698476623898158929, guid: b20f87627dd5f5a4b9037b4e556746ab, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 8.300003
+      value: 0.1900034
       objectReference: {fileID: 0}
     - target: {fileID: 6698476623898158929, guid: b20f87627dd5f5a4b9037b4e556746ab, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 114
+      value: 23.120003
       objectReference: {fileID: 0}
     - target: {fileID: 6698476623898158929, guid: b20f87627dd5f5a4b9037b4e556746ab, type: 3}
       propertyPath: m_LocalRotation.w
@@ -26527,6 +26533,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 768dcba42500d32469bccfaefd8288f9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerInteraction
+  pickupedLetter: {fileID: 0}
   manager: {fileID: 0}
 --- !u!1 &6703135510242768343
 GameObject:
@@ -27117,7 +27124,6 @@ SceneRoots:
   - {fileID: 943724738}
   - {fileID: 1878145737}
   - {fileID: 1355764864}
-  - {fileID: 5570827556700531587}
   - {fileID: 2135349726}
   - {fileID: 1848025428}
   - {fileID: 5497009074119276398}

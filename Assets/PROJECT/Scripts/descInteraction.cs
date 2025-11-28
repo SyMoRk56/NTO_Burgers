@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.UI;
 
 public class DeskInteraction : MonoBehaviour
 {
@@ -25,8 +26,8 @@ public class DeskInteraction : MonoBehaviour
     private Vector3 originalCameraPosition;
     private Quaternion originalCameraRotation;
     private Transform originalCameraParent;
+    private GameObject player;
 
-    // �������� ��� ��������, ������ �� ������
     public bool IsCanvasOpen => isCanvasOpen;
 
     void Start()
@@ -34,15 +35,19 @@ public class DeskInteraction : MonoBehaviour
         if (deskCanvas != null)
             deskCanvas.gameObject.SetActive(false);
 
-        HideAllImages();
+        player = GameObject.FindGameObjectWithTag("Player");
     }
 
     void Update()
     {
         if (playerInRange && Input.GetKeyDown(KeyCode.E))
         {
-            if (!isCanvasOpen)
+            if (!isCanvasOpen && HasBag())
                 OpenDeskCanvas();
+            else if (!HasBag())
+            {
+                Debug.Log("You need a bag to interact with the desk!");
+            }
         }
 
         if (isCanvasOpen && Input.GetKeyDown(KeyCode.Escape))
@@ -51,24 +56,39 @@ public class DeskInteraction : MonoBehaviour
         }
     }
 
+    private bool HasBag()
+    {
+        if (player == null) return false;
+        return FindChildWithTag(player.transform, "Bag") != null;
+    }
+
+    private Transform FindChildWithTag(Transform parent, string tag)
+    {
+        foreach (Transform child in parent)
+        {
+            if (child.CompareTag(tag))
+                return child;
+
+            Transform result = FindChildWithTag(child, tag);
+            if (result != null)
+                return result;
+        }
+        return null;
+    }
+
     void OpenDeskCanvas()
     {
         isCanvasOpen = true;
 
-        // �������� popup ��� �������� UI ������
         if (interactionUI != null)
-        {
             interactionUI.HidePopup();
-        }
 
-        // ��������� ������������ ������� � ������� ������
         if (mainCamera != null)
         {
             originalCameraPosition = mainCamera.position;
             originalCameraRotation = mainCamera.rotation;
             originalCameraParent = mainCamera.parent;
 
-            // ���������� ������ � �����
             mainCamera.SetParent(transform);
             mainCamera.localPosition = cameraOffset;
             mainCamera.localRotation = Quaternion.Euler(cameraRotation);
@@ -77,8 +97,7 @@ public class DeskInteraction : MonoBehaviour
         if (deskCanvas != null)
         {
             deskCanvas.gameObject.SetActive(true);
-            SpawnLetters(4);
-            //ShowRandomImages();
+            ShowAvailableMails();
         }
 
         if (playerMovement != null)
@@ -95,7 +114,6 @@ public class DeskInteraction : MonoBehaviour
     {
         isCanvasOpen = false;
 
-        // ���������� ������ �� �����
         if (mainCamera != null)
         {
             mainCamera.SetParent(originalCameraParent);
@@ -106,7 +124,7 @@ public class DeskInteraction : MonoBehaviour
         if (deskCanvas != null)
         {
             deskCanvas.gameObject.SetActive(false);
-            HideAllImages();
+            ClearAllLetters();
         }
 
         if (playerMovement != null)
@@ -117,11 +135,8 @@ public class DeskInteraction : MonoBehaviour
 
         StartCoroutine(LockCursorNextFrame());
 
-        // ���������� popup ��� �������� UI ������ (���� ����� � ����)
-        if (interactionUI != null)
-        {
+        if (interactionUI != null && playerInRange)
             interactionUI.ShowPopup();
-        }
     }
 
     System.Collections.IEnumerator LockCursorNextFrame()
@@ -130,94 +145,95 @@ public class DeskInteraction : MonoBehaviour
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
     }
-    private void OnEnable()
+
+    private void ShowAvailableMails()
     {
+        ClearAllLetters();
 
-    }
-    //void ShowRandomImages()
-    //{
-    //    HideAllImages();
-
-    //    if (randomImages == null || randomImages.Count == 0)
-    //        return;
-
-    //    int imagesToShow = Random.Range(1, Mathf.Min(4, randomImages.Count + 1));
-    //    List<GameObject> available = new List<GameObject>(randomImages);
-
-    //    for (int i = 0; i < imagesToShow; i++)
-    //    {
-    //        if (available.Count == 0)
-    //            break;
-
-    //        int id = Random.Range(0, available.Count);
-    //        GameObject img = available[id];
-
-    //        img.SetActive(true);
-
-    //        RectTransform rt = img.GetComponent<RectTransform>();
-    //        if (rt != null)
-    //        {
-    //            rt.anchoredPosition = GetSafeScreenPosition(rt);
-    //        }
-
-    //        available.RemoveAt(id);
-    //    }
-    //}
-    public void SpawnLetter()
-    {
-        var letter = Instantiate(letterPrefab, transform.GetChild(0).GetChild(0));
-        letter.transform.position = new Vector3();
-        var drag = letter.GetComponent<DraggableUI>();
-        print(MailManager.Instance == null);
-        var a = MailManager.Instance.GetNextUndelivered();
-        drag.recipient = a.reciever;
-        drag.id = a.id;
-        drag.address = a.adress;
-        randomImages.Add(letter);
-    }
-    public void SpawnLetters(int count)
-    {
-        var ls = MailManager.Instance.GetNextXUndelivered(count);
-        ls.Reverse();
-        print("LS " + ls.Count);
-        foreach (var l in ls)
+        // Получаем доступные письма из TaskManager
+        if (TaskManager.Instance != null && TaskManager.Instance.tasks.Count > 0)
         {
-            var letter = Instantiate(letterPrefab, transform.GetChild(0).GetChild(0));
-            letter.transform.position = new Vector3();
-            var drag = letter.GetComponent<DraggableUI>();
-            print(MailManager.Instance == null);
-            var a = l;
-            drag.recipient = a.reciever;
-            drag.id = a.id;
-            drag.address = a.adress;
-            randomImages.Add(letter);
+            // Создаем копию списка, чтобы избежать модификации во время итерации
+            var availableTasks = new List<Task>(TaskManager.Instance.tasks);
+
+            foreach (var task in availableTasks)
+            {
+                // Проверяем, не взято ли уже это письмо в инвентарь
+                if (!PlayerMailInventory.Instance.ContainsTask(task.id))
+                {
+                    CreateMailUI(task);
+                }
+            }
         }
     }
-    Vector2 GetSafeScreenPosition(RectTransform rectTransform)
+
+    private void CreateMailUI(Task task)
     {
-        RectTransform canvasRect = deskCanvas.GetComponent<RectTransform>();
-        Vector2 canvasSize = canvasRect.rect.size;
-        Vector2 size = rectTransform.rect.size;
+        if (letterPrefab == null) return;
 
-        float minX = -canvasSize.x / 2 + size.x / 2;
-        float maxX = canvasSize.x / 2 - size.x / 2;
-        float minY = -canvasSize.y / 2 + size.y / 2;
-        float maxY = canvasSize.y / 2 - size.y / 2;
+        var letter = Instantiate(letterPrefab, transform.GetChild(0).GetChild(0));
+        letter.transform.localPosition = Vector3.zero;
 
-        return new Vector2(
-            Random.Range(minX, maxX),
-            Random.Range(minY, maxY)
-        );
+        // Настраиваем UI письма
+        var drag = letter.GetComponent<DraggableUI>();
+        if (drag != null)
+        {
+            drag.recipient = task.recieverName;
+            drag.id = task.id;
+            drag.address = task.adress;
+        }
+
+        // Добавляем кнопку для взятия письма в инвентарь
+        var button = letter.GetComponent<Button>();
+        if (button == null)
+            button = letter.AddComponent<Button>();
+
+        button.onClick.RemoveAllListeners();
+        button.onClick.AddListener(() => TakeMailToInventory(task));
+
+        randomImages.Add(letter);
     }
 
-    void HideAllImages()
+    private void TakeMailToInventory(Task task)
     {
-        if (randomImages == null)
-            return;
+        if (PlayerMailInventory.Instance != null)
+        {
+            PlayerMailInventory.Instance.AddMailToInventory(task);
 
-        foreach (var img in randomImages)
+            // НЕМЕДЛЕННО удаляем письмо из UI стола
+            RemoveMailFromUI(task.id);
+
+            Debug.Log($"Письмо добавлено в инвентарь: {task.recieverName}");
+        }
+    }
+
+    // Новый метод для удаления письма из UI
+    private void RemoveMailFromUI(string taskId)
+    {
+        for (int i = randomImages.Count - 1; i >= 0; i--)
+        {
+            var img = randomImages[i];
             if (img != null)
-                img.SetActive(false);
+            {
+                var draggable = img.GetComponent<DraggableUI>();
+                if (draggable != null && draggable.id == taskId)
+                {
+                    Destroy(img.gameObject);
+                    randomImages.RemoveAt(i);
+                    break;
+                }
+            }
+        }
+    }
+
+    private void ClearAllLetters()
+    {
+        foreach (var img in randomImages)
+        {
+            if (img != null)
+                Destroy(img.gameObject);
+        }
+        randomImages.Clear();
     }
 
     public void PlayerEntered()
@@ -228,7 +244,6 @@ public class DeskInteraction : MonoBehaviour
     public void PlayerExited()
     {
         playerInRange = false;
-
         if (isCanvasOpen)
             CloseDeskCanvas();
     }

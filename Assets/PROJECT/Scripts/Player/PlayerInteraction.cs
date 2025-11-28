@@ -2,124 +2,85 @@
 
 public class PlayerInteraction : MonoBehaviour
 {
-    public Letter pickupedLetter;
     public PlayerManager manager;
 
     private void Update()
     {
-        if (pickupedLetter != null)
-        {
-            pickupedLetter.transform.position = transform.position + transform.forward;
-        }
-
         if (Input.GetKeyDown(KeyCode.E))
         {
-            if (pickupedLetter == null)
+            Collider[] hits = Physics.OverlapSphere(transform.position, GameConfig.interactionRange);
+            Debug.Log($"=== ПОИСК ВЗАИМОДЕЙСТВИЙ ===");
+            Debug.Log($"Найдено объектов в радиусе: {hits.Length}");
+
+            bool interactionHandled = false;
+
+            // ПЕРВЫЙ ПРИОРИТЕТ: Почтовые ящики
+            foreach (var hit in hits)
             {
-                Collider[] hits = Physics.OverlapSphere(transform.position, GameConfig.interactionRange);
-
-                foreach (var hit in hits)
+                if (hit.TryGetComponent(out MailBox box))
                 {
-                    print("Hit: " + hit.name + " " + hit.tag);
+                    Debug.Log($"✓ ВЗАИМОДЕЙСТВИЕ С ПОЧТОВЫМ ЯЩИКОМ");
+                    Debug.Log($"  Ящик: {box.name}");
+                    Debug.Log($"  Адрес ящика: '{box.mailboxAddress}'");
 
-                    if (hit.CompareTag("Dialog"))
+                    // Проверяем состояние инвентаря перед взаимодействием
+                    if (PlayerMailInventory.Instance != null)
                     {
-                        hit.GetComponent<DialogueRunner>().StartDialogue(false);
-                        return;
-                    }
-
-                    if (hit.CompareTag("Pickup"))
-                    {
-                        PickupObject(hit.gameObject);
-                        return;
-                    }
-
-                    if (hit.TryGetComponent(out MailBox box))
-                    {
-                        box.Interact();
-                        return;
-                    }
-
-                    // ✅ ВХОД В ДОМ
-                    if (hit.TryGetComponent(out EnterToHouse enter))
-                    {
-                        enter.Interact();
-                        return;
-                    }
-                }
-            }
-            else
-            {
-                Collider[] hits = Physics.OverlapSphere(transform.position, GameConfig.interactionRange);
-
-                // Сначала проверяем диалоги (для сдачи письма)
-                foreach (var hit in hits)
-                {
-                    if (hit.CompareTag("Dialog"))
-                    {
-                        var dialog = hit.GetComponent<DialogueRunner>();
-                        if (dialog.ownerName == pickupedLetter.recieverName)
+                        var allMails = PlayerMailInventory.Instance.GetAllMails();
+                        Debug.Log($"  Писем в инвентаре: {allMails.Count}");
+                        foreach (var mail in allMails)
                         {
-                            // Сначала сохраняем ссылку на письмо
-                            Letter letterToDeliver = pickupedLetter;
-
-                            // Очищаем ссылку ДО начала диалога
-                            pickupedLetter = null;
-
-                            // Запускаем диалог и логику доставки
-                            dialog.StartDialogue(true);
-                            MailManager.Instance.SetDelivered(letterToDeliver.id, true);
-                            TaskManager.Instance.NextTask();
-                            Destroy(letterToDeliver.gameObject);
-                            return;
+                            Debug.Log($"    - {mail.recieverName} -> '{mail.adress}'");
                         }
                     }
-                }
 
-                // Если диалог не найден, проверяем дверь
-                foreach (var hit in hits)
-                {
-                    if (hit.TryGetComponent(out EnterToHouse enter))
-                    {
-                        // Телепортируемся с письмом
-                        enter.InteractWithLetter(pickupedLetter);
-                        return;
-                    }
+                    box.Interact();
+                    interactionHandled = true;
+                    break;
                 }
-
-                // Если не у диалога и не у двери - дропаем письмо
-                ReleaseObject();
             }
-        }
-    }
 
-    public void ReleaseObject()
-    {
-        if (pickupedLetter != null)
-        {
-            // Включаем физику при дропе
-            Rigidbody rb = pickupedLetter.GetComponent<Rigidbody>();
-            if (rb != null)
+            if (interactionHandled) return;
+
+            // ВТОРОЙ ПРИОРИТЕТ: Остальные взаимодействия
+            foreach (var hit in hits)
             {
-                rb.isKinematic = false;
+                Debug.Log($"Объект: {hit.name} (тег: {hit.tag})");
+
+                if (hit.CompareTag("Dialog"))
+                {
+                    Debug.Log("Взаимодействие с диалогом");
+                    hit.GetComponent<DialogueRunner>().StartDialogue(false);
+                    interactionHandled = true;
+                    break;
+                }
+
+                if (hit.CompareTag("Pickup"))
+                {
+                    Debug.Log("Взаимодействие с пикапом");
+                    PickupObject(hit.gameObject);
+                    interactionHandled = true;
+                    break;
+                }
+
+                if (hit.TryGetComponent(out EnterToHouse enter))
+                {
+                    Debug.Log("Вход в дом");
+                    enter.Interact();
+                    interactionHandled = true;
+                    break;
+                }
             }
-            pickupedLetter = null;
+
+            if (!interactionHandled)
+            {
+                Debug.Log("✗ Ни один объект не обработан");
+            }
         }
     }
 
     public void PickupObject(GameObject go)
     {
-        print("Pickup");
-        pickupedLetter = go.GetComponent<Letter>();
-
-        // Отключаем физику при поднятии
-        if (pickupedLetter != null)
-        {
-            Rigidbody rb = pickupedLetter.GetComponent<Rigidbody>();
-            if (rb != null)
-            {
-                rb.isKinematic = true;
-            }
-        }
+        Debug.Log("Подобран объект: " + go.name);
     }
 }
