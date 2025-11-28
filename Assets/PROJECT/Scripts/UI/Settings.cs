@@ -49,7 +49,7 @@ public class Settings : MonoBehaviour
     {
         //PlayerPrefs.SetInt("Resolution", resolutionDropdown.value);
         var data = SettingsSaveSystem.Instance.GetData();
-        data.resolution = resolutionDropdown.value;
+        //data.resolution = resolutionDropdown.value;
         data.masterVolume = volumeSlider.value;
         SettingsSaveSystem.Instance.LoadData(data);
     }

@@ -14,6 +14,7 @@ public class LocalizedText : MonoBehaviour
 
     private void OnEnable()
     {
+        print(gameObject.name + " " + key);
         LocalizationManager.Instance.OnLanguageChanged += UpdateText;
     }
 
