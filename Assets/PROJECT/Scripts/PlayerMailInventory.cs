@@ -1,0 +1,138 @@
+﻿using UnityEngine;
+using System.Collections.Generic;
+
+public class PlayerMailInventory : MonoBehaviour
+{
+    public static PlayerMailInventory Instance;
+
+    private List<Task> carriedMails = new List<Task>();
+
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
+
+    public void AddMailToInventory(Task task)
+    {
+        if (!ContainsTask(task.id))
+        {
+            carriedMails.Add(task);
+            UpdateTaskUI();
+            Debug.Log($"✓ Письмо добавлено в инвентарь: {task.recieverName} (ID: {task.id})");
+            Debug.Log($"  Всего писем в инвентаре: {carriedMails.Count}");
+        }
+        else
+        {
+            Debug.LogWarning($"Письмо с ID {task.id} уже в инвентаре!");
+        }
+    }
+
+    public void RemoveMailFromInventory(string taskId)
+    {
+        int removed = carriedMails.RemoveAll(task => task.id == taskId);
+        if (removed > 0)
+        {
+            UpdateTaskUI();
+            Debug.Log($"✓ Письмо с ID {taskId} удалено из инвентаря");
+            Debug.Log($"  Осталось писем: {carriedMails.Count}");
+        }
+        else
+        {
+            Debug.LogWarning($"Письмо с ID {taskId} не найдено в инвентаре!");
+        }
+    }
+
+    public bool HasMailForAddress(string address)
+    {
+        bool hasMail = carriedMails.Exists(task =>
+            NormalizeAddress(task.adress) == NormalizeAddress(address));
+
+        Debug.Log($"Поиск письма для адреса '{address}': {(hasMail ? "НАЙДЕНО" : "НЕ НАЙДЕНО")}");
+        return hasMail;
+    }
+
+    public Task GetMailForAddress(string address)
+    {
+        var mail = carriedMails.Find(task =>
+            NormalizeAddress(task.adress) == NormalizeAddress(address));
+
+        if (mail.adress != null)
+        {
+            Debug.Log($"✓ Найдено письмо для адреса '{address}': {mail.recieverName}");
+        }
+        else
+        {
+            Debug.Log($"✗ Письмо для адреса '{address}' не найдено");
+        }
+
+        return mail;
+    }
+
+    public List<Task> GetAllMails() => new List<Task>(carriedMails);
+
+    public bool ContainsTask(string taskId)
+    {
+        return carriedMails.Exists(task => task.id == taskId);
+    }
+
+    private void UpdateTaskUI()
+    {
+        if (carriedMails.Count > 0 && TaskUI.Instance != null)
+        {
+            TaskUI.Instance.SetTask(carriedMails[0], carriedMails.Count - 1);
+            Debug.Log($"✓ UI обновлено: {carriedMails[0].recieverName} (+{carriedMails.Count - 1} других)");
+        }
+        else if (TaskUI.Instance != null)
+        {
+            TaskUI.Instance.HideTask();
+            Debug.Log("✓ UI скрыто - нет писем");
+        }
+    }
+
+    // Нормализация адреса для сравнения (убираем пробелы, приводим к нижнему регистру)
+    private string NormalizeAddress(string address)
+    {
+        if (string.IsNullOrEmpty(address))
+            return "";
+
+        return address.Trim().ToLower().Replace(" ", "").Replace(".", "").Replace(",", "");
+    }
+
+    // Исправленный метод - возвращает default(Task) вместо null
+    public Task GetNextMailForDelivery()
+    {
+        return carriedMails.Count > 0 ? carriedMails[0] : default(Task);
+    }
+
+    // Альтернативное решение - сделать метод возвращающим bool
+    public bool TryGetNextMailForDelivery(out Task nextMail)
+    {
+        if (carriedMails.Count > 0)
+        {
+            nextMail = carriedMails[0];
+            return true;
+        }
+        else
+        {
+            nextMail = default(Task);
+            return false;
+        }
+    }
+
+    // Удаляет первое письмо из очереди (после доставки)
+    public void RemoveFirstMail()
+    {
+        if (carriedMails.Count > 0)
+        {
+            carriedMails.RemoveAt(0);
+            UpdateTaskUI();
+        }
+    }
+}

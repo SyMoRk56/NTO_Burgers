@@ -10,26 +10,32 @@ public class MailManager : MonoBehaviour
     [Header("Mail Order (ScriptableObject)")]
     public MailCatalog catalog;
 
-    // внутреннее состояние писем
     private Dictionary<string, bool> state = new();
 
     private void Awake()
     {
-        Instance = this;
-        //catalog = Resources.LoadAll<MailCatalog>("")[0];
-        if(catalog != null )
-        // Инициализация — все письма недоставлены
-        foreach (var mail in catalog.mails)
-            state[mail.id] = false;
-        
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        if (catalog != null)
+        {
+            foreach (var mail in catalog.mails)
+                state[mail.id] = false;
+        }
+        else
+        {
+            Debug.LogError("MailCatalog is not assigned in MailManager!");
+        }
     }
 
-
-    // ==========================
-    //       ПОЛУЧЕНИЕ ДАННЫХ
-    // ==========================
-
-    /// Получить следующее недоставленное письмо
     public MailItem GetNextUndelivered()
     {
         foreach (var mail in catalog.mails)
@@ -39,15 +45,38 @@ public class MailManager : MonoBehaviour
         }
         return null;
     }
+
     public List<MailItem> GetNextXUndelivered(int count)
     {
         var l = new List<MailItem>();
         foreach (var mail in catalog.mails)
         {
-            if(!state[mail.id]) l.Add(mail);
+            if (!state[mail.id]) l.Add(mail);
         }
-        print(l.Count);
         return l.Take(count).ToList();
+    }
+
+    // НОВЫЙ МЕТОД: Получить все недоставленные письма
+    public List<MailItem> GetAllUndeliveredMails()
+    {
+        List<MailItem> undelivered = new List<MailItem>();
+        foreach (var mail in catalog.mails)
+        {
+            if (!state[mail.id])
+                undelivered.Add(mail);
+        }
+        return undelivered;
+    }
+
+    // НОВЫЙ МЕТОД: Получить письмо по ID
+    public MailItem GetMailById(string id)
+    {
+        foreach (var mail in catalog.mails)
+        {
+            if (mail.id == id)
+                return mail;
+        }
+        return null;
     }
 
     public bool IsDelivered(string id)
@@ -60,11 +89,6 @@ public class MailManager : MonoBehaviour
         if (state.ContainsKey(id))
             state[id] = delivered;
     }
-
-
-    // ==========================
-    //         SAVE
-    // ==========================
 
     public MailSaveData GetSaveData()
     {
@@ -81,11 +105,6 @@ public class MailManager : MonoBehaviour
 
         return save;
     }
-
-
-    // ==========================
-    //         LOAD
-    // ==========================
 
     public void LoadSaveData(MailSaveData save)
     {

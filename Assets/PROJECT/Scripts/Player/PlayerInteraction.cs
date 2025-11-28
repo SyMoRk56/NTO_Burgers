@@ -2,87 +2,85 @@
 
 public class PlayerInteraction : MonoBehaviour
 {
-    public Letter pickupedLetter;
     public PlayerManager manager;
 
     private void Update()
     {
-        if (pickupedLetter != null)
-        {
-            pickupedLetter.transform.position = transform.position + transform.forward;
-        }
-
         if (Input.GetKeyDown(KeyCode.E))
         {
-            if (pickupedLetter == null)
+            Collider[] hits = Physics.OverlapSphere(transform.position, GameConfig.interactionRange);
+            Debug.Log($"=== ПОИСК ВЗАИМОДЕЙСТВИЙ ===");
+            Debug.Log($"Найдено объектов в радиусе: {hits.Length}");
+
+            bool interactionHandled = false;
+
+            // ПЕРВЫЙ ПРИОРИТЕТ: Почтовые ящики
+            foreach (var hit in hits)
             {
-                Collider[] hits = Physics.OverlapSphere(transform.position, GameConfig.interactionRange);
-
-                foreach (var hit in hits)
+                if (hit.TryGetComponent(out MailBox box))
                 {
-                    print("Hit: " + hit.name + " " + hit.tag);
+                    Debug.Log($"✓ ВЗАИМОДЕЙСТВИЕ С ПОЧТОВЫМ ЯЩИКОМ");
+                    Debug.Log($"  Ящик: {box.name}");
+                    Debug.Log($"  Адрес ящика: '{box.mailboxAddress}'");
 
-                    if (hit.CompareTag("Dialog"))
+                    // Проверяем состояние инвентаря перед взаимодействием
+                    if (PlayerMailInventory.Instance != null)
                     {
-                        hit.GetComponent<DialogueRunner>().StartDialogue(false);
-                        return;
+                        var allMails = PlayerMailInventory.Instance.GetAllMails();
+                        Debug.Log($"  Писем в инвентаре: {allMails.Count}");
+                        foreach (var mail in allMails)
+                        {
+                            Debug.Log($"    - {mail.recieverName} -> '{mail.adress}'");
+                        }
                     }
 
-                    if (hit.CompareTag("Pickup"))
-                    {
-                        PickupObject(hit.gameObject);
-                        return;
-                    }
-
-                    if (hit.TryGetComponent(out MailBox box))
-                    {
-                        box.Interact();
-                        return;
-                    }
-
-                    // ✅ ВХОД В ДОМ
-                    if (hit.TryGetComponent(out EnterToHouse enter))
-                    {
-                        enter.Interact();
-                        return;
-                    }
+                    box.Interact();
+                    interactionHandled = true;
+                    break;
                 }
             }
-            else
+
+            if (interactionHandled) return;
+
+            // ВТОРОЙ ПРИОРИТЕТ: Остальные взаимодействия
+            foreach (var hit in hits)
             {
-                Collider[] hits = Physics.OverlapSphere(transform.position, GameConfig.interactionRange);
+                Debug.Log($"Объект: {hit.name} (тег: {hit.tag})");
 
-                foreach (var hit in hits)
+                if (hit.CompareTag("Dialog"))
                 {
-                    print("Hit: " + hit.name + " " + hit.tag);
-
-                    if (hit.CompareTag("Dialog"))
-                    {
-                        var dialog = hit.GetComponent<DialogueRunner>();
-                        if (dialog.ownerName == pickupedLetter.recieverName)
-                        {
-                            dialog.StartDialogue(true);
-                            MailManager.Instance.SetDelivered(pickupedLetter.id, true);
-                            TaskManager.Instance.NextTask();
-                            Destroy(pickupedLetter.gameObject);
-                        }
-                        return;
-                    }
+                    Debug.Log("Взаимодействие с диалогом");
+                    hit.GetComponent<DialogueRunner>().StartDialogue(false);
+                    interactionHandled = true;
+                    break;
                 }
 
-                ReleaseObject();
+                if (hit.CompareTag("Pickup"))
+                {
+                    Debug.Log("Взаимодействие с пикапом");
+                    PickupObject(hit.gameObject);
+                    interactionHandled = true;
+                    break;
+                }
+
+                if (hit.TryGetComponent(out EnterToHouse enter))
+                {
+                    Debug.Log("Вход в дом");
+                    enter.Interact();
+                    interactionHandled = true;
+                    break;
+                }
+            }
+
+            if (!interactionHandled)
+            {
+                Debug.Log("✗ Ни один объект не обработан");
             }
         }
-    }
-
-    public void ReleaseObject()
-    {
-        pickupedLetter = null;
     }
 
     public void PickupObject(GameObject go)
     {
-        print("Pickup");
-        pickupedLetter = go.GetComponent<Letter>();
+        Debug.Log("Подобран объект: " + go.name);
     }
 }

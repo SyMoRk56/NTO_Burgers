@@ -1,71 +1,62 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public class TaskManager : MonoBehaviour
 {
-    public GameObject letterPrefab;
     public static TaskManager Instance;
 
     public List<Task> tasks = new();
 
     private void Awake()
     {
-        Instance = this;
+        if (Instance == null)
+        {
+            Instance = this;
+            Debug.Log("✓ TaskManager инициализирован");
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 
     public void AddTask(string recieverName, string adress, string id)
     {
-        tasks.Add(new Task(recieverName, adress, id));
-        bool b = GameManager.Instance.GetPlayer().GetComponent<PlayerInteraction>().pickupedLetter == null;
-        print("add task: " + b);
-        if (b)
-            StartCoroutine(GetPlayerNextLetter(tasks[0])); // ������ Queue.Peek()
+        // Проверяем, нет ли уже такого задания
+        if (!tasks.Exists(task => task.id == id))
+        {
+            tasks.Add(new Task(recieverName, adress, id));
+            Debug.Log($"✓ Добавлено задание: {recieverName} -> {adress} (ID: {id})");
+            Debug.Log($"  Всего заданий: {tasks.Count}");
+        }
         else
         {
-            TaskUI.Instance.SetTask(tasks[0], tasks.Count - 1);
+            Debug.LogWarning($"Задание с ID {id} уже существует!");
         }
     }
 
-    public void NextTask()
+    public void RemoveTask(string taskId)
     {
-        TaskUI.Instance.SetTask(new("", "", ""), 0);
-
-        if (tasks.Count == 0) return;
-        var task = tasks[0]; // ������ Queue.Dequeue()
-        tasks.RemoveAt(0);
-
-        StartCoroutine(GetPlayerNextLetter(task));
+        int removed = tasks.RemoveAll(task => task.id == taskId);
+        if (removed > 0)
+        {
+            Debug.Log($"✓ Задание с ID {taskId} удалено");
+            Debug.Log($"  Осталось заданий: {tasks.Count}");
+        }
+        else
+        {
+            Debug.LogWarning($"Задание с ID {taskId} не найдено для удаления!");
+        }
     }
 
-    public IEnumerator GetPlayerNextLetter(Task task)
+    // Метод для проверки состояния
+    public void DebugState()
     {
-        yield return new WaitForSeconds(3);
-
-        var letterGO = Instantiate(letterPrefab);
-        var letter = letterGO.GetComponent<Letter>();
-
-        letter.recieverName = task.recieverName;
-        letter.id = task.id;
-        GameManager.Instance.GetPlayer()
-            .GetComponent<PlayerInteraction>()
-            .pickupedLetter = letter;
-
-        TaskUI.Instance.SetTask(task, tasks.Count - 1);
-    }
-}
-[Serializable]
-public struct Task
-{
-    public string recieverName;
-    public string adress;
-    public string id;
-
-    public Task(string recieverName, string adress, string id)
-    {
-        this.recieverName = recieverName;
-        this.adress = adress;
-        this.id = id;
+        Debug.Log($"=== СОСТОЯНИЕ TASKMANAGER ===");
+        Debug.Log($"Всего заданий: {tasks.Count}");
+        foreach (var task in tasks)
+        {
+            Debug.Log($" - {task.recieverName} -> {task.adress} (ID: {task.id})");
+        }
     }
 }
