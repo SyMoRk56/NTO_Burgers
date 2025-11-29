@@ -12,6 +12,8 @@ public class DialogueRunner : MonoBehaviour
     int currentDialogueIndex;
     int currentPhraseIndex;
 
+    public Face face;
+
     void Start()
     {
         
@@ -40,7 +42,10 @@ public class DialogueRunner : MonoBehaviour
         var block = isLetter ? letterDialogues[currentDialogueIndex] : defaultDialogues[currentDialogueIndex];
 
         if (currentPhraseIndex < block.phrases.Length)
+        {
             dialogueUI.ShowPhrase(ownerName, block.phrases[currentPhraseIndex]);
+            face?.SetFace(block.emotions[currentDialogueIndex]);
+        }
         else
             dialogueUI.ShowChoices(block.choices);
     }

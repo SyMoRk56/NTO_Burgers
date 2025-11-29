@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 [System.Serializable]
 public class DialogueChoice
@@ -13,4 +14,5 @@ public class DialogueScriptableObject : ScriptableObject
 {
     public string[] phrases;         // фразы в виде KEY
     public DialogueChoice[] choices;
+    public List<FaceType> emotions;
 }
