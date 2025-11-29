@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class CameraSwitcher : MonoBehaviour
 {
+    public static CameraSwitcher Instance;
     [Header("References")]
     public Camera firstPersonCamera;
     public CinemachineCamera thirdPersonCamera;
@@ -12,6 +13,7 @@ public class CameraSwitcher : MonoBehaviour
 
     void Start()
     {
+        Instance = this;
         SetCameraMode(isFirstPerson);
     }
 

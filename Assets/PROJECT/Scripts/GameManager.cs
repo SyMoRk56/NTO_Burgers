@@ -76,7 +76,7 @@ public class GameManager : MonoBehaviour
             StopCoroutine(autosaveRoutine);
 
         autosaveRoutine = StartCoroutine(Autosave());
-
+        FindFirstObjectByType<CheckForInHouse>().OnStartGame();
         Time.timeScale = 1;
     }
 
