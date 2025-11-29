@@ -2,6 +2,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 [System.Serializable]
 public class AutoSaveSlot
@@ -17,13 +18,78 @@ public class SaveGameManager : MonoBehaviour
     private string autosavePath;
     public GameObject autosaveIndicator;
 
+    // Флаги для контроля показа индикатора
+    private bool isFirstSaveInGame = true;
+    private string currentSceneName;
+
+    void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        saveFolder = Path.Combine(Application.persistentDataPath, "Saves");
+        autosavePath = Path.Combine(saveFolder, "autosave.json");
+
+        Directory.CreateDirectory(saveFolder);
+        Directory.CreateDirectory(Path.Combine(saveFolder, "manual"));
+
+        // Получаем текущую сцену
+        currentSceneName = SceneManager.GetActiveScene().name;
+
+        // Подписываемся на событие загрузки сцены
+        SceneManager.sceneLoaded += OnSceneLoaded;
+
+        Debug.Log($"SaveManager initialized on scene: {currentSceneName}");
+
+        // Сразу отключаем индикатор
+        if (autosaveIndicator != null)
+            autosaveIndicator.SetActive(false);
+    }
+
+    void Start()
+    {
+        // Дополнительно отключаем индикатор при старте
+        if (autosaveIndicator != null)
+            autosaveIndicator.SetActive(false);
+    }
+
+    void OnDestroy()
+    {
+        // Отписываемся от события при уничтожении объекта
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        currentSceneName = scene.name;
+        Debug.Log($"Scene loaded: {currentSceneName}");
+
+        // При загрузке сцены Game сбрасываем флаг первого сохранения
+        if (currentSceneName == "Game")
+        {
+            isFirstSaveInGame = true;
+            Debug.Log("First save in Game scene will be hidden");
+        }
+
+        // Всегда отключаем индикатор при смене сцены
+        if (autosaveIndicator != null)
+            autosaveIndicator.SetActive(false);
+    }
+
     public bool CheckSave(string saveName)
     {
         string folder = Path.Combine(saveFolder, "manual");
         string jsonPath = Path.Combine(folder, saveName + ".json");
         string hashPath = Path.Combine(folder, saveName + ".hash");
 
-        // ��������� ������������� ������
         if (!File.Exists(jsonPath))
         {
             Debug.LogWarning($"Save file not found: {jsonPath}");
@@ -38,14 +104,10 @@ public class SaveGameManager : MonoBehaviour
 
         try
         {
-            // ������ ���������� ������
             string json = File.ReadAllText(jsonPath);
             string savedHash = File.ReadAllText(hashPath);
-
-            // ��������� ������� ���
             string actualHash = ComputeHash(json);
 
-            // ���������� ����
             bool isValid = savedHash == actualHash;
 
             if (isValid)
@@ -55,8 +117,6 @@ public class SaveGameManager : MonoBehaviour
             else
             {
                 Debug.LogError($"Save integrity check failed for: {saveName}");
-                Debug.LogError($"Expected: {savedHash}");
-                Debug.LogError($"Actual: {actualHash}");
             }
 
             return isValid;
@@ -67,6 +127,7 @@ public class SaveGameManager : MonoBehaviour
             return false;
         }
     }
+
     public bool CheckAutoSave()
     {
         if (!File.Exists(autosavePath))
@@ -85,7 +146,6 @@ public class SaveGameManager : MonoBehaviour
                 return false;
             }
 
-            // ��������� ��������������� ������ ����������
             return CheckSave(slot.slotName);
         }
         catch (System.Exception ex)
@@ -94,18 +154,7 @@ public class SaveGameManager : MonoBehaviour
             return false;
         }
     }
-    void Awake()
-    {
-        Instance = this;
 
-        saveFolder = Path.Combine(Application.persistentDataPath, "Saves");
-        autosavePath = Path.Combine(saveFolder, "autosave.json");
-
-        Directory.CreateDirectory(saveFolder);
-        Directory.CreateDirectory(Path.Combine(saveFolder, "manual"));
-    }
-
-    // ======================= HASH =======================
     private string ComputeHash(string content)
     {
         using (SHA256 sha = SHA256.Create())
@@ -132,7 +181,26 @@ public class SaveGameManager : MonoBehaviour
         AutoSaveSlot data = new AutoSaveSlot() { slotName = slot };
         File.WriteAllText(autosavePath, JsonUtility.ToJson(data, true));
 
-        if (showIndicator) ShowSaveIndicator();
+        // НИКОГДА не показываем на сцене Menu
+        if (currentSceneName == "Menu")
+        {
+            Debug.Log("Autosave on Menu scene - indicator hidden");
+            return;
+        }
+
+        // На сцене Game показываем только если НЕ первое сохранение
+        if (currentSceneName == "Game")
+        {
+            if (isFirstSaveInGame)
+            {
+                Debug.Log("First save in Game scene - indicator hidden");
+                isFirstSaveInGame = false;
+            }
+            else if (showIndicator)
+            {
+                ShowSaveIndicator();
+            }
+        }
 
         Debug.Log("Autosave saved slot name: " + slot);
     }
@@ -150,15 +218,33 @@ public class SaveGameManager : MonoBehaviour
 
         File.WriteAllText(jsonPath, json);
 
-        // ---- Create hash file ----
         string hash = ComputeHash(json);
         File.WriteAllText(hashPath, hash);
 
-        // Screenshot
         ScreenCapture.CaptureScreenshot(Path.Combine(folder, saveName + ".png"));
 
-        if (showIndicator) ShowSaveIndicator();
-        Debug.Log("Manual save created -> " + jsonPath + " (HASH updated)");
+        // НИКОГДА не показываем на сцене Menu
+        if (currentSceneName == "Menu")
+        {
+            Debug.Log("Manual save on Menu scene - indicator hidden");
+            return;
+        }
+
+        // На сцене Game показываем только если НЕ первое сохранение
+        if (currentSceneName == "Game")
+        {
+            if (isFirstSaveInGame)
+            {
+                Debug.Log("First manual save in Game scene - indicator hidden");
+                isFirstSaveInGame = false;
+            }
+            else if (showIndicator)
+            {
+                ShowSaveIndicator();
+            }
+        }
+
+        Debug.Log("Manual save created -> " + jsonPath);
     }
 
     // ======================= LOAD =======================
@@ -211,7 +297,6 @@ public class SaveGameManager : MonoBehaviour
         string savedHash = File.ReadAllText(hashPath);
         string actualHash = ComputeHash(json);
 
-        // --- Validate hash ---
         if (savedHash != actualHash)
         {
             Debug.LogError("SAVE INTEGRITY ERROR! External modification detected! Slot: " + name);
@@ -239,6 +324,10 @@ public class SaveGameManager : MonoBehaviour
         try { data.mailData = MailManager.Instance.GetSaveData(); }
         catch { data.mailData = null; }
 
+        // ДОБАВЛЕНО: сохранение данных инвентаря
+        try { data.inventoryData = PlayerMailInventory.Instance.GetSaveData(); }
+        catch { data.inventoryData = null; }
+
         data.saveDate = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
         data.timestamp = System.DateTimeOffset.Now.ToUnixTimeSeconds();
         data.playtime = Time.time;
@@ -248,12 +337,17 @@ public class SaveGameManager : MonoBehaviour
 
     private void LoadFromJson(string json)
     {
-        Debug.LogWarning("LOAD FROM JSON " + json);
+        Debug.Log("Loading from JSON");
         GameSaveData data = JsonUtility.FromJson<GameSaveData>(json);
 
         PlayerSaveSystem.Instance.LoadData(data.playerData);
+
         if (data.mailData != null)
             MailManager.Instance.LoadSaveData(data.mailData);
+
+        // ДОБАВЛЕНО: загрузка данных инвентаря
+        if (data.inventoryData != null)
+            PlayerMailInventory.Instance.LoadSaveData(data.inventoryData);
 
         Debug.Log("Save loaded successfully");
 
@@ -270,8 +364,13 @@ public class SaveGameManager : MonoBehaviour
     // ======================= UI =======================
     private void ShowSaveIndicator()
     {
-        if (autosaveIndicator == null) return;
+        if (autosaveIndicator == null)
+        {
+            Debug.LogWarning("Autosave indicator is not assigned!");
+            return;
+        }
 
+        Debug.Log("Showing save indicator");
         autosaveIndicator.SetActive(true);
         Invoke(nameof(DisableIndicator), 2.5f);
     }
@@ -279,8 +378,12 @@ public class SaveGameManager : MonoBehaviour
     private void DisableIndicator()
     {
         if (autosaveIndicator != null)
+        {
             autosaveIndicator.SetActive(false);
+            Debug.Log("Save indicator hidden");
+        }
     }
+
     // ======================= DELETE SAVE =======================
     public void DeleteSave(string saveName)
     {
@@ -291,7 +394,6 @@ public class SaveGameManager : MonoBehaviour
 
         try
         {
-            // ������� ����� ����������
             if (File.Exists(jsonPath))
             {
                 File.Delete(jsonPath);
@@ -310,7 +412,6 @@ public class SaveGameManager : MonoBehaviour
                 Debug.Log($"Deleted screenshot: {screenshotPath}");
             }
 
-            // ���������, ���� �� ��� ���������� ��������������
             if (File.Exists(autosavePath))
             {
                 AutoSaveSlot autoSave = JsonUtility.FromJson<AutoSaveSlot>(File.ReadAllText(autosavePath));

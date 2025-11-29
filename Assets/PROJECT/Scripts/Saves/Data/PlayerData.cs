@@ -4,5 +4,5 @@ using UnityEngine;
 public class PlayerData
 {
     public float[] position;
+    public bool hasBag; // ДОБАВЛЕНО: наличие сумки у игрока
 }
-

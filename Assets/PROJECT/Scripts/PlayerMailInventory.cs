@@ -12,6 +12,7 @@ public class PlayerMailInventory : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
+            DontDestroyOnLoad(gameObject);
         }
         else
         {
@@ -133,6 +134,35 @@ public class PlayerMailInventory : MonoBehaviour
         {
             carriedMails.RemoveAt(0);
             UpdateTaskUI();
+        }
+    }
+
+    // НОВЫЕ МЕТОДЫ ДЛЯ СОХРАНЕНИЯ/ЗАГРУЗКИ
+    public InventorySaveData GetSaveData()
+    {
+        var saveData = new InventorySaveData();
+        saveData.carriedMails = new List<Task>(carriedMails);
+        return saveData;
+    }
+
+    public void LoadSaveData(InventorySaveData saveData)
+    {
+        if (saveData != null && saveData.carriedMails != null)
+        {
+            carriedMails = new List<Task>(saveData.carriedMails);
+            UpdateTaskUI();
+            Debug.Log($"Загружено {carriedMails.Count} писем в инвентарь");
+        }
+    }
+
+    // Метод для отладки
+    public void DebugInventory()
+    {
+        Debug.Log($"=== ИНВЕНТАРЬ ИГРОКА ===");
+        Debug.Log($"Всего писем в инвентаре: {carriedMails.Count}");
+        foreach (var mail in carriedMails)
+        {
+            Debug.Log($" - {mail.recieverName} -> {mail.adress} (ID: {mail.id})");
         }
     }
 }

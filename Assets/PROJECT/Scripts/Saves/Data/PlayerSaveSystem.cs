@@ -9,7 +9,7 @@ public class PlayerSaveSystem : MonoBehaviour
     IEnumerator Start()
     {
         Instance = this;
-        while (GameManager.Instance.GetPlayer() == null)yield return null;
+        while (GameManager.Instance.GetPlayer() == null) yield return null;
         player = GameManager.Instance.GetPlayer()?.transform;
     }
 
@@ -32,7 +32,8 @@ public class PlayerSaveSystem : MonoBehaviour
                 player.position.x,
                 player.position.y,
                 player.position.z,
-            }
+            },
+            hasBag = HasBag() // ДОБАВЛЕНО: сохраняем состояние сумки
         };
     }
 
@@ -49,12 +50,17 @@ public class PlayerSaveSystem : MonoBehaviour
             return;
         }
         print("Set player position " + data.position.Length);
-        if(data.position.Length == 3) StartCoroutine(SetPlayerPosDelay(data.position));
+        if (data.position.Length == 3) StartCoroutine(SetPlayerPosDelay(data.position));
 
         else
         {
             player.GetComponent<PlayerMovement>().enabled = true;
+        }
 
+        // ДОБАВЛЕНО: восстанавливаем состояние сумки
+        if (data.hasBag && !HasBag())
+        {
+            CreateBagForPlayer();
         }
 
     }
@@ -70,5 +76,72 @@ public class PlayerSaveSystem : MonoBehaviour
         yield return new WaitForSeconds(.3f);
         player.GetComponent<PlayerMovement>().enabled = true;
         yield break;
+    }
+
+    // ДОБАВЛЕНО: проверка наличия сумки
+    private bool HasBag()
+    {
+        if (player == null) return false;
+        return FindChildWithTag(player.transform, "Bag") != null;
+    }
+
+    // ДОБАВЛЕНО: создание сумки при загрузке
+    private void CreateBagForPlayer()
+    {
+        // Находим BagPickup в сцене чтобы получить настройки
+        BagPickup bagPickup = FindObjectOfType<BagPickup>();
+        if (bagPickup != null && bagPickup.bagPrefab != null)
+        {
+            Transform parentTransform = player.transform;
+
+            if (!string.IsNullOrEmpty(bagPickup.attachToChildName))
+            {
+                Transform childTransform = FindChildRecursive(player.transform, bagPickup.attachToChildName);
+                if (childTransform != null)
+                {
+                    parentTransform = childTransform;
+                }
+            }
+
+            GameObject bagInstance = Instantiate(bagPickup.bagPrefab, parentTransform);
+            bagInstance.transform.localPosition = bagPickup.localPosition;
+            bagInstance.transform.localEulerAngles = bagPickup.localRotation;
+
+            Debug.Log("Bag restored from save data");
+        }
+        else
+        {
+            Debug.LogWarning("BagPickup or bagPrefab not found for restoring bag");
+        }
+    }
+
+    // Вспомогательный метод для поиска дочерних объектов
+    private Transform FindChildWithTag(Transform parent, string tag)
+    {
+        foreach (Transform child in parent)
+        {
+            if (child.CompareTag(tag))
+                return child;
+
+            Transform result = FindChildWithTag(child, tag);
+            if (result != null)
+                return result;
+        }
+        return null;
+    }
+
+    // Вспомогательный метод для рекурсивного поиска
+    private Transform FindChildRecursive(Transform parent, string childName)
+    {
+        foreach (Transform child in parent)
+        {
+            if (child.name == childName)
+                return child;
+
+            Transform result = FindChildRecursive(child, childName);
+            if (result != null)
+                return result;
+        }
+        return null;
     }
 }

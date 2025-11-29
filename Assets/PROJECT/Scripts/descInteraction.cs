@@ -28,6 +28,10 @@ public class DeskInteraction : MonoBehaviour
     private Transform originalCameraParent;
     private GameObject player;
 
+    // Новая переменная для проверки нахождения в UI стола
+    public bool isInTable => isCanvasOpen;
+
+    // Старое свойство для обратной совместимости
     public bool IsCanvasOpen => isCanvasOpen;
 
     void Start()

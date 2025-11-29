@@ -87,6 +87,12 @@ public class BagPickup : MonoBehaviour
             bagInstance.transform.localEulerAngles = localRotation;
 
             Debug.Log("Bag picked up!");
+
+            // ДОБАВЛЕНО: запускаем автосохранение после подбора сумки
+            if (SaveGameManager.Instance != null)
+            {
+                SaveGameManager.Instance.SaveAuto(true);
+            }
         }
 
         Destroy(gameObject);

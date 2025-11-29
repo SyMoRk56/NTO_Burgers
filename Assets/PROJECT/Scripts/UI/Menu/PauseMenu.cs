@@ -12,13 +12,32 @@ public class PauseMenu : MonoBehaviour
     {
         Setup();
     }
+
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
+            // Проверяем, не находимся ли мы в UI стола
+            if (IsInTableUI()) return;
+
             if (PauseGame) Resume();
             else Pause();
         }
+    }
+
+    // Метод для проверки, находится ли игрок в UI стола
+    private bool IsInTableUI()
+    {
+        // Ищем все объекты DeskInteraction в сцене
+        DeskInteraction[] desks = FindObjectsOfType<DeskInteraction>();
+        foreach (DeskInteraction desk in desks)
+        {
+            if (desk.isInTable)
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
     public void Resume()
@@ -43,6 +62,7 @@ public class PauseMenu : MonoBehaviour
     {
         GameManager.Instance.ExitToMenu();
     }
+
     public void SaveToSlot(string slotName)
     {
         if (string.IsNullOrEmpty(slotName))
@@ -64,16 +84,18 @@ public class PauseMenu : MonoBehaviour
         GameManager.Instance.currentManualSlot = slotName;
 
         // Сохраняем (создаст новый файл)
-        SaveGameManager.Instance.SaveManual(slotName, false);
+        SaveGameManager.Instance.SaveManual(slotName);
 
         Debug.Log("PauseMenu: Saved to slot -> " + slotName);
         Setup();
     }
+
     public GameObject saveMenu;
     public void ToggleSaveMenu()
     {
         saveMenu.SetActive(!saveMenu.activeSelf);
     }
+
     public SavePanel[] saves;
 
     void Setup()
@@ -106,6 +128,7 @@ public class PauseMenu : MonoBehaviour
             }
         }
     }
+
     private void FillPanel(SavePanel panel)
     {
         string json = File.ReadAllText(panel.savePath);
