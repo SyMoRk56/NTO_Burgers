@@ -27,15 +27,15 @@ public class TaskUI : MonoBehaviour
         if (taskCanvas != null)
             taskCanvas.SetActive(true);
 
-        if (string.IsNullOrEmpty(task.recieverName) && string.IsNullOrEmpty(task.adress))
+        if (string.IsNullOrEmpty( task.recieverName) && string.IsNullOrEmpty(task.adress))
         {
             if (taskCanvas != null)
                 taskCanvas.SetActive(false);
             return;
         }
 
-        reciever.text = task.recieverName;
-        adress.text = task.adress;
+        reciever.text = LocalizationManager.Instance.Get(task.recieverName);
+        adress.text = LocalizationManager.Instance.Get(task.adress);
 
         if (remainingCount > 0)
             countText.text = remainingCount.ToString();
