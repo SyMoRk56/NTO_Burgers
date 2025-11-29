@@ -3,7 +3,17 @@ guid: 412f133f7e0f24243baa1d35f662759d
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Stolb
+    second: {fileID: 2100000, guid: adb3fdbaa35ca6949a0e85fc6d433850, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: light
+    second: {fileID: 2100000, guid: 52f8160b1625a0845bf69b411647f63d, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
