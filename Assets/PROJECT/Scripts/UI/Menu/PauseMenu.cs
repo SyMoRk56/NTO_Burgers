@@ -64,7 +64,7 @@ public class PauseMenu : MonoBehaviour
         GameManager.Instance.currentManualSlot = slotName;
 
         // Сохраняем (создаст новый файл)
-        SaveGameManager.Instance.SaveManual(slotName);
+        SaveGameManager.Instance.SaveManual(slotName, false);
 
         Debug.Log("PauseMenu: Saved to slot -> " + slotName);
         Setup();

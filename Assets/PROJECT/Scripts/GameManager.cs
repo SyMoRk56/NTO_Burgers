@@ -115,7 +115,7 @@ public class GameManager : MonoBehaviour
         }
 
         // 1. Сохраняем данные в слот
-        SaveGameManager.Instance.SaveManual(slot);
+        SaveGameManager.Instance.SaveManual(slot, false);
 
         // 2. Обновляем autosave.json (записываем только имя слота)
         AutoSaveSlot auto = new AutoSaveSlot { slotName = slot };

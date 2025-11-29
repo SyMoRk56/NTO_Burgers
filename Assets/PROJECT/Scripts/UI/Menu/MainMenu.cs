@@ -66,7 +66,7 @@ public class MainMenu : MonoBehaviour
         if (!SaveGameManager.Instance.HasManual(slotName))
         {
             Debug.LogWarning("Autosave points to missing slot, creating new one: " + slotName);
-            SaveGameManager.Instance.SaveManual(slotName);
+            SaveGameManager.Instance.SaveManual(slotName, false);
         }
 
         // Говорим GameManager какой слот грузить

@@ -130,7 +130,7 @@ public class MainMenuSaves : MonoBehaviour
         if (!SaveGameManager.Instance.HasManual(saveName))
         {
             Debug.Log("Save not found, creating a new empty save: " + saveName);
-            SaveGameManager.Instance.SaveManual(saveName);
+            SaveGameManager.Instance.SaveManual(saveName, false);
         }
 
         // ��������� GameManager ����� ���� ���������
