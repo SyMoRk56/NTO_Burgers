@@ -5,7 +5,7 @@ public class Face : MonoBehaviour
 {
     public string textureParamName = "Texture";
     public Material targetMat;
-    [Tooltip("обычное - улыбка - рот")]
+    [Tooltip("обычное - улыбка - рот - грусни")]
     public List<Texture> faces = new List<Texture>();
     public void SetFace(FaceType face)
     {
@@ -16,5 +16,6 @@ public enum FaceType
 {
     def,
     smile,
-    mouth
+    mouth,
+    sad
 }
