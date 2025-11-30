@@ -5,9 +5,10 @@ using System.Collections;
 public class RespawnPlayer : MonoBehaviour
 {
     public float respawnDelay = 2f;
-
     private List<PositionRecord> positionHistory = new List<PositionRecord>();
-    private float historyLength = 1.2f; // храним чуть больше чем 1 сек
+
+    // Увеличиваем длину истории чтобы хватило на респавн
+    public float historyLength = 5f;
 
     public LayerMask groundLayer;
 
@@ -15,21 +16,23 @@ public class RespawnPlayer : MonoBehaviour
     {
         float rayDistance = 1.1f;
         Vector3 origin = transform.position + Vector3.up * 0.1f;
-
         return Physics.Raycast(origin, Vector3.down, rayDistance, groundLayer);
     }
 
     void Update()
     {
-        if(IsGrounded())
-        // Записываем позицию каждый кадр
-        positionHistory.Add(new PositionRecord(Time.time, transform.position));
-
-        // Удаляем старые записи
-        while (positionHistory.Count > 1 && Time.time - positionHistory[0].time > historyLength)
+        // Записываем позицию каждый кадр, независимо от состояния
+        if (IsGrounded())
         {
-            positionHistory.RemoveAt(0);
+            positionHistory.Add(new PositionRecord(Time.time, transform.position));
+
+            // Удаляем старые записи
+            while (positionHistory.Count > 0 && Time.time - positionHistory[0].time > historyLength)
+            {
+                positionHistory.RemoveAt(0);
+            }
         }
+        
     }
 
     public void TriggerWater()
@@ -39,33 +42,47 @@ public class RespawnPlayer : MonoBehaviour
 
     IEnumerator RespawnRoutine()
     {
+        GetComponent<PlayerMovement>().enabled = false;
         yield return new WaitForSeconds(respawnDelay);
+        Vector3 targetPos = GetPositionBeforeFall();
+        transform.GetComponent<Rigidbody>().MovePosition(targetPos);
+        print(transform.position);
+        print(targetPos);
+        yield return null;
+        print(transform.position);
+        yield return new WaitForSeconds(.5f);
+        GetComponent<PlayerMovement>().enabled = true;
 
-        Vector3 targetPos = GetPositionOneSecondAgo();
-
-        transform.position = targetPos;
     }
 
-    private Vector3 GetPositionOneSecondAgo()
+    private Vector3 GetPositionBeforeFall()
     {
-        float targetTime = Time.time - 1f;
+        if (positionHistory.Count == 0)
+            return transform.position;
 
-        PositionRecord best = positionHistory[0];
+        // Время до падения (текущее время минус задержка респавна)
+        float fallTime = positionHistory[0].time - respawnDelay;
 
-        // Находим ближайшую запись к времени 1 секунду назад
-        foreach (var rec in positionHistory)
+        // Ищем позицию за 1 секунду до падения
+        float targetTime = fallTime - 1f;
+
+        PositionRecord closestRecord = positionHistory[0];
+
+        // Находим ближайшую запись ко времени за 1 секунду до падения
+        foreach (var record in positionHistory)
         {
-            if (Mathf.Abs(rec.time - targetTime) < Mathf.Abs(best.time - targetTime))
+            if (Mathf.Abs(record.time - targetTime) < Mathf.Abs(closestRecord.time - targetTime))
             {
-                best = rec;
+                closestRecord = record;
             }
         }
 
-        return best.position;
+        return closestRecord.position;
     }
 
     private void OnTriggerEnter(Collider other)
     {
+        print("TRIGGER " + other.name);
         if (other.CompareTag("Water"))
         {
             TriggerWater();

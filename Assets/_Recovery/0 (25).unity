@@ -3135,7 +3135,7 @@ GameObject:
   - component: {fileID: 371087343}
   m_Layer: 4
   m_Name: water
-  m_TagString: Water
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -29916,8 +29916,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 42286c368e6b93644854bbeeb3e16140, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RespawnPlayer
-  respawnDelay: 0.5
-  historyLength: 5
+  respawnDelay: 1
   groundLayer:
     serializedVersion: 2
     m_Bits: 64
