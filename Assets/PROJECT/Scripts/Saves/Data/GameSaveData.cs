@@ -5,7 +5,6 @@ using UnityEngine;
 public class GameSaveData
 {
     public PlayerData playerData;
-    public SettingsData settingsData;
     public MailSaveData mailData;
 
     // ДОБАВЛЕНО: данные инвентаря игрока

@@ -5,7 +5,7 @@ using UnityEngine;
 public class SettingsData
 {
     public string lang;
-
     public float masterVolume = 1;
-    public int resolution;
+    public float musicVolume = 1;
+    public float dialoguesVolume = 1;
 }

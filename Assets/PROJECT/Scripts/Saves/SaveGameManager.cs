@@ -318,8 +318,8 @@ public class SaveGameManager : MonoBehaviour
         try { data.playerData = PlayerSaveSystem.Instance.GetData(); }
         catch { data.playerData = null; }
 
-        try { data.settingsData = SettingsSaveSystem.Instance.GetData(); }
-        catch { data.settingsData = null; }
+        //try { data.settingsData = SettingsSaveSystem.Instance.GetData(); }
+        //catch { data.settingsData = null; }
 
         try { data.mailData = MailManager.Instance.GetSaveData(); }
         catch { data.mailData = null; }

@@ -12,6 +12,7 @@ public class InteractionUI : MonoBehaviour
 
     private void Start()
     {
+        if(trigger != null)
         trigger.radius = GameConfig.interactionRange;
 
         // Получаем компонент Image из popup

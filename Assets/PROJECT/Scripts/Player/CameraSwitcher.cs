@@ -8,6 +8,7 @@ public class CameraSwitcher : MonoBehaviour
     public Camera firstPersonCamera;
     public CinemachineCamera thirdPersonCamera;
     public CinemachinePlayerRotation rot;
+    public SkinnedMeshRenderer renderer;
 
     private bool isFirstPerson = false;
 
@@ -25,11 +26,12 @@ public class CameraSwitcher : MonoBehaviour
 
     void SetCameraMode(bool firstPerson)
     {
+        renderer.enabled = !firstPerson;
         if (firstPerson)
         {
             // Enable first-person camera
             firstPersonCamera.gameObject.SetActive(true);
-
+            
             // Disable Cinemachine
             thirdPersonCamera.Priority = 0;
             rot.enabled = false;

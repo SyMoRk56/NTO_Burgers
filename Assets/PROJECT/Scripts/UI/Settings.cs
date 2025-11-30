@@ -8,15 +8,13 @@ using TMPro;
 
 public class Settings : MonoBehaviour
 {
-    public TMP_Dropdown resolutionDropdown;
 
     Resolution[] resolution;
     public TMP_Dropdown langDropdown;
-    public Slider volumeSlider;
+    public Slider masterVolumeSlider, musicVolumeSlider, dialoguesVolumeSlider;
     void Start()
     {
         langDropdown.SetValueWithoutNotify(LocalizationManager.Instance.CurrentLanguage == "RU" ? 0 : 1);
-        resolutionDropdown.ClearOptions();
         List<string> options = new List<string>();
         resolution = Screen.resolutions;
         int currentResolutionIndex = 0;
@@ -28,9 +26,6 @@ public class Settings : MonoBehaviour
             if (resolution[i].width == Screen.currentResolution.width && resolution[i].height == Screen.currentResolution.height)
                 currentResolutionIndex = i;
         }
-
-        resolutionDropdown.AddOptions(options);
-        resolutionDropdown.RefreshShownValue();
         LoadSettings(currentResolutionIndex);
     }
     
@@ -47,18 +42,20 @@ public class Settings : MonoBehaviour
     
     public void SaveSettings()
     {
-        //PlayerPrefs.SetInt("Resolution", resolutionDropdown.value);
         var data = SettingsSaveSystem.Instance.GetData();
-        data.resolution = resolutionDropdown.value;
-        data.masterVolume = volumeSlider.value;
+        data.masterVolume = masterVolumeSlider.value;
+        data.dialoguesVolume = dialoguesVolumeSlider.value;
+        data.musicVolume = musicVolumeSlider.value;
         SettingsSaveSystem.Instance.LoadData(data);
+        SettingsSaveManager.Instance.SaveSettings();
     }
 
     public void LoadSettings(int currentResolutionIndex)
     {
         var data = SettingsSaveSystem.Instance.GetData();
-        resolutionDropdown.SetValueWithoutNotify(data.resolution);
-        volumeSlider.SetValueWithoutNotify(data.masterVolume);
+        masterVolumeSlider.SetValueWithoutNotify(data.masterVolume);
+        dialoguesVolumeSlider.SetValueWithoutNotify(data.dialoguesVolume);
+        musicVolumeSlider.SetValueWithoutNotify(data.musicVolume);
 
     }
     public void SetLang()
