@@ -14,11 +14,16 @@ public class MusicManager : MonoBehaviour
 
     private MusicMixer activeMixer;
 
+    private AudioClip currentClip;
+    private MusicMixer currentMixer;
+
     private void Awake()
     {
         Instance = this;
         audioSource = gameObject.AddComponent<AudioSource>();
         audioSource.loop = true;
+
+        currentClip = defaultMusic;
 
         if (defaultMusic != null)
         {
@@ -29,16 +34,18 @@ public class MusicManager : MonoBehaviour
 
     public void PlayMusic(AudioClip clip, MusicMixer mixer)
     {
-        if (mixer == null)
-        {
-            if (clip == null) return;
-            if (audioSource.clip == clip && activeMixer == null) return;
-        }
+        // --- NEW --- проверяем, не пытаемся ли мы запустить то же самое
+        if (clip == currentClip && mixer == currentMixer)
+            return;
 
         if (fadeRoutine != null)
             StopCoroutine(fadeRoutine);
 
         fadeRoutine = StartCoroutine(FadeSwitch(clip, mixer));
+
+        // Запоминаем активные параметры
+        currentClip = clip;
+        currentMixer = mixer;
     }
 
     public void PlayDefault()
