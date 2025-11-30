@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -41,6 +42,7 @@ public class PointToPointMovement : MonoBehaviour
     float traveled = 0f;              // distance traveled along path
     Vector3 velocity = Vector3.zero;  // helper for smoothing rotation (unused by SmoothDampQuaternion)
     float currentVelYaw = 0f;
+    public float moveDelay;
 
     void Awake()
     {
@@ -53,13 +55,19 @@ public class PointToPointMovement : MonoBehaviour
             return;
         }
 
+        
+    }
+    private IEnumerator Start()
+    {
+        yield return new WaitForSeconds(moveDelay);
         BuildSamples();
         // position object at nearest point on path initially
-        traveled = FindClosestDistanceOnPath(transform.position);
+        traveled = 0;//FindClosestDistanceOnPath(transform.position);
         // optionally snap vertically to ground at that sample
         SnapVerticalToSample(traveled);
-    }
+        transform.position = waypoints[0].position ;
 
+    }
     void FixedUpdate()
     {
         if (samples == null || samples.Count == 0) return;
