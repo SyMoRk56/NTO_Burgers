@@ -16,7 +16,7 @@ public class DialogueRunner : MonoBehaviour
 
     void Start()
     {
-        
+
     }
 
     public void StartDialogue(bool letter)
@@ -33,7 +33,7 @@ public class DialogueRunner : MonoBehaviour
             GameManager.Instance.GetPlayer().GetComponent<PlayerManager>().CanMove = false;
 
         }
-        
+
     }
 
     void ShowCurrentPhrase()
@@ -86,7 +86,4 @@ public class DialogueRunner : MonoBehaviour
     }
     bool isLetter;
     private bool isRunning;
-
-   
-
 }

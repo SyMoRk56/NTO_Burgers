@@ -19,8 +19,8 @@ public class DialogueUI : MonoBehaviour
     void Awake()
     {
         runner = GetComponentInParent<DialogueRunner>();
-        if(hideOnAwake)
-        Hide();
+        if (hideOnAwake)
+            Hide();
     }
 
     public void ShowPhrase(string name, string text)

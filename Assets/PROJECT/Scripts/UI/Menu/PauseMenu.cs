@@ -28,7 +28,6 @@ public class PauseMenu : MonoBehaviour
     // Метод для проверки, находится ли игрок в UI стола
     private bool IsInTableUI()
     {
-        // Ищем все объекты DeskInteraction в сцене
         DeskInteraction[] desks = FindObjectsOfType<DeskInteraction>();
         foreach (DeskInteraction desk in desks)
         {
