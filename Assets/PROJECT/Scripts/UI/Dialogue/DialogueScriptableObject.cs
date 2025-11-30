@@ -12,7 +12,8 @@ public class DialogueChoice
 [CreateAssetMenu(menuName = "Dialogue/Dialogue Block")]
 public class DialogueScriptableObject : ScriptableObject
 {
-    public string[] phrases;         // фразы в виде KEY
+    public string[] phrases;
+    public AudioClip[] voiceOver;
     public DialogueChoice[] choices;
     public List<FaceType> emotions;
 }

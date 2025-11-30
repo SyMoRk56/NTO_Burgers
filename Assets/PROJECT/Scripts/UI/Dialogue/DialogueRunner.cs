@@ -43,7 +43,7 @@ public class DialogueRunner : MonoBehaviour
 
         if (currentPhraseIndex < block.phrases.Length)
         {
-            dialogueUI.ShowPhrase(ownerName, block.phrases[currentPhraseIndex]);
+            dialogueUI.ShowPhrase(ownerName, block.phrases[currentPhraseIndex], block.voiceOver[currentDialogueIndex]);
             face?.SetFace(block.emotions[currentDialogueIndex]);
         }
         else

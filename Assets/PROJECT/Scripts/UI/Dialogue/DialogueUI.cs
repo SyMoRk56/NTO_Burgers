@@ -2,6 +2,7 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 using System.Collections;
+using DG.Tweening;
 
 public class DialogueUI : MonoBehaviour
 {
@@ -13,7 +14,7 @@ public class DialogueUI : MonoBehaviour
     DialogueRunner runner;
     Coroutine typeCoroutine;
     float typeSpeed = 0.03f;
-
+    public AudioSource voiceOver;
     public bool hideOnAwake = true;
 
     void Awake()
@@ -23,18 +24,25 @@ public class DialogueUI : MonoBehaviour
         Hide();
     }
 
-    public void ShowPhrase(string name, string text)
+    public void ShowPhrase(string name, string text, AudioClip clip)
     {
         ClearChoices();
         gameObject.SetActive(true);
         nameText.text = LocalizationManager.Instance.Get(name);
 
         if (typeCoroutine != null) StopCoroutine(typeCoroutine);
-        typeCoroutine = StartCoroutine(TypeText(LocalizationManager.Instance.Get(text)));
+        typeCoroutine = StartCoroutine(TypeText(LocalizationManager.Instance.Get(text), clip));
     }
 
-    IEnumerator TypeText(string text)
+    IEnumerator TypeText(string text, AudioClip clip)
     {
+        voiceOver.DOFade(0, .2f);
+        if(clip!= null && LocalizationManager.Instance.CurrentLanguage == "RU")
+        {
+            voiceOver.clip = clip;
+            voiceOver.PlayDelayed(.2f);
+            voiceOver.DOFade(1, .2f).SetDelay(.2f);
+        }
         phraseText.text = "";
         foreach (char c in text)
         {
@@ -45,6 +53,8 @@ public class DialogueUI : MonoBehaviour
 
     public void ShowChoices(DialogueChoice[] choices)
     {
+        voiceOver.DOFade(0, .2f);
+
         ClearChoices();
         phraseText.text = "";
 
