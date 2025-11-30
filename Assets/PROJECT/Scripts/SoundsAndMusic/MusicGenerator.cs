@@ -6,23 +6,30 @@ public class MusicGenerator : MonoBehaviour
     [Header("Instruments")]
     public List<InstrumentSample> instruments = new List<InstrumentSample>();
 
+    [Header("Pad Instruments (soft pad, synth, ambience)")]
+    public List<InstrumentSample> padInstruments = new List<InstrumentSample>();   // ★ ДОБАВЛЕНО
+
+    [Header("Pad Settings")]
+    public float padVolume = 0.6f;       // ★ ДОБАВЛЕНО
+    public float padLength = 4f;         // длительность пэда в сек (можно менять) ★
+    public bool generatePads = true;     // включить / выключить пэды ★
+
     [Header("Melody Settings")]
     public MelodyPattern melodyPattern = MelodyPattern.OneNote;
     public float bpm = 120f;
     public int bars = 4;
-    public float restChance = 0.15f; // 15% шанс паузы
+    public float restChance = 0.15f;
 
     [Header("Pitch Settings")]
     public Vector2 pitchRange = new Vector2(0.9f, 1.1f);
 
     [Header("Scale Settings")]
     public ScaleType scaleType = ScaleType.Major;
-    public int rootNote = 60; // 60 = C4
+    public int rootNote = 60;
 
     [Header("Chord Progression")]
     public ChordProgression progression;
 
-    // Паттерн мелодии для каждого бара
     private MelodyPattern[] barPatterns;
 
     private void Start()
@@ -38,9 +45,8 @@ public class MusicGenerator : MonoBehaviour
     {
         GenerateDynamicProgression();
         GenerateBarPatterns();
+        var padsd = GeneratePads();
     }
-
-
 
     // -------------------------------------------------------------------------
     // DYNAMIC PROGRESSION
@@ -48,8 +54,8 @@ public class MusicGenerator : MonoBehaviour
 
     public void GenerateDynamicProgression()
     {
-        int[] majorDegrees = { 0, 1, 2, 3, 4, 5 };     // I ii iii IV V vi
-        int[] minorDegrees = { 0, 2, 3, 4, 5 };        // i III iv v VI VII
+        int[] majorDegrees = { 0, 1, 2, 3, 4, 5 };
+        int[] minorDegrees = { 0, 2, 3, 4, 5 };
 
         List<int> pool = scaleType == ScaleType.Major
             ? new List<int>(majorDegrees)
@@ -57,7 +63,6 @@ public class MusicGenerator : MonoBehaviour
 
         progression.degrees = new List<int>();
 
-        // Первый бар — тоника
         progression.degrees.Add(0);
 
         for (int i = 1; i < bars; i++)
@@ -72,12 +77,12 @@ public class MusicGenerator : MonoBehaviour
     {
         Dictionary<int, int[]> transitions = new Dictionary<int, int[]>()
         {
-            { 0, new[]{ 3, 4, 5 } },  // I → IV, V, vi
-            { 1, new[]{ 4, 5, 0 } },  // ii → V, vi, I
-            { 2, new[]{ 5, 0 } },     // iii → vi, I
-            { 3, new[]{ 4, 5, 0 } },  // IV → V, vi, I
-            { 4, new[]{ 5, 0 } },     // V → vi, I
-            { 5, new[]{ 3, 0 } }      // vi → IV, I
+            { 0, new[]{ 3, 4, 5 } },
+            { 1, new[]{ 4, 5, 0 } },
+            { 2, new[]{ 5, 0 } },
+            { 3, new[]{ 4, 5, 0 } },
+            { 4, new[]{ 5, 0 } },
+            { 5, new[]{ 3, 0 } }
         };
 
         if (transitions.ContainsKey(prev))
@@ -90,7 +95,6 @@ public class MusicGenerator : MonoBehaviour
     }
 
 
-
     // -------------------------------------------------------------------------
     // BAR MELODY PATTERNS
     // -------------------------------------------------------------------------
@@ -101,11 +105,12 @@ public class MusicGenerator : MonoBehaviour
 
         for (int i = 0; i < bars; i++)
         {
-            // Паттерны 1–3: TwoNotes, Triad, RandomSequence
-            barPatterns[i] = (MelodyPattern)Random.Range(1, 3);
+            barPatterns[i] = MelodyPattern.OneNote;
+
+            if (Random.value < 0.2f)
+                barPatterns[i] = MelodyPattern.TwoNotes;
         }
     }
-
 
 
     // -------------------------------------------------------------------------
@@ -122,7 +127,7 @@ public class MusicGenerator : MonoBehaviour
 
         for (int bar = 0; bar < bars; bar++)
         {
-            int chordDegree = progression.degrees[bar % progression.degrees.Count];
+            int chordDegree = progression.degrees[bar];
             int chordRoot = rootNote + scale[chordDegree];
 
             MelodyPattern pattern = barPatterns[bar];
@@ -150,7 +155,7 @@ public class MusicGenerator : MonoBehaviour
             beat += 1f;
         }
 
-        // Переводим биты → секунды
+        // Биты → секунды
         for (int i = 0; i < melody.Count; i++)
         {
             var n = melody[i];
@@ -161,10 +166,42 @@ public class MusicGenerator : MonoBehaviour
         return melody;
     }
 
+    // -------------------------------------------------------------------------
+    // ★★★ PADS GENERATION ★★★
+    // -------------------------------------------------------------------------
 
+    public List<PadNote> GeneratePads()
+    {
+        List<PadNote> pads = new List<PadNote>();
+
+        if (!generatePads || padInstruments.Count == 0)
+            return pads;
+
+        float secondsPerBeat = 60f / bpm;
+        int[] scale = MusicScales.GetScale(scaleType);
+
+        for (int bar = 0; bar < bars; bar++)
+        {
+            int degree = progression.degrees[bar];
+            int midi = rootNote + scale[degree]-7;
+
+            float pitch = Mathf.Pow(2f, (midi - 60) / 12f);
+
+            var inst = padInstruments[Random.Range(0, padInstruments.Count)];
+
+            pads.Add(new PadNote(
+                inst.sample,
+                pitch,
+                bar * secondsPerBeat,   // старт пэда
+                padLength                // длительная нота
+            ));
+        }
+
+        return pads;
+    }
 
     // -------------------------------------------------------------------------
-    // PATTERN HELPERS
+    // MELODY HELPERS
     // -------------------------------------------------------------------------
 
     private void AddPatternNotes(List<Note> melody, float beatStart, int chordRoot, int count)
@@ -185,11 +222,11 @@ public class MusicGenerator : MonoBehaviour
 
     private void AddTriad(List<Note> melody, float beatStart, int chordRoot, int[] scale)
     {
-        int[] triadSteps = { 0, 2, 4 }; // корень, терция, квинта
+        int[] triadSteps = { 0, 2, 4 };
 
         for (int i = 0; i < triadSteps.Length; i++)
         {
-            float time = beatStart + i * 0.33f;
+            float time = beatStart + i * 0.33333333333333333333333333333333333f;
 
             if (Random.value < restChance)
             {
@@ -197,8 +234,8 @@ public class MusicGenerator : MonoBehaviour
                 continue;
             }
 
-            int pitchMidi = chordRoot + scale[triadSteps[i] % scale.Length];
-            AddMusicalNote(melody, time, pitchMidi);
+            int midi = chordRoot + scale[triadSteps[i] % scale.Length];
+            AddMusicalNote(melody, time, midi);
         }
     }
 
@@ -209,21 +246,15 @@ public class MusicGenerator : MonoBehaviour
         float pitch = Mathf.Pow(2f, (midiNote - 60) / 12f);
         pitch *= Random.Range(pitchRange.x, pitchRange.y);
 
-        // -----------------------------------------------------
-        // ANTI-REPEAT FILTER — чтобы ноты не повторялись
-        // -----------------------------------------------------
         if (melody.Count > 0)
         {
             Note last = melody[melody.Count - 1];
 
-            // Проверяем только ноты, не паузы
             if (!last.isRest && Mathf.Abs(last.pitch - pitch) < 0.0001f)
             {
-                // Если нота совпала — смещаем на полтона вверх или вниз
                 int direction = Random.value < 0.5f ? -1 : 1;
                 midiNote += direction;
 
-                // Пересчёт pitch
                 pitch = Mathf.Pow(2f, (midiNote - 60) / 12f);
                 pitch *= Random.Range(pitchRange.x, pitchRange.y);
             }
@@ -231,8 +262,30 @@ public class MusicGenerator : MonoBehaviour
 
         melody.Add(new Note(instrument.sample, pitch, startBeat));
     }
-
 }
+
+
+// -----------------------------------------------------------------------------
+// ★★★ ДОБАВЛЕНО: СТРУКТУРА ПЭДА ★★★
+// -----------------------------------------------------------------------------
+
+[System.Serializable]
+public struct PadNote
+{
+    public AudioClip clip;
+    public float pitch;
+    public float startTime;
+    public float length;
+
+    public PadNote(AudioClip clip, float pitch, float startTime, float length)
+    {
+        this.clip = clip;
+        this.pitch = pitch;
+        this.startTime = startTime;
+        this.length = length;
+    }
+}
+
 
 
 [CreateAssetMenu(menuName = "MusicGen/Drum Sample")]
