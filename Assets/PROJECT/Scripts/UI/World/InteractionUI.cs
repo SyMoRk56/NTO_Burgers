@@ -5,14 +5,13 @@ public class InteractionUI : MonoBehaviour
 {
     public GameObject popup;
     public SphereCollider trigger;
-    public DeskInteraction deskInteraction;
+    public DeskInteraction deskInteraction; // Опционально, только для объектов с UI
 
     private Image popupImage;
     private bool playerInRange = false;
 
     private void Start()
     {
-        if(trigger != null)
         trigger.radius = GameConfig.interactionRange;
 
         // Получаем компонент Image из popup
@@ -23,8 +22,9 @@ public class InteractionUI : MonoBehaviour
             return;
         }
 
-        // Устанавливаем начальную прозрачность
+        // Скрываем popup полностью при старте
         SetPopupAlpha(0f);
+        popup.SetActive(false);
     }
 
     private void OnTriggerEnter(Collider other)
@@ -32,11 +32,21 @@ public class InteractionUI : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             playerInRange = true;
+            Debug.Log($"Player entered {gameObject.name} trigger");
 
-            // Показываем popup только если UI панель стола закрыта
-            if (deskInteraction != null && !deskInteraction.IsCanvasOpen)
+            // Для объектов со столом: показываем popup только если UI закрыт
+            // Для объектов без стола (NPC и др.): всегда показываем popup
+            if (deskInteraction != null)
             {
-                SetPopupAlpha(1f);
+                if (!deskInteraction.IsCanvasOpen)
+                {
+                    ShowPopup();
+                }
+            }
+            else
+            {
+                // NPC и другие объекты без DeskInteraction
+                ShowPopup();
             }
 
             // Уведомляем скрипт стола о том, что игрок вошел в зону
@@ -52,9 +62,8 @@ public class InteractionUI : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             playerInRange = false;
-
-            // При выходе всегда скрываем popup
-            SetPopupAlpha(0f);
+            Debug.Log($"Player exited {gameObject.name} trigger");
+            HidePopup();
 
             // Уведомляем скрипт стола о том, что игрок вышел из зоны
             if (deskInteraction != null)
@@ -73,23 +82,50 @@ public class InteractionUI : MonoBehaviour
             color.a = alpha;
             popupImage.color = color;
         }
-
-        // Управляем активностью всего GameObject
-        popup.SetActive(alpha > 0);
     }
 
-    // Метод для скрытия popup (вызывается при открытии UI панели)
+    // Метод для скрытия popup
     public void HidePopup()
     {
         SetPopupAlpha(0f);
+        popup.SetActive(false);
+        Debug.Log($"HidePopup called for {gameObject.name}");
     }
 
-    // Метод для показа popup (вызывается при закрытии UI панели, если игрок в зоне)
+    // Метод для показа popup
     public void ShowPopup()
+    {
+        SetPopupAlpha(1f);
+        popup.SetActive(true);
+        Debug.Log($"ShowPopup called for {gameObject.name}");
+    }
+
+    // Метод для обновления видимости popup (вызывается из DeskInteraction при закрытии UI)
+    public void UpdatePopupVisibility()
     {
         if (playerInRange)
         {
-            SetPopupAlpha(1f);
+            if (deskInteraction != null)
+            {
+                // Для стола: показываем только если UI закрыт
+                if (!deskInteraction.IsCanvasOpen)
+                {
+                    ShowPopup();
+                }
+                else
+                {
+                    HidePopup();
+                }
+            }
+            else
+            {
+                // Для NPC: всегда показываем если игрок в зоне
+                ShowPopup();
+            }
+        }
+        else
+        {
+            HidePopup();
         }
     }
 }

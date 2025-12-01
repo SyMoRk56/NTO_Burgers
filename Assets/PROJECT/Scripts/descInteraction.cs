@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.UI;
+using System.Collections;
 
 public class DeskInteraction : MonoBehaviour
 {
@@ -10,7 +11,7 @@ public class DeskInteraction : MonoBehaviour
     public List<GameObject> randomImages = new();
 
     [Header("Camera Settings")]
-    public Transform mainCamera;
+    public Camera deskCamera;
     public Vector3 cameraOffset = new Vector3(0, 3, 0);
     public Vector3 cameraRotation = new Vector3(90, 0, 0);
 
@@ -23,21 +24,18 @@ public class DeskInteraction : MonoBehaviour
 
     private bool playerInRange = false;
     private bool isCanvasOpen = false;
-    private Vector3 originalCameraPosition;
-    private Quaternion originalCameraRotation;
-    private Transform originalCameraParent;
     private GameObject player;
 
-    // Новая переменная для проверки нахождения в UI стола
     public bool isInTable => isCanvasOpen;
-
-    // Старое свойство для обратной совместимости
     public bool IsCanvasOpen => isCanvasOpen;
 
     void Start()
     {
         if (deskCanvas != null)
             deskCanvas.gameObject.SetActive(false);
+
+        if (deskCamera != null)
+            deskCamera.gameObject.SetActive(false);
 
         player = GameObject.FindGameObjectWithTag("Player");
     }
@@ -87,15 +85,12 @@ public class DeskInteraction : MonoBehaviour
         if (interactionUI != null)
             interactionUI.HidePopup();
 
-        if (mainCamera != null)
+        if (deskCamera != null)
         {
-            originalCameraPosition = mainCamera.position;
-            originalCameraRotation = mainCamera.rotation;
-            originalCameraParent = mainCamera.parent;
-
-            mainCamera.SetParent(transform);
-            mainCamera.localPosition = cameraOffset;
-            mainCamera.localRotation = Quaternion.Euler(cameraRotation);
+            DisableMainCameraSystems();
+            deskCamera.gameObject.SetActive(true);
+            deskCamera.transform.position = transform.position + cameraOffset;
+            deskCamera.transform.rotation = Quaternion.Euler(cameraRotation);
         }
 
         if (deskCanvas != null)
@@ -107,22 +102,19 @@ public class DeskInteraction : MonoBehaviour
         if (playerMovement != null)
             playerMovement.enabled = false;
 
-        if (playerCameraScript != null)
-            playerCameraScript.enabled = false;
-
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
     }
 
-    void CloseDeskCanvas()
+    // Оставляем основной метод как private
+    private void CloseDeskCanvas()
     {
         isCanvasOpen = false;
 
-        if (mainCamera != null)
+        if (deskCamera != null)
         {
-            mainCamera.SetParent(originalCameraParent);
-            mainCamera.position = originalCameraPosition;
-            mainCamera.rotation = originalCameraRotation;
+            deskCamera.gameObject.SetActive(false);
+            EnableMainCameraSystems();
         }
 
         if (deskCanvas != null)
@@ -134,13 +126,19 @@ public class DeskInteraction : MonoBehaviour
         if (playerMovement != null)
             playerMovement.enabled = true;
 
-        if (playerCameraScript != null)
-            playerCameraScript.enabled = true;
-
         StartCoroutine(LockCursorNextFrame());
 
         if (interactionUI != null && playerInRange)
             interactionUI.ShowPopup();
+    }
+
+    // Добавляем публичный метод для внешнего закрытия
+    public void ForceCloseDesk()
+    {
+        if (isCanvasOpen)
+        {
+            CloseDeskCanvas();
+        }
     }
 
     System.Collections.IEnumerator LockCursorNextFrame()
@@ -150,19 +148,52 @@ public class DeskInteraction : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
     }
 
+    private void DisableMainCameraSystems()
+    {
+        CameraSwitcher switcher = FindObjectOfType<CameraSwitcher>();
+        if (switcher != null)
+            switcher.enabled = false;
+
+        CameraManagement cameraManagement = FindObjectOfType<CameraManagement>();
+        if (cameraManagement != null)
+            cameraManagement.enabled = false;
+
+        CameraController cameraController = FindObjectOfType<CameraController>();
+        if (cameraController != null)
+            cameraController.enabled = false;
+
+        if (playerCameraScript != null)
+            playerCameraScript.enabled = false;
+    }
+
+    private void EnableMainCameraSystems()
+    {
+        CameraSwitcher switcher = FindObjectOfType<CameraSwitcher>();
+        if (switcher != null)
+            switcher.enabled = true;
+
+        CameraManagement cameraManagement = FindObjectOfType<CameraManagement>();
+        if (cameraManagement != null)
+            cameraManagement.enabled = true;
+
+        CameraController cameraController = FindObjectOfType<CameraController>();
+        if (cameraController != null)
+            cameraController.enabled = true;
+
+        if (playerCameraScript != null)
+            playerCameraScript.enabled = true;
+    }
+
     private void ShowAvailableMails()
     {
         ClearAllLetters();
 
-        // Получаем доступные письма из TaskManager
         if (TaskManager.Instance != null && TaskManager.Instance.tasks.Count > 0)
         {
-            // Создаем копию списка, чтобы избежать модификации во время итерации
             var availableTasks = new List<Task>(TaskManager.Instance.tasks);
 
             foreach (var task in availableTasks)
             {
-                // Проверяем, не взято ли уже это письмо в инвентарь
                 if (!PlayerMailInventory.Instance.ContainsTask(task.id))
                 {
                     CreateMailUI(task);
@@ -178,7 +209,6 @@ public class DeskInteraction : MonoBehaviour
         var letter = Instantiate(letterPrefab, transform.GetChild(0).GetChild(0));
         letter.transform.localPosition = Vector3.zero;
 
-        // Настраиваем UI письма
         var drag = letter.GetComponent<DraggableUI>();
         if (drag != null)
         {
@@ -187,7 +217,6 @@ public class DeskInteraction : MonoBehaviour
             drag.address = task.adress;
         }
 
-        // Добавляем кнопку для взятия письма в инвентарь
         var button = letter.GetComponent<Button>();
         if (button == null)
             button = letter.AddComponent<Button>();
@@ -203,15 +232,11 @@ public class DeskInteraction : MonoBehaviour
         if (PlayerMailInventory.Instance != null)
         {
             PlayerMailInventory.Instance.AddMailToInventory(task);
-
-            // НЕМЕДЛЕННО удаляем письмо из UI стола
             RemoveMailFromUI(task.id);
-
             Debug.Log($"Письмо добавлено в инвентарь: {task.recieverName}");
         }
     }
 
-    // Новый метод для удаления письма из UI
     private void RemoveMailFromUI(string taskId)
     {
         for (int i = randomImages.Count - 1; i >= 0; i--)
