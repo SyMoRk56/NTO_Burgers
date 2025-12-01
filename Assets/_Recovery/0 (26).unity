@@ -4418,7 +4418,7 @@ MonoBehaviour:
     waitAfterWalk: {x: 1, y: 2}
     interactObject: {fileID: 0}
     interactionTrigger: 
-    interactionDistance: 0
+    interactionDistance: 1
     interactionDuration: 0
   - actionType: 1
     walkTarget: {fileID: 724754104}
@@ -4432,15 +4432,8 @@ MonoBehaviour:
     waitAfterWalk: {x: 1, y: 2}
     interactObject: {fileID: 0}
     interactionTrigger: 
-    interactionDistance: 0
+    interactionDistance: 1
     interactionDuration: 0
-  - actionType: 1
-    walkTarget: {fileID: 1549686241}
-    waitAfterWalk: {x: 1, y: 5}
-    interactObject: {fileID: 0}
-    interactionTrigger: isIdle
-    interactionDistance: 0
-    interactionDuration: 5
 --- !u!1001 &804734815
 PrefabInstance:
   m_ObjectHideFlags: 0

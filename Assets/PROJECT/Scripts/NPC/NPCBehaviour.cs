@@ -9,7 +9,7 @@ public class NPCBehaviour : MonoBehaviour
     [SerializeField] private Animator animator;
 
     [Header("Animation Parameters")]
-    [SerializeField] private string moveAnimParameter = "IsMoving";
+    [SerializeField] private string moveAnimParameter = "isMoving";
 
     [Header("Action Sequence")]
     [SerializeField] private NPCAction[] actions;
@@ -79,7 +79,7 @@ public class NPCBehaviour : MonoBehaviour
         agent.SetDestination(act.interactObject.position);
         animator.SetBool(moveAnimParameter, true);
 
-        while (Vector3.Distance(transform.position, act.interactObject.position) > act.interactionDistance)
+        while (Vector3.Distance(new Vector3(transform.position.x, 0, transform.position.z), new Vector3(act.interactObject.position.x, 0, act.interactObject.position.z)) > act.interactionDistance)
         {
             yield return null;
         }
