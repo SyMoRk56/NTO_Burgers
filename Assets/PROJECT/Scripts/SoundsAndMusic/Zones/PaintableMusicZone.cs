@@ -36,7 +36,7 @@ public class PaintableMusicZone : MonoBehaviour
         }
     }
 
-    // Алгоритм лучевого метода
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
     public bool IsPointInsidePolygon(Vector3 point)
     {
         int count = points.Count;
