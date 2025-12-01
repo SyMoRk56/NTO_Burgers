@@ -3,7 +3,7 @@
 public class PlayerInteraction : MonoBehaviour
 {
     public PlayerManager manager;
-
+    public AudioSource mailSource;
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.E))
@@ -36,6 +36,7 @@ public class PlayerInteraction : MonoBehaviour
 
                     box.Interact();
                     interactionHandled = true;
+                    mailSource.Play();
                     break;
                 }
             }

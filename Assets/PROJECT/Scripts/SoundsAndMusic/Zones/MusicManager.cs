@@ -50,7 +50,6 @@ public class MusicManager : MonoBehaviour
 
     public void PlayDefault()
     {
-        if (defaultMusic == null) return;
         PlayMusic(defaultMusic, null);
     }
 

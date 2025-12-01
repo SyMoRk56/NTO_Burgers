@@ -48,6 +48,13 @@ public class PlayerMovement : MonoBehaviour
     private Vector3 lastPosition;
     private Vector2 lastLookInput;
 
+    public AudioSource step, jump;
+    public void PlayStepSound()
+    {
+        if(isGrounded)
+        step.Play();
+    }
+
     void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -168,6 +175,8 @@ public class PlayerMovement : MonoBehaviour
 
         currentVelocity.y = rb.linearVelocity.y;
         rb.linearVelocity = currentVelocity;
+
+        animScript.anim.SetFloat("MoveSpeed", !isRunning ? 1 : runSpeed / walkSpeed);
     }
 
     void ApplyFriction()
@@ -210,6 +219,7 @@ public class PlayerMovement : MonoBehaviour
         float jumpPower = jumpForce * Mathf.Sqrt(mass / 70f);
         rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
         rb.AddForce(Vector3.up * jumpPower, ForceMode.Impulse);
+        jump.PlayScheduled(.34f);
     }
 
     float GetTargetSpeed()

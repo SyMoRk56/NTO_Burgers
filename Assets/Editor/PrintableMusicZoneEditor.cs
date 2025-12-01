@@ -3,7 +3,7 @@ using UnityEditor;
 using System.Collections.Generic;
 
 [CustomEditor(typeof(PaintableMusicZone))]
-public class BrushZoneEditor : Editor
+public class PrintableMusicZoneEditor : Editor
 {
     private bool paintMode;
 
@@ -44,6 +44,7 @@ public class BrushZoneEditor : Editor
             Ray ray = HandleUtility.GUIPointToWorldRay(e.mousePosition);
             if (Physics.Raycast(ray, out RaycastHit hit))
             {
+                Debug.Log("Add point");
                 Undo.RecordObject(zone, "Add Point");
                 zone.points.Add(hit.point);
                 e.Use();
