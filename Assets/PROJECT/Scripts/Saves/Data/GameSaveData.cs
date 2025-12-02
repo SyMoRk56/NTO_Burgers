@@ -6,11 +6,23 @@ public class GameSaveData
 {
     public PlayerData playerData;
     public MailSaveData mailData;
-
-    // ДОБАВЛЕНО: данные инвентаря игрока
     public InventorySaveData inventoryData;
-
     public string saveDate;
     public long timestamp;
     public float playtime;
+
+    // ДОБАВЛЕНО: данные туториала
+    public TutorialSaveData tutorialData;
+}
+
+// Новый класс для сохранения данных туториала
+[System.Serializable]
+public class TutorialSaveData
+{
+    public List<string> completedTutorialSteps;
+
+    public TutorialSaveData()
+    {
+        completedTutorialSteps = new List<string>();
+    }
 }

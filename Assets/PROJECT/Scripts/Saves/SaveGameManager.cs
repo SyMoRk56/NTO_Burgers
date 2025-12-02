@@ -3,6 +3,7 @@ using System.Security.Cryptography;
 using System.Text;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Collections.Generic;
 
 [System.Serializable]
 public class AutoSaveSlot
