@@ -1,11 +1,12 @@
 using UnityEngine;
+using Unity.Cinemachine;
 
 public class RotateToPlayer : MonoBehaviour
 {
     GameObject obj;
     private void Start()
     {
-        obj = GameManager.Instance.GetPlayer().transform.GetChild(0).gameObject;
+        obj = FindFirstObjectByType<CinemachineCamera>().gameObject;
     }
     private void Update()
     {

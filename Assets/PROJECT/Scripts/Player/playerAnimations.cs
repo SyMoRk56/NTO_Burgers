@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class playerAnimations : MonoBehaviour
 {    
-    private Animator anim;
+    public Animator anim;
     private void Awake()
     {
         anim = GetComponentInChildren<Animator>();
