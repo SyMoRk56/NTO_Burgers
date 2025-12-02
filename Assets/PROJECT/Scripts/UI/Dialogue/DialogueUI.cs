@@ -25,11 +25,21 @@ public class DialogueUI : MonoBehaviour
 
     public void ShowPhrase(string name, string text)
     {
+        // ОЧИЩАЕМ всё перед показом новой фразы
+        if (typeCoroutine != null)
+        {
+            StopCoroutine(typeCoroutine);
+            typeCoroutine = null;
+        }
+
         ClearChoices();
         gameObject.SetActive(true);
+
+        // Очищаем текст
+        phraseText.text = "";
         nameText.text = LocalizationManager.Instance.Get(name);
 
-        if (typeCoroutine != null) StopCoroutine(typeCoroutine);
+        // Запускаем печать текста
         typeCoroutine = StartCoroutine(TypeText(LocalizationManager.Instance.Get(text)));
     }
 
@@ -65,9 +75,49 @@ public class DialogueUI : MonoBehaviour
     public void Hide()
     {
         print("Hide dialogue");
+
+        // Останавливаем печать текста
+        if (typeCoroutine != null)
+        {
+            StopCoroutine(typeCoroutine);
+            typeCoroutine = null;
+        }
+
+        ClearChoices();
+        phraseText.text = "";
+        nameText.text = "";
         gameObject.SetActive(false);
+
         GameManager.Instance.GetPlayer().GetComponent<PlayerManager>().CanMove = true;
         GameManager.Instance.GetPlayer().GetComponent<PlayerManager>().ShowCursor(false);
+    }
+
+    // ДОБАВЛЕНО: метод для принудительного скрытия
+    public void ForceHide()
+    {
+        print("ForceHide dialogue");
+
+        if (typeCoroutine != null)
+        {
+            StopCoroutine(typeCoroutine);
+            typeCoroutine = null;
+        }
+
+        ClearChoices();
+        phraseText.text = "";
+        nameText.text = "";
+        gameObject.SetActive(false);
+
+        var player = GameManager.Instance.GetPlayer();
+        if (player != null)
+        {
+            var playerManager = player.GetComponent<PlayerManager>();
+            if (playerManager != null)
+            {
+                playerManager.CanMove = true;
+                playerManager.ShowCursor(false);
+            }
+        }
     }
 
     void ClearChoices()

@@ -18,8 +18,6 @@ public class DialogueRunner : MonoBehaviour
 
     bool isLetter;
     private bool isRunning;
-
-    // Флаг, указывающий, что сейчас показываются варианты выбора
     private bool isChoosing = false;
 
     void Update()
@@ -37,24 +35,45 @@ public class DialogueRunner : MonoBehaviour
         {
             NextPhrase();
         }
-
-        // Если показываются варианты - никакой автоматической обработки ввода
-        // Кнопки сами обработают нажатия через onClick
     }
 
     public void StartDialogue(bool letter)
     {
+        // ВАЖНО: сначала закрываем предыдущий диалог, если он активен
+        if (isRunning)
+        {
+            ForceCloseDialogue();
+        }
+
         if (!isRunning)
         {
             isLetter = letter;
             currentDialogueIndex = 0;
             currentPhraseIndex = 0;
             isChoosing = false;
+
+            // Проверяем, есть ли диалог для этого типа
+            var dialogues = letter ? letterDialogues : defaultDialogues;
+            if (dialogues.Length == 0)
+            {
+                Debug.LogError($"No dialogues found for type: letter={letter}");
+                return;
+            }
+
             dialogueUI.gameObject.SetActive(true);
             ShowCurrentPhrase();
             isRunning = true;
-            GameManager.Instance.GetPlayer().GetComponent<PlayerManager>().ShowCursor(true);
-            GameManager.Instance.GetPlayer().GetComponent<PlayerManager>().CanMove = false;
+
+            var player = GameManager.Instance.GetPlayer();
+            if (player != null)
+            {
+                var playerManager = player.GetComponent<PlayerManager>();
+                if (playerManager != null)
+                {
+                    playerManager.ShowCursor(true);
+                    playerManager.CanMove = false;
+                }
+            }
         }
     }
 
@@ -120,5 +139,34 @@ public class DialogueRunner : MonoBehaviour
         currentDialogueIndex = next;
         currentPhraseIndex = 0;
         ShowCurrentPhrase();
+    }
+
+    // ДОБАВЛЕНО: метод для принудительного закрытия диалога
+    public void ForceCloseDialogue()
+    {
+        if (!isRunning) return;
+
+        Debug.Log("Force closing dialogue");
+        isRunning = false;
+        isLetter = false;
+        isChoosing = false;
+        currentDialogueIndex = 0;
+        currentPhraseIndex = 0;
+
+        if (dialogueUI != null)
+            dialogueUI.ForceHide();
+    }
+
+    // ДОБАВЛЕНО: метод для сброса состояния
+    public void ResetDialogue()
+    {
+        isRunning = false;
+        isLetter = false;
+        isChoosing = false;
+        currentDialogueIndex = 0;
+        currentPhraseIndex = 0;
+
+        if (dialogueUI != null)
+            dialogueUI.ForceHide();
     }
 }

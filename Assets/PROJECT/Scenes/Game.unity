@@ -269,9 +269,81 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 31571366}
     - target: {fileID: 477202130241581328, guid: 4123bfbafa99b424b9ad77b25747a71a, type: 3}
-      propertyPath: 'defaultDialogues.Array.data[0]'
+      propertyPath: random
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 477202130241581328, guid: 4123bfbafa99b424b9ad77b25747a71a, type: 3}
+      propertyPath: ownerName
+      value: "\u0441\u0430\u0431\u0430\u043A\u0430 \u0430\u043B\u0435\u043A\u0441\u043D\u0434\u0440\u0440\u0440"
+      objectReference: {fileID: 0}
+    - target: {fileID: 477202130241581328, guid: 4123bfbafa99b424b9ad77b25747a71a, type: 3}
+      propertyPath: letterDialogues.Array.size
+      value: 14
+      objectReference: {fileID: 0}
+    - target: {fileID: 477202130241581328, guid: 4123bfbafa99b424b9ad77b25747a71a, type: 3}
+      propertyPath: defaultDialogues.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 477202130241581328, guid: 4123bfbafa99b424b9ad77b25747a71a, type: 3}
+      propertyPath: 'letterDialogues.Array.data[0]'
       value: 
       objectReference: {fileID: 11400000, guid: 3665a80ff2a316e45ae9dcd3b79a4225, type: 2}
+    - target: {fileID: 477202130241581328, guid: 4123bfbafa99b424b9ad77b25747a71a, type: 3}
+      propertyPath: 'letterDialogues.Array.data[1]'
+      value: 
+      objectReference: {fileID: 11400000, guid: da03b81bbe0136749bf6a90cb3f768ef, type: 2}
+    - target: {fileID: 477202130241581328, guid: 4123bfbafa99b424b9ad77b25747a71a, type: 3}
+      propertyPath: 'letterDialogues.Array.data[2]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 29180c39fc12b4540a58f48dad3a0fb9, type: 2}
+    - target: {fileID: 477202130241581328, guid: 4123bfbafa99b424b9ad77b25747a71a, type: 3}
+      propertyPath: 'letterDialogues.Array.data[3]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 66de088b8296be149993f50aa33a372e, type: 2}
+    - target: {fileID: 477202130241581328, guid: 4123bfbafa99b424b9ad77b25747a71a, type: 3}
+      propertyPath: 'letterDialogues.Array.data[4]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 0e03cef1bc7eb6143b03e0ba4a36d6b9, type: 2}
+    - target: {fileID: 477202130241581328, guid: 4123bfbafa99b424b9ad77b25747a71a, type: 3}
+      propertyPath: 'letterDialogues.Array.data[5]'
+      value: 
+      objectReference: {fileID: 11400000, guid: f82e48e3cfecc9049902af075d5ca88e, type: 2}
+    - target: {fileID: 477202130241581328, guid: 4123bfbafa99b424b9ad77b25747a71a, type: 3}
+      propertyPath: 'letterDialogues.Array.data[6]'
+      value: 
+      objectReference: {fileID: 11400000, guid: fc9de6493acfd2c43ad950148fe6158d, type: 2}
+    - target: {fileID: 477202130241581328, guid: 4123bfbafa99b424b9ad77b25747a71a, type: 3}
+      propertyPath: 'letterDialogues.Array.data[7]'
+      value: 
+      objectReference: {fileID: 11400000, guid: f2e5a6d216f1974408c9a175ffe669e3, type: 2}
+    - target: {fileID: 477202130241581328, guid: 4123bfbafa99b424b9ad77b25747a71a, type: 3}
+      propertyPath: 'letterDialogues.Array.data[8]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 99bd9d61d064c3b4da2de18f62a275b9, type: 2}
+    - target: {fileID: 477202130241581328, guid: 4123bfbafa99b424b9ad77b25747a71a, type: 3}
+      propertyPath: 'letterDialogues.Array.data[9]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 4b5d19a8f92f076459211f8e892f50c9, type: 2}
+    - target: {fileID: 477202130241581328, guid: 4123bfbafa99b424b9ad77b25747a71a, type: 3}
+      propertyPath: 'defaultDialogues.Array.data[0]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 0c8e8d22207f5a346ba459534bf2212b, type: 2}
+    - target: {fileID: 477202130241581328, guid: 4123bfbafa99b424b9ad77b25747a71a, type: 3}
+      propertyPath: 'letterDialogues.Array.data[10]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 094b63b599cb9df4ab4adc432e325462, type: 2}
+    - target: {fileID: 477202130241581328, guid: 4123bfbafa99b424b9ad77b25747a71a, type: 3}
+      propertyPath: 'letterDialogues.Array.data[11]'
+      value: 
+      objectReference: {fileID: 11400000, guid: e10bb2ea0de7024459801a673f6c194e, type: 2}
+    - target: {fileID: 477202130241581328, guid: 4123bfbafa99b424b9ad77b25747a71a, type: 3}
+      propertyPath: 'letterDialogues.Array.data[12]'
+      value: 
+      objectReference: {fileID: 11400000, guid: de1b5e3c3a81bb64b85098067d0d35a7, type: 2}
+    - target: {fileID: 477202130241581328, guid: 4123bfbafa99b424b9ad77b25747a71a, type: 3}
+      propertyPath: 'letterDialogues.Array.data[13]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 0c8e8d22207f5a346ba459534bf2212b, type: 2}
     - target: {fileID: 1680697255755912324, guid: 4123bfbafa99b424b9ad77b25747a71a, type: 3}
       propertyPath: m_Radius
       value: 0.6
@@ -316,6 +388,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3608569066453577613, guid: 4123bfbafa99b424b9ad77b25747a71a, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5182092201386522026, guid: 4123bfbafa99b424b9ad77b25747a71a, type: 3}
       propertyPath: m_fontColor.b
       value: 0.078431375
@@ -327,6 +403,18 @@ PrefabInstance:
     - target: {fileID: 5182092201386522026, guid: 4123bfbafa99b424b9ad77b25747a71a, type: 3}
       propertyPath: m_fontColor.r
       value: 0.078431375
+      objectReference: {fileID: 0}
+    - target: {fileID: 6432225289005757674, guid: 4123bfbafa99b424b9ad77b25747a71a, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 760.4795
+      objectReference: {fileID: 0}
+    - target: {fileID: 6432225289005757674, guid: 4123bfbafa99b424b9ad77b25747a71a, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6432225289005757674, guid: 4123bfbafa99b424b9ad77b25747a71a, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 380.23972
       objectReference: {fileID: 0}
     - target: {fileID: 6925332162127993816, guid: 4123bfbafa99b424b9ad77b25747a71a, type: 3}
       propertyPath: m_Name
@@ -383,6 +471,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 9037974743739519721, guid: 4123bfbafa99b424b9ad77b25747a71a, type: 3}
       insertIndex: -1
       addedObject: {fileID: 31571366}
+    - targetCorrespondingSourceObject: {fileID: 9037974743739519721, guid: 4123bfbafa99b424b9ad77b25747a71a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 31571368}
   m_SourcePrefab: {fileID: 100100000, guid: 4123bfbafa99b424b9ad77b25747a71a, type: 3}
 --- !u!1 &31571365 stripped
 GameObject:
@@ -406,6 +497,33 @@ MonoBehaviour:
   faces:
   - {fileID: 0}
   - {fileID: 0}
+--- !u!114 &31571367 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 477202130241581328, guid: 4123bfbafa99b424b9ad77b25747a71a, type: 3}
+  m_PrefabInstance: {fileID: 31571364}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 31571365}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8092978f730f5b443bc4f0910b43808c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DialogueRunner
+--- !u!114 &31571368
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 31571365}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67040f88a13bf5749b7c7be6485d4095, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mailboxAddress: post2
+  dialogueRunner: {fileID: 31571367}
+  triggerDialogueAfterDelivery: 1
+  dialogueDelay: 0.3
 --- !u!1 &36627302
 GameObject:
   m_ObjectHideFlags: 0
@@ -2085,6 +2203,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MailBox
   mailboxAddress: post1
+  dialogueRunner: {fileID: 0}
+  triggerDialogueAfterDelivery: 1
+  dialogueDelay: 0.3
 --- !u!1001 &376032391
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6431,7 +6552,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2172257634138948764, guid: 5eb9e2fc09fc8f04cb178e9cda743cfa, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 95.6
+      value: 84.7
       objectReference: {fileID: 0}
     - target: {fileID: 2172257634138948764, guid: 5eb9e2fc09fc8f04cb178e9cda743cfa, type: 3}
       propertyPath: m_LocalRotation.w
@@ -6517,6 +6638,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MailBox
   mailboxAddress: post2
+  dialogueRunner: {fileID: 0}
+  triggerDialogueAfterDelivery: 1
+  dialogueDelay: 0.3
 --- !u!65 &1052682330
 BoxCollider:
   m_ObjectHideFlags: 0
