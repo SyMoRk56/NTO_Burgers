@@ -14,9 +14,32 @@ public class DialogueRunner : MonoBehaviour
 
     public Face face;
 
-    void Start()
+    public bool IsDialogueActive => isRunning;
+
+    bool isLetter;
+    private bool isRunning;
+
+    // Флаг, указывающий, что сейчас показываются варианты выбора
+    private bool isChoosing = false;
+
+    void Update()
     {
-        
+        if (!isRunning) return;
+
+        // Проверяем, показываются ли сейчас варианты выбора
+        var block = isLetter ? letterDialogues[currentDialogueIndex] : defaultDialogues[currentDialogueIndex];
+        bool isAtChoicePoint = currentPhraseIndex >= block.phrases.Length;
+
+        // Если показывается текст - Space/E/клик для продолжения
+        if (!isChoosing && !isAtChoicePoint && (Input.GetKeyDown(KeyCode.Space) ||
+            Input.GetKeyDown(KeyCode.E) ||
+            Input.GetMouseButtonDown(0)))
+        {
+            NextPhrase();
+        }
+
+        // Если показываются варианты - никакой автоматической обработки ввода
+        // Кнопки сами обработают нажатия через onClick
     }
 
     public void StartDialogue(bool letter)
@@ -26,34 +49,38 @@ public class DialogueRunner : MonoBehaviour
             isLetter = letter;
             currentDialogueIndex = 0;
             currentPhraseIndex = 0;
+            isChoosing = false;
             dialogueUI.gameObject.SetActive(true);
             ShowCurrentPhrase();
             isRunning = true;
             GameManager.Instance.GetPlayer().GetComponent<PlayerManager>().ShowCursor(true);
             GameManager.Instance.GetPlayer().GetComponent<PlayerManager>().CanMove = false;
-
         }
-        
     }
 
     void ShowCurrentPhrase()
     {
+        isChoosing = false;
         print(currentDialogueIndex);
         var block = isLetter ? letterDialogues[currentDialogueIndex] : defaultDialogues[currentDialogueIndex];
 
         if (currentPhraseIndex < block.phrases.Length)
         {
-            dialogueUI.ShowPhrase(ownerName, block.phrases[currentPhraseIndex], (block.voiceOver != null) ? (block.voiceOver.Length == 0 || currentDialogueIndex >= block.voiceOver.Length) ? null : block.voiceOver[currentDialogueIndex] : null);
-            if(face != null)
+            dialogueUI.ShowPhrase(ownerName, block.phrases[currentPhraseIndex]);
+
+            if (face != null)
             {
-                if(block.emotions.Count != 0 || currentDialogueIndex < block.emotions.Count)
+                if (block.emotions.Count != 0 || currentDialogueIndex < block.emotions.Count)
                 {
                     face.SetFace(block.emotions[currentDialogueIndex]);
                 }
             }
         }
         else
+        {
+            isChoosing = true;
             dialogueUI.ShowChoices(block.choices);
+        }
     }
 
     public void NextPhrase()
@@ -65,11 +92,15 @@ public class DialogueRunner : MonoBehaviour
         if (currentPhraseIndex < block.phrases.Length)
             ShowCurrentPhrase();
         else
+        {
+            isChoosing = true;
             dialogueUI.ShowChoices(block.choices);
+        }
     }
 
     public void Choose(int index)
     {
+        isChoosing = false;
         var block = isLetter ? letterDialogues[currentDialogueIndex] : defaultDialogues[currentDialogueIndex];
 
         if (index < 0 || index >= block.choices.Length) return;
@@ -90,9 +121,4 @@ public class DialogueRunner : MonoBehaviour
         currentPhraseIndex = 0;
         ShowCurrentPhrase();
     }
-    bool isLetter;
-    private bool isRunning;
-
-   
-
 }

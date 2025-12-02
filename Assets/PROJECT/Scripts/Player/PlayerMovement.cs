@@ -20,10 +20,9 @@ public class PlayerMovement : MonoBehaviour
 
     public playerAnimations animScript;
 
-
-    public float idleTimeThreshold = 60f; // 1 минута
-    public ParticleSystem idleVFX; // Ссылка на VFX компонент
-    public Transform vfxSpawnPoint; // Точка появления VFX (опционально)
+    public float idleTimeThreshold = 60f;
+    public ParticleSystem idleVFX;
+    public Transform vfxSpawnPoint;
 
     private Rigidbody rb;
     private CapsuleCollider col;
@@ -42,7 +41,6 @@ public class PlayerMovement : MonoBehaviour
 
     public Transform forwardVector;
 
-    // Переменные для отслеживания бездействия
     private float idleTimer = 0f;
     private bool isIdleVFXActive = false;
     private Vector3 lastPosition;
@@ -62,11 +60,9 @@ public class PlayerMovement : MonoBehaviour
         if (cameraTransform == null)
             cameraTransform = Camera.main.transform;
 
-        // Инициализация отслеживания бездействия
         lastPosition = transform.position;
         lastLookInput = Vector2.zero;
 
-        // Выключаем VFX на старте
         if (idleVFX != null && idleVFX.isPlaying)
             idleVFX.Stop();
     }
@@ -75,7 +71,9 @@ public class PlayerMovement : MonoBehaviour
     {
         if (!manager.CanMove)
         {
-            animScript.HeroWalkAnim();
+            // ИСПРАВЛЕНО: при диалоге или других ситуациях, когда движение заблокировано, 
+            // проигрываем анимацию idle
+            animScript.HeroIdleAnim();
             ResetIdleTimer();
             return;
         }
@@ -87,7 +85,7 @@ public class PlayerMovement : MonoBehaviour
         if (isGrounded && Keyboard.current.spaceKey.wasPressedThisFrame)
         {
             jumpRequested = true;
-            ResetIdleTimer(); // Сброс таймера при прыжке
+            ResetIdleTimer();
         }
     }
 
@@ -128,9 +126,9 @@ public class PlayerMovement : MonoBehaviour
             animScript.HeroWalkAnim();
         }
 
-        if (Keyboard.current.dKey.isPressed) 
+        if (Keyboard.current.dKey.isPressed)
         {
-            moveInput.x += 1; 
+            moveInput.x += 1;
             animScript.HeroWalkAnim();
         }
 
@@ -143,18 +141,15 @@ public class PlayerMovement : MonoBehaviour
 
     void HandleLook()
     {
-        //xRotation -= lookInput.y;
-        //xRotation = Mathf.Clamp(xRotation, -maxViewAngle, maxViewAngle);
-
-        //cameraTransform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
-
-        //transform.Rotate(Vector3.up * lookInput.x);
+        // Камера остается как есть
+        // xRotation -= lookInput.y;
+        // xRotation = Mathf.Clamp(xRotation, -maxViewAngle, maxViewAngle);
+        // cameraTransform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+        // transform.Rotate(Vector3.up * lookInput.x);
     }
 
     void HandleMovement()
     {
-
-
         Vector3 wishDir = (forwardVector.forward * moveInput.y + forwardVector.right * moveInput.x).normalized;
 
         float targetSpeed = GetTargetSpeed();
@@ -224,10 +219,8 @@ public class PlayerMovement : MonoBehaviour
         return baseSpeed * massSpeedFactor;
     }
 
-    // Методы для отслеживания бездействия и управления VFX
     void UpdateIdleTimer()
     {
-        // Проверяем движение и вращение
         bool isMoving = moveInput != Vector2.zero ||
                        transform.position != lastPosition ||
                        lookInput != Vector2.zero;
@@ -248,7 +241,6 @@ public class PlayerMovement : MonoBehaviour
             }
         }
 
-        // Сохраняем текущие значения для следующего кадра
         lastPosition = transform.position;
         lastLookInput = lookInput;
     }
@@ -267,7 +259,6 @@ public class PlayerMovement : MonoBehaviour
     {
         if (idleVFX != null)
         {
-            // Устанавливаем позицию VFX если указана точка спавна
             if (vfxSpawnPoint != null)
             {
                 idleVFX.transform.position = vfxSpawnPoint.position;

@@ -17,7 +17,13 @@ public class PauseMenu : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            // Проверяем, не находимся ли мы в UI стола
+            // Сначала проверяем активные диалоги
+            if (IsAnyDialogueActive())
+            {
+                return; // Не открывать паузу во время диалога
+            }
+
+            // Затем проверяем UI стола
             if (IsInTableUI()) return;
 
             if (PauseGame) Resume();
@@ -25,10 +31,23 @@ public class PauseMenu : MonoBehaviour
         }
     }
 
+    // Метод для проверки активных диалогов
+    private bool IsAnyDialogueActive()
+    {
+        DialogueRunner[] dialogueRunners = FindObjectsOfType<DialogueRunner>();
+        foreach (DialogueRunner runner in dialogueRunners)
+        {
+            if (runner.IsDialogueActive)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     // Метод для проверки, находится ли игрок в UI стола
     private bool IsInTableUI()
     {
-        // Ищем все объекты DeskInteraction в сцене
         DeskInteraction[] desks = FindObjectsOfType<DeskInteraction>();
         foreach (DeskInteraction desk in desks)
         {
@@ -71,19 +90,14 @@ public class PauseMenu : MonoBehaviour
             return;
         }
 
-        // Проверяем, существует ли слот
         bool exists = SaveGameManager.Instance.HasManual(slotName);
 
-        // Если слота нет — создаём новый
         if (!exists)
         {
             Debug.Log("SaveToSlot: Slot does not exist, creating -> " + slotName);
         }
 
-        // Выставляем активный слот
         GameManager.Instance.currentManualSlot = slotName;
-
-        // Сохраняем (создаст новый файл)
         SaveGameManager.Instance.SaveManual(slotName);
 
         Debug.Log("PauseMenu: Saved to slot -> " + slotName);

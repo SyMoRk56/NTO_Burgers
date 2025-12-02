@@ -29,23 +29,18 @@ public class CameraSwitcher : MonoBehaviour
         renderer.enabled = !firstPerson;
         if (firstPerson)
         {
-            // Enable first-person camera
             firstPersonCamera.gameObject.SetActive(true);
-            
-            // Disable Cinemachine
             thirdPersonCamera.Priority = 0;
             rot.enabled = false;
         }
         else
         {
-            // Disable first-person camera
             firstPersonCamera.gameObject.SetActive(false);
-
-            // Enable Cinemachine
             thirdPersonCamera.Priority = 10;
             rot.enabled = true;
         }
     }
+
     private void Update()
     {
 #if UNITY_EDITOR
