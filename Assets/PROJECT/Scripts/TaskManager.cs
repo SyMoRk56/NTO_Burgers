@@ -18,6 +18,11 @@ public class TaskManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
+        var m = Resources.LoadAll<MailCatalog>("");
+        foreach(var n in m[0].mails)
+        {
+            tasks.Add(new Task(n.reciever, n.adress, n.id));
+        }
     }
 
     public void AddTask(string recieverName, string adress, string id)

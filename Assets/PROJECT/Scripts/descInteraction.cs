@@ -187,15 +187,18 @@ public class DeskInteraction : MonoBehaviour
     private void ShowAvailableMails()
     {
         ClearAllLetters();
-
+        print("SHOW AVIA");
         if (TaskManager.Instance != null && TaskManager.Instance.tasks.Count > 0)
         {
+            print(1);
             var availableTasks = new List<Task>(TaskManager.Instance.tasks);
 
             foreach (var task in availableTasks)
             {
+                print(task.adress);
                 if (!PlayerMailInventory.Instance.ContainsTask(task.id))
                 {
+                    print("1123;");
                     CreateMailUI(task);
                 }
             }
