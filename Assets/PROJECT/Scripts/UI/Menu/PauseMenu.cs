@@ -98,8 +98,7 @@ public class PauseMenu : MonoBehaviour
         }
 
         GameManager.Instance.currentManualSlot = slotName;
-        SaveGameManager.Instance.SaveManual(slotName);
-
+        SaveGameManager.Instance.SaveAuto(true);
         Debug.Log("PauseMenu: Saved to slot -> " + slotName);
         Setup();
     }
