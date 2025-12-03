@@ -37,8 +37,7 @@ public class FlowerTriggerHandler : MonoBehaviour
         }
 
         // Находим DialogueRunner
-        dialogueRunner = FindObjectOfType<DialogueRunner>();
-
+        dialogueRunner = GetComponent<DialogueRunner>();
         // Находим VFX для чихания
         if (autoFindVFX)
         {
@@ -81,10 +80,12 @@ public class FlowerTriggerHandler : MonoBehaviour
 
     void CheckDialogueStatus()
     {
+        print(1);
         if (sequenceTriggered || dialogueRunner == null) return;
-
         // Проверяем, активен ли диалог
+        print(dialogueRunner.gameObject.name);
         bool isDialogueActive = dialogueRunner.IsDialogueActive;
+        print(2 + (dialogueWasActiveLastFrame).ToString() + isDialogueActive.ToString());
 
         // Сохраняем состояние в статической переменной
         if (!dialogueWasActiveLastFrame && isDialogueActive)
@@ -94,6 +95,7 @@ public class FlowerTriggerHandler : MonoBehaviour
         }
         else if (dialogueWasActiveLastFrame && !isDialogueActive)
         {
+            print("ENDED");
             // Диалог только что завершился
             float dialogueDuration = Time.time - dialogueStartTime;
 
