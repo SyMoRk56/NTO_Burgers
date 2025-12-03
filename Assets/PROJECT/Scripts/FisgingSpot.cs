@@ -129,14 +129,12 @@ public class FishingSpot : MonoBehaviour
             spawnedFish.transform.localPosition = Vector3.up * 2f;
             Debug.Log("FishingSpot: Рыба появилась у игрока");
 
-            // Ждем 2 секунды
-            yield return new WaitForSeconds(fishAttachTime);
-
-            // Уничтожаем рыбу
-            Destroy(spawnedFish);
-            Debug.Log("FishingSpot: Рыба исчезла");
+            // Теперь НИКАКОГО Destroy(spawnedFish)!
+            // Рыба должна остаться до прихода NPC
+            yield return null;
         }
     }
+
 
     IEnumerator SpawnNPCAndWait()
     {
@@ -167,6 +165,18 @@ public class FishingSpot : MonoBehaviour
             // Ждем, пока NPC подойдет к игроку
             yield return new WaitUntil(() => currentNPC.HasReachedPlayer());
             Debug.Log("FishingSpot: NPC подошел к игроку");
+
+            // ============================
+            //     ВОТ СЮДА ВСТАВЛЯТЬ !!!
+            // ============================
+
+            // === УДАЛЯЕМ РЫБУ ТОЛЬКО СЕЙЧАС ===
+            if (spawnedFish != null)
+            {
+                Destroy(spawnedFish);
+                spawnedFish = null;
+                Debug.Log("FishingSpot: Рыба забрана NPC");
+            }
         }
 
         // 4. NPC стоит 5 секунд
@@ -187,6 +197,7 @@ public class FishingSpot : MonoBehaviour
             Debug.Log("FishingSpot: Движение игрока восстановлено");
         }
     }
+
 
     IEnumerator TestFullSequence()
     {

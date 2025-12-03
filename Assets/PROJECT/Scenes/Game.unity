@@ -1904,7 +1904,7 @@ Transform:
   m_GameObject: {fileID: 270933141}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -123.9, y: 0, z: 4.5}
+  m_LocalPosition: {x: -7.27, y: -0.4, z: 33}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -9109,9 +9109,9 @@ MonoBehaviour:
   fishingUI: {fileID: 1689928899}
   fishPrefab: {fileID: 9170475284647827352, guid: 9666e09ed6486b7469c920a15961f222, type: 3}
   npcPrefab: {fileID: 8498948708426339669, guid: b4fa8e1afcbe98c46b85d035dcc6979d, type: 3}
-  successChance: 0.8
-  npcSpawnChance: 0.2
-  npcSpawnPoint: {fileID: 0}
+  successChance: 1
+  npcSpawnChance: 1
+  npcSpawnPoint: {fileID: 270933142}
   fishingTime: 2
   fishAttachTime: 2
   npcWaitTime: 5
@@ -11029,11 +11029,11 @@ GameObject:
   - component: {fileID: 1824064071}
   m_Layer: 0
   m_Name: Particle System (1)
-  m_TagString: Untagged
+  m_TagString: snezy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1824064070
 Transform:
   m_ObjectHideFlags: 0
@@ -11262,7 +11262,7 @@ ParticleSystem:
     startSpeed:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 1
+      scalar: 3
       minScalar: 5
       maxCurve:
         serializedVersion: 2
@@ -11380,7 +11380,7 @@ ParticleSystem:
     startSize:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 1
+      scalar: 0.2
       minScalar: 1
       maxCurve:
         serializedVersion: 2

@@ -38,23 +38,18 @@ public class FlowerTriggerHandler : MonoBehaviour
 
         // Находим DialogueRunner
         dialogueRunner = GetComponent<DialogueRunner>();
-        // Находим VFX для чихания
+        // Находим VFX для чихания по тегу
         if (autoFindVFX)
         {
-            ParticleSystem[] allVFX = FindObjectsOfType<ParticleSystem>();
-            foreach (ParticleSystem vfx in allVFX)
-            {
-                if (vfx.name.Contains("Sneeze") || vfx.name.Contains("sneeze"))
-                {
-                    sneezeVFX = vfx;
-                    break;
-                }
-            }
+            GameObject taggedObj = GameObject.FindGameObjectWithTag("snezy");
 
-            // Если не нашли по имени, берем первый попавшийся
-            if (sneezeVFX == null && allVFX.Length > 0)
+            if (taggedObj != null)
             {
-                sneezeVFX = allVFX[0];
+                sneezeVFX = taggedObj.GetComponent<ParticleSystem>();
+            }
+            else
+            {
+                Debug.LogWarning("Объект с тегом 'snezy' не найден!");
             }
         }
 
@@ -63,6 +58,7 @@ public class FlowerTriggerHandler : MonoBehaviour
         {
             sneezeVFX.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
         }
+
     }
 
     void Update()
