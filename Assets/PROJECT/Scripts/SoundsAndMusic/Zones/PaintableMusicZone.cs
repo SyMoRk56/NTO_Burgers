@@ -24,7 +24,9 @@ public class PaintableMusicZone : MonoBehaviour
         {
             if (zone.IsPointInsidePolygon(playerPos))
             {
-                MusicManager.Instance.PlayMusic(zone.music, zone.mixer);
+                if (zone.mixer == null)
+                    MusicManager.Instance.PlayMusic(zone.music);
+                else MusicManager.Instance.PlayMusic(zone.mixer);
                 insideAnyZone = true;
                 break;
             }
