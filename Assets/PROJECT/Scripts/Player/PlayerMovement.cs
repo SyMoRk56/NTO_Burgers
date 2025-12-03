@@ -49,14 +49,127 @@ public class PlayerMovement : MonoBehaviour
     private Vector2 lastLookInput;
 
     public AudioSource step, jump;
+
+    [Header("Footstep Sounds")]
+    public AudioClip[] grassSteps;
+    public AudioClip[] woodSteps;
+    public AudioClip[] stoneSteps;
+
+    public float stepInterval = 0.45f; // задержка между шагами
+    private float stepTimer = 0f;
+
+    private Terrain terrain;
+    private TerrainData terrainData;
+    public AudioClip defaultStepSound;
     public void PlayStepSound()
     {
-        if(isGrounded)
-        step.Play();
+        if (!isGrounded)
+            return;
+
+        // Проверка поверхности под ногами
+        if (TryGetGroundCollider(out Collider ground))
+        {
+            // Если это Terrain
+            if (ground is TerrainCollider)
+            {
+                AudioClip clip = GetFootstepSound();
+                if (clip != null)
+                {
+                    step.PlayOneShot(clip, 1f);
+                    return;
+                }
+            }
+        }
+
+        // Если НЕ террейн — играем другой звук
+        if (defaultStepSound != null)
+            step.PlayOneShot(defaultStepSound, 1f);
+    }
+    private bool TryGetGroundCollider(out Collider col)
+    {
+        col = null;
+
+        float rayLength = 2 * 0.6f + 0.3f;
+        Vector3 start = transform.position + Vector3.up * 0.1f;
+
+        if (Physics.Raycast(start, Vector3.down, out RaycastHit hit, rayLength))
+        {
+            col = hit.collider;
+            return true;
+        }
+
+        return false;
+    }
+
+
+    private AudioClip GetFootstepSound()
+    {
+        int tex = GetMainTexture(transform.position);
+
+        AudioClip[] targetArray = null;
+
+        switch (tex)
+        {
+            case 1: // Sand / Wood
+                targetArray = woodSteps;
+                break;
+
+            case 2: // Grass
+                targetArray = grassSteps;
+                break;
+
+            case 3: // Stone
+                targetArray = stoneSteps;
+                break;
+
+            // 0 — пустой террейн: можно возвращать null или подставлять дефолтный звук
+            case 0:
+            default:
+                return null;
+        }
+
+        if (targetArray == null || targetArray.Length == 0)
+            return null;
+
+        return targetArray[Random.Range(0, targetArray.Length)];
+    }
+
+
+    private int GetMainTexture(Vector3 worldPos)
+    {
+        if (terrainData == null) return 0;
+
+        Vector3 terrainPos = worldPos - terrain.transform.position;
+
+        float x = terrainPos.x / terrainData.size.x;
+        float z = terrainPos.z / terrainData.size.z;
+
+        int mapX = Mathf.Clamp((int)(x * terrainData.alphamapWidth), 0, terrainData.alphamapWidth - 1);
+        int mapZ = Mathf.Clamp((int)(z * terrainData.alphamapHeight), 0, terrainData.alphamapHeight - 1);
+
+        float[,,] splatmap = terrainData.GetAlphamaps(mapX, mapZ, 1, 1);
+
+        int best = 0;
+        float max = 0f;
+
+        for (int i = 0; i < splatmap.GetLength(2); i++)
+        {
+            if (splatmap[0, 0, i] > max)
+            {
+                best = i;
+                max = splatmap[0, 0, i];
+            }
+        }
+
+        return best;
     }
 
     void Start()
     {
+        terrain = Terrain.activeTerrain;
+        if (terrain != null)
+            terrainData = terrain.terrainData;
+
         rb = GetComponent<Rigidbody>();
         col = GetComponent<CapsuleCollider>();
         animScript = GetComponent<playerAnimations>();
@@ -82,7 +195,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (!manager.CanMove)
         {
-            animScript.HeroWalkAnim();
+            animScript.HeroIdleAnim();
             ResetIdleTimer();
             return;
         }
@@ -96,8 +209,12 @@ public class PlayerMovement : MonoBehaviour
             jumpRequested = true;
             ResetIdleTimer(); // Сброс таймера при прыжке
         }
-    }
 
+    }
+    private void OnDisable()
+    {
+        animScript.HeroIdleAnim();
+    }
     void FixedUpdate()
     {
         if (!manager.CanMove || !GameManager.Instance.isGameGoing)
@@ -219,7 +336,7 @@ public class PlayerMovement : MonoBehaviour
         float jumpPower = jumpForce * Mathf.Sqrt(mass / 70f);
         rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
         rb.AddForce(Vector3.up * jumpPower, ForceMode.Impulse);
-        jump.PlayScheduled(.34f);
+        jump.PlayScheduled(.5f);
     }
 
     float GetTargetSpeed()

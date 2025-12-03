@@ -4,8 +4,10 @@ public class PlayerInteraction : MonoBehaviour
 {
     public PlayerManager manager;
     public AudioSource mailSource;
+    public PlayerMovement mov;
     private void Update()
     {
+        if (!manager.CanMove) return;
         if (Input.GetKeyDown(KeyCode.E))
         {
             Collider[] hits = Physics.OverlapSphere(transform.position, GameConfig.interactionRange);
@@ -50,6 +52,8 @@ public class PlayerInteraction : MonoBehaviour
 
                 if (hit.CompareTag("Dialog"))
                 {
+                    mov.animScript.HeroIdleAnim();
+
                     Debug.Log("Взаимодействие с диалогом");
                     hit.GetComponent<DialogueRunner>().StartDialogue(false);
                     interactionHandled = true;

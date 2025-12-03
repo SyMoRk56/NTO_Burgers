@@ -20,9 +20,18 @@ public class playerAnimations : MonoBehaviour
         State = States.idle;
     }
 
-    public void HeroWalkAnim() { State = States.walk; }
+    public void HeroWalkAnim() { print("SET WALK"); State = States.walk; }
 
     public void HeroJumpAnim() { State = States.jump; }
+
+    public void DelaySetStateIdle()
+    {
+
+    }
+    void S()
+    {
+        State = States.idle;
+    }
 }
 
 public enum States
