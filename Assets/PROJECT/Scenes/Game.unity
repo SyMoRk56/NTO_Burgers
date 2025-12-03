@@ -4150,6 +4150,34 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 936709233368181333, guid: 0910cd8d95f59a742a5e020e2f8b9ddb, type: 3}
+      propertyPath: defaultStepSound
+      value: 
+      objectReference: {fileID: 8300000, guid: b62eca4217454e94fb49c0340c48b7c4, type: 3}
+    - target: {fileID: 936709233368181333, guid: 0910cd8d95f59a742a5e020e2f8b9ddb, type: 3}
+      propertyPath: woodSteps.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 936709233368181333, guid: 0910cd8d95f59a742a5e020e2f8b9ddb, type: 3}
+      propertyPath: grassSteps.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 936709233368181333, guid: 0910cd8d95f59a742a5e020e2f8b9ddb, type: 3}
+      propertyPath: stoneSteps.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 936709233368181333, guid: 0910cd8d95f59a742a5e020e2f8b9ddb, type: 3}
+      propertyPath: 'woodSteps.Array.data[0]'
+      value: 
+      objectReference: {fileID: 8300000, guid: b62eca4217454e94fb49c0340c48b7c4, type: 3}
+    - target: {fileID: 936709233368181333, guid: 0910cd8d95f59a742a5e020e2f8b9ddb, type: 3}
+      propertyPath: 'grassSteps.Array.data[0]'
+      value: 
+      objectReference: {fileID: 8300000, guid: 8b0f1505301c2664d805e41c5a0fd152, type: 3}
+    - target: {fileID: 936709233368181333, guid: 0910cd8d95f59a742a5e020e2f8b9ddb, type: 3}
+      propertyPath: 'stoneSteps.Array.data[0]'
+      value: 
+      objectReference: {fileID: 8300000, guid: 779d44aa435f766458cb0ecfc4aee82d, type: 3}
     - target: {fileID: 6799889744852767885, guid: 0910cd8d95f59a742a5e020e2f8b9ddb, type: 3}
       propertyPath: m_Name
       value: PlayerAndCamera
