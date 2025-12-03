@@ -82,7 +82,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (!manager.CanMove)
         {
-            animScript.HeroWalkAnim();
+            animScript.HeroIdleAnim();
             ResetIdleTimer();
             return;
         }
@@ -96,8 +96,12 @@ public class PlayerMovement : MonoBehaviour
             jumpRequested = true;
             ResetIdleTimer(); // Сброс таймера при прыжке
         }
-    }
 
+    }
+    private void OnDisable()
+    {
+        animScript.HeroIdleAnim();
+    }
     void FixedUpdate()
     {
         if (!manager.CanMove || !GameManager.Instance.isGameGoing)

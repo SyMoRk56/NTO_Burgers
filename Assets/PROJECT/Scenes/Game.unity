@@ -4154,6 +4154,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: PlayerAndCamera
       objectReference: {fileID: 0}
+    - target: {fileID: 8258321718247822341, guid: 0910cd8d95f59a742a5e020e2f8b9ddb, type: 3}
+      propertyPath: mov
+      value: 
+      objectReference: {fileID: 785407981}
     - target: {fileID: 8258953086909395393, guid: 0910cd8d95f59a742a5e020e2f8b9ddb, type: 3}
       propertyPath: m_LocalPosition.x
       value: 65.03
@@ -4231,6 +4235,17 @@ Camera:
   m_CorrespondingSourceObject: {fileID: 7014738891391277496, guid: 0910cd8d95f59a742a5e020e2f8b9ddb, type: 3}
   m_PrefabInstance: {fileID: 785407976}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &785407981 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 936709233368181333, guid: 0910cd8d95f59a742a5e020e2f8b9ddb, type: 3}
+  m_PrefabInstance: {fileID: 785407976}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1ec1f5bad7b0b347a6c3962e7bc7022, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
 --- !u!1 &791420724
 GameObject:
   m_ObjectHideFlags: 0
