@@ -13,7 +13,9 @@ MonoBehaviour:
   m_Name: dog_1 6
   m_EditorClassIdentifier: Assembly-CSharp::DialogueScriptableObject
   phrases:
-  - dia_1_dog_phr_1_2_2
+  - dia_1_dog_phr_1_1_1_2
+  voiceOver: []
   choices:
-  - text: dia_1_ans_2_2_1
-    nextDialogueIndex: 13
+  - text: ...
+    nextDialogueIndex: -1
+  emotions: 

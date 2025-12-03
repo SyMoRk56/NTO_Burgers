@@ -228,11 +228,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 477202130241581328, guid: 4123bfbafa99b424b9ad77b25747a71a, type: 3}
       propertyPath: ownerName
-      value: "\u0441\u0430\u0431\u0430\u043A\u0430 \u0430\u043B\u0435\u043A\u0441\u043D\u0434\u0440\u0440\u0440"
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 477202130241581328, guid: 4123bfbafa99b424b9ad77b25747a71a, type: 3}
       propertyPath: letterDialogues.Array.size
-      value: 14
+      value: 15
       objectReference: {fileID: 0}
     - target: {fileID: 477202130241581328, guid: 4123bfbafa99b424b9ad77b25747a71a, type: 3}
       propertyPath: defaultDialogues.Array.size
@@ -296,6 +296,10 @@ PrefabInstance:
       objectReference: {fileID: 11400000, guid: de1b5e3c3a81bb64b85098067d0d35a7, type: 2}
     - target: {fileID: 477202130241581328, guid: 4123bfbafa99b424b9ad77b25747a71a, type: 3}
       propertyPath: 'letterDialogues.Array.data[13]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 0c8e8d22207f5a346ba459534bf2212b, type: 2}
+    - target: {fileID: 477202130241581328, guid: 4123bfbafa99b424b9ad77b25747a71a, type: 3}
+      propertyPath: 'letterDialogues.Array.data[14]'
       value: 
       objectReference: {fileID: 11400000, guid: 0c8e8d22207f5a346ba459534bf2212b, type: 2}
     - target: {fileID: 1680697255755912324, guid: 4123bfbafa99b424b9ad77b25747a71a, type: 3}
@@ -3019,7 +3023,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 5570392111569664945, guid: e1f5c7a418122f14aa07c9ded9d04dbd, type: 3}
       propertyPath: tasks.Array.size
-      value: 2
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5570392111569664945, guid: e1f5c7a418122f14aa07c9ded9d04dbd, type: 3}
       propertyPath: tasks.Array.data[0].id
@@ -4252,7 +4256,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7762256097630750453, guid: a3223bef488f5db45b1d05b4ebd4c961, type: 3}
       propertyPath: letterDialogues.Array.size
-      value: 20
+      value: 17
       objectReference: {fileID: 0}
     - target: {fileID: 7762256097630750453, guid: a3223bef488f5db45b1d05b4ebd4c961, type: 3}
       propertyPath: defaultDialogues.Array.size
@@ -4261,83 +4265,83 @@ PrefabInstance:
     - target: {fileID: 7762256097630750453, guid: a3223bef488f5db45b1d05b4ebd4c961, type: 3}
       propertyPath: 'letterDialogues.Array.data[0]'
       value: 
-      objectReference: {fileID: 11400000, guid: 18333aef692d8b642bd801aef164f917, type: 2}
+      objectReference: {fileID: 11400000, guid: ab935fd4ea9739b408eafbc3a15b94f9, type: 2}
     - target: {fileID: 7762256097630750453, guid: a3223bef488f5db45b1d05b4ebd4c961, type: 3}
       propertyPath: 'letterDialogues.Array.data[1]'
       value: 
-      objectReference: {fileID: 11400000, guid: bdda6ae3295cd8c41877b1b8a544c913, type: 2}
+      objectReference: {fileID: 11400000, guid: 65e042f1a63fb3f4d877febcee003682, type: 2}
     - target: {fileID: 7762256097630750453, guid: a3223bef488f5db45b1d05b4ebd4c961, type: 3}
       propertyPath: 'letterDialogues.Array.data[2]'
       value: 
-      objectReference: {fileID: 11400000, guid: 40018ecafeaa2394c8d10e1fb37665dc, type: 2}
+      objectReference: {fileID: 11400000, guid: 9af90bef5d37ec1488a664857faa5d2c, type: 2}
     - target: {fileID: 7762256097630750453, guid: a3223bef488f5db45b1d05b4ebd4c961, type: 3}
       propertyPath: 'letterDialogues.Array.data[3]'
       value: 
-      objectReference: {fileID: 11400000, guid: 7360dd8ec5ae89841b5768db4d606a38, type: 2}
+      objectReference: {fileID: 11400000, guid: 23b12dcc044ae7d44bb8cb66eae619a5, type: 2}
     - target: {fileID: 7762256097630750453, guid: a3223bef488f5db45b1d05b4ebd4c961, type: 3}
       propertyPath: 'letterDialogues.Array.data[4]'
       value: 
-      objectReference: {fileID: 11400000, guid: fb5278af046350e4590273fe1421959c, type: 2}
+      objectReference: {fileID: 11400000, guid: 65e5cdf873e11ad4781f436c817c23fa, type: 2}
     - target: {fileID: 7762256097630750453, guid: a3223bef488f5db45b1d05b4ebd4c961, type: 3}
       propertyPath: 'letterDialogues.Array.data[5]'
       value: 
-      objectReference: {fileID: 11400000, guid: 7a706df2108c2074cbe4f299d94d6deb, type: 2}
+      objectReference: {fileID: 11400000, guid: 1fe6832b9dee7ca468f4431874a61d87, type: 2}
     - target: {fileID: 7762256097630750453, guid: a3223bef488f5db45b1d05b4ebd4c961, type: 3}
       propertyPath: 'letterDialogues.Array.data[6]'
       value: 
-      objectReference: {fileID: 11400000, guid: 13cccf3ad4a39fa458d8e295b8ff8f8c, type: 2}
+      objectReference: {fileID: 11400000, guid: 451d121a88624544088049e3f1c3b8d1, type: 2}
     - target: {fileID: 7762256097630750453, guid: a3223bef488f5db45b1d05b4ebd4c961, type: 3}
       propertyPath: 'letterDialogues.Array.data[7]'
       value: 
-      objectReference: {fileID: 11400000, guid: 33d4e726794db5f40939983a6cbbe64e, type: 2}
+      objectReference: {fileID: 11400000, guid: 9bcbaa4d98b5c2744bc605ee8e12b036, type: 2}
     - target: {fileID: 7762256097630750453, guid: a3223bef488f5db45b1d05b4ebd4c961, type: 3}
       propertyPath: 'letterDialogues.Array.data[8]'
       value: 
-      objectReference: {fileID: 11400000, guid: 0abf3dfb8c9290e47bbf9f534ada4817, type: 2}
+      objectReference: {fileID: 11400000, guid: d3d4a08207570fb4b8be74039b19f1e7, type: 2}
     - target: {fileID: 7762256097630750453, guid: a3223bef488f5db45b1d05b4ebd4c961, type: 3}
       propertyPath: 'letterDialogues.Array.data[9]'
       value: 
-      objectReference: {fileID: 11400000, guid: b4194207575ac7f47a254a74e5b1c84a, type: 2}
+      objectReference: {fileID: 11400000, guid: d6073724dd8aecd48a0fe80d30e6b5e7, type: 2}
     - target: {fileID: 7762256097630750453, guid: a3223bef488f5db45b1d05b4ebd4c961, type: 3}
       propertyPath: 'defaultDialogues.Array.data[0]'
       value: 
-      objectReference: {fileID: 11400000, guid: 36617f70058477f45ad3d25b8bb74adb, type: 2}
+      objectReference: {fileID: 11400000, guid: 7b37d55868a8dfa4f987a0b6a43f6798, type: 2}
     - target: {fileID: 7762256097630750453, guid: a3223bef488f5db45b1d05b4ebd4c961, type: 3}
       propertyPath: 'letterDialogues.Array.data[10]'
       value: 
-      objectReference: {fileID: 11400000, guid: 22de4779abb63e94d853af5d2e82fd6d, type: 2}
+      objectReference: {fileID: 11400000, guid: 5160489be0716c14d837eb552c507388, type: 2}
     - target: {fileID: 7762256097630750453, guid: a3223bef488f5db45b1d05b4ebd4c961, type: 3}
       propertyPath: 'letterDialogues.Array.data[11]'
       value: 
-      objectReference: {fileID: 11400000, guid: 0a60b944f91b16244831c9837d6ec015, type: 2}
+      objectReference: {fileID: 11400000, guid: 28d9bc79d8309d141a1051d166b76857, type: 2}
     - target: {fileID: 7762256097630750453, guid: a3223bef488f5db45b1d05b4ebd4c961, type: 3}
       propertyPath: 'letterDialogues.Array.data[12]'
       value: 
-      objectReference: {fileID: 11400000, guid: ad8f3a331c9e69c4b90f54f090dcd856, type: 2}
+      objectReference: {fileID: 11400000, guid: ad2d6c160d833a9479cc2e8638aaa4c2, type: 2}
     - target: {fileID: 7762256097630750453, guid: a3223bef488f5db45b1d05b4ebd4c961, type: 3}
       propertyPath: 'letterDialogues.Array.data[13]'
       value: 
-      objectReference: {fileID: 11400000, guid: 23bbca0a0b05433469e6aa3563e5a36a, type: 2}
+      objectReference: {fileID: 11400000, guid: 3bdbc2b3274a2fd4bb28c721dbc8148b, type: 2}
     - target: {fileID: 7762256097630750453, guid: a3223bef488f5db45b1d05b4ebd4c961, type: 3}
       propertyPath: 'letterDialogues.Array.data[14]'
       value: 
-      objectReference: {fileID: 11400000, guid: eddfb3a50e8bd0c428dd388b7ca733e3, type: 2}
+      objectReference: {fileID: 11400000, guid: 98c4c3e4fdb3c794c8cf5c299e279db6, type: 2}
     - target: {fileID: 7762256097630750453, guid: a3223bef488f5db45b1d05b4ebd4c961, type: 3}
       propertyPath: 'letterDialogues.Array.data[15]'
       value: 
-      objectReference: {fileID: 11400000, guid: e16d96ec6dfa71d4eafc0ae08a54a015, type: 2}
+      objectReference: {fileID: 11400000, guid: 84bc05e6afc4f524b9c717eb6dfd0bc4, type: 2}
     - target: {fileID: 7762256097630750453, guid: a3223bef488f5db45b1d05b4ebd4c961, type: 3}
       propertyPath: 'letterDialogues.Array.data[16]'
       value: 
-      objectReference: {fileID: 11400000, guid: 31334dd8f6c09314ebdcd6747d963b31, type: 2}
+      objectReference: {fileID: 11400000, guid: 7b37d55868a8dfa4f987a0b6a43f6798, type: 2}
     - target: {fileID: 7762256097630750453, guid: a3223bef488f5db45b1d05b4ebd4c961, type: 3}
       propertyPath: 'letterDialogues.Array.data[17]'
       value: 
-      objectReference: {fileID: 11400000, guid: d7a3db475c335cf4fb60a26aef26d579, type: 2}
+      objectReference: {fileID: 11400000, guid: 4d8af72ed2ac6f34fa2dd00c5cba4afd, type: 2}
     - target: {fileID: 7762256097630750453, guid: a3223bef488f5db45b1d05b4ebd4c961, type: 3}
       propertyPath: 'letterDialogues.Array.data[18]'
       value: 
-      objectReference: {fileID: 11400000, guid: 4d8af72ed2ac6f34fa2dd00c5cba4afd, type: 2}
+      objectReference: {fileID: 11400000, guid: 36617f70058477f45ad3d25b8bb74adb, type: 2}
     - target: {fileID: 7762256097630750453, guid: a3223bef488f5db45b1d05b4ebd4c961, type: 3}
       propertyPath: 'letterDialogues.Array.data[19]'
       value: 
