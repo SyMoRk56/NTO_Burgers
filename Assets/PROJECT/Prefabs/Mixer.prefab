@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &1395598099912620037
+--- !u!1 &133161063748765471
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,14 +8,14 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 6021750971730780594}
-  - component: {fileID: 5302095122806462987}
-  - component: {fileID: 8579186631213999723}
-  - component: {fileID: 3470816663262834897}
-  - component: {fileID: 4245948856641643509}
-  - component: {fileID: 5791484271607382432}
-  - component: {fileID: 8414743335787888477}
-  - component: {fileID: 2787217739612150832}
+  - component: {fileID: 496141516589136528}
+  - component: {fileID: 8044634405192252106}
+  - component: {fileID: 1630160625797749962}
+  - component: {fileID: 1057108259595614633}
+  - component: {fileID: 1392312634420860122}
+  - component: {fileID: 349747099948397217}
+  - component: {fileID: 7318568402369234947}
+  - component: {fileID: 8034124109682468539}
   m_Layer: 0
   m_Name: Mixer
   m_TagString: Untagged
@@ -23,49 +23,49 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &6021750971730780594
+--- !u!4 &496141516589136528
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1395598099912620037}
+  m_GameObject: {fileID: 133161063748765471}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: -6.4294, y: 3.31141, z: -3.39423}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &5302095122806462987
+--- !u!114 &8044634405192252106
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1395598099912620037}
+  m_GameObject: {fileID: 133161063748765471}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f9a319094326b8a4c9d27596ecea8973, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MusicMixer
-  melodyGenerator: {fileID: 4245948856641643509}
-  bassGenerator: {fileID: 8579186631213999723}
-  rhythmGenerator: {fileID: 5791484271607382432}
-  chordGenerator: {fileID: 3470816663262834897}
+  melodyGenerator: {fileID: 1392312634420860122}
+  bassGenerator: {fileID: 1630160625797749962}
+  rhythmGenerator: {fileID: 349747099948397217}
+  chordGenerator: {fileID: 1057108259595614633}
   melodyVolume: 0.091
   bassVolume: 0
   chordsVolume: 0
   drumsVolume: 0
-  group: {fileID: 0}
---- !u!114 &8579186631213999723
+  group: {fileID: 810310755162250902, guid: 14c75e4879c20a3419636ffbd9b0541d, type: 2}
+--- !u!114 &1630160625797749962
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1395598099912620037}
+  m_GameObject: {fileID: 133161063748765471}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0613aad42ff656c43943b28405d40ec1, type: 3}
@@ -80,13 +80,13 @@ MonoBehaviour:
   progression:
     name: 
     degrees: 00000000040000000500000003000000
---- !u!114 &3470816663262834897
+--- !u!114 &1057108259595614633
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1395598099912620037}
+  m_GameObject: {fileID: 133161063748765471}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 314c6911c25055d4f8bf30d54e84f821, type: 3}
@@ -102,13 +102,13 @@ MonoBehaviour:
     degrees: 00000000040000000500000003000000
   pitchMultiplyRange: {x: 1, y: 1}
   chordType: 1
---- !u!114 &4245948856641643509
+--- !u!114 &1392312634420860122
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1395598099912620037}
+  m_GameObject: {fileID: 133161063748765471}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2e2fdd19306172446a8241b7049df37d, type: 3}
@@ -131,13 +131,13 @@ MonoBehaviour:
   progression:
     name: 
     degrees: 000000000200000004000000020000000400000006000000010000000300000005000000030000000500000006000000
---- !u!114 &5791484271607382432
+--- !u!114 &349747099948397217
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1395598099912620037}
+  m_GameObject: {fileID: 133161063748765471}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3d283e74df25bf548bdf82d07d3a8ab4, type: 3}
@@ -150,13 +150,13 @@ MonoBehaviour:
   pattern: 1
   bars: 50
   bpm: 120
---- !u!82 &8414743335787888477
+--- !u!82 &7318568402369234947
 AudioSource:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1395598099912620037}
+  m_GameObject: {fileID: 133161063748765471}
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
@@ -247,13 +247,13 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!164 &2787217739612150832
+--- !u!164 &8034124109682468539
 AudioReverbFilter:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1395598099912620037}
+  m_GameObject: {fileID: 133161063748765471}
   m_Enabled: 1
   m_DryLevel: 0
   m_Room: 0
