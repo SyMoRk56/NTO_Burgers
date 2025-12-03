@@ -3,188 +3,198 @@ using System.Collections;
 
 public class NPCController : MonoBehaviour
 {
+    [Header("Настройки движения")]
     public float moveSpeed = 3f;
-    public float stopDistance = 4f; // Дистанция остановки от игрока
-    public float wanderRadius = 10f; // Радиус блуждания
+    public float stopDistance = 2f;
+    public float rotationSpeed = 5f;
 
-    private Transform player;
-    private Vector3 spawnPosition; // Позиция где NPC появился
-    private Vector3 targetPosition; // Текущая целевая позиция
-    private NPCState currentState = NPCState.MovingToPlayer;
-    private float stateTimer = 0f;
+    [Header("Визуальные эффекты")]
+    public ParticleSystem appearEffect;
+    public ParticleSystem disappearEffect;
 
-    // Состояния NPC
+    // Состояния
     private enum NPCState
     {
-        MovingToPlayer,     // Движется к игроку
-        WaitingForInteraction, // Ждет взаимодействия с игроком
-        ReturningToSpawn,   // Возвращается к точке спавна
-        MovingToRandom,     // Движется в случайную точку
-        Disappearing        // Исчезает
+        Appearing,      // Появление
+        Approaching,    // Подход к игроку
+        Waiting,        // Ожидание у игрока
+        Leaving,        // Уход
+        Disappearing    // Исчезновение
     }
+
+    private NPCState currentState = NPCState.Appearing;
+    private Transform player;
+    private bool hasReachedPlayer = false;
+    private Vector3 leaveDirection;
 
     void Start()
     {
-        player = GameObject.FindGameObjectWithTag("Player").transform;
-        spawnPosition = transform.position; // Запоминаем точку появления
-        Debug.Log("NPC создан в позиции: " + spawnPosition);
+        Debug.Log($"NPC {name}: Появился");
+
+        // Находим игрока
+        player = GameObject.FindGameObjectWithTag("Player")?.transform;
+
+        if (player == null)
+        {
+            Debug.LogError($"NPC {name}: Игрок не найден!");
+        }
+
+        // Запускаем эффект появления
+        if (appearEffect != null)
+        {
+            appearEffect.Play();
+        }
+
+        // Через 1 секунду начинаем движение к игроку
+        Invoke("StartApproach", 1f);
     }
 
     void Update()
     {
-        // Обновляем таймер состояния
-        stateTimer += Time.deltaTime;
-
         switch (currentState)
         {
-            case NPCState.MovingToPlayer:
-                MoveToPlayer();
+            case NPCState.Approaching:
+                ApproachPlayer();
                 break;
 
-            case NPCState.WaitingForInteraction:
-                // Ждем когда игрок нажмет E
-                if (Input.GetKeyDown(KeyCode.E))
-                {
-                    StartInteraction();
-                }
-                break;
-
-            case NPCState.ReturningToSpawn:
-                MoveToPosition(spawnPosition);
-
-                // Если дошли до точки спавна или прошло больше 10 секунд
-                if (Vector3.Distance(transform.position, spawnPosition) < 0.5f || stateTimer > 10f)
-                {
-                    GoToRandomPosition();
-                }
-                break;
-
-            case NPCState.MovingToRandom:
-                MoveToPosition(targetPosition);
-
-                // Если дошли до цели или прошло больше 10 секунд
-                if (Vector3.Distance(transform.position, targetPosition) < 0.5f || stateTimer > 10f)
-                {
-                    Disappear();
-                }
+            case NPCState.Leaving:
+                Leave();
                 break;
 
             case NPCState.Disappearing:
-                // Ничего не делаем, просто ждем уничтожения
+                // Ничего не делаем, ждем уничтожения
                 break;
         }
     }
 
-    void MoveToPlayer()
+    void StartApproach()
+    {
+        if (player != null)
+        {
+            currentState = NPCState.Approaching;
+            Debug.Log($"NPC {name}: Начинает подход к игроку");
+        }
+    }
+
+    // Метод для вызова из FishingSpot
+    public void StartApproach(Transform playerTransform)
+    {
+        if (playerTransform == null) return;
+
+        player = playerTransform;
+        currentState = NPCState.Approaching;
+        hasReachedPlayer = false;
+
+        Debug.Log($"NPC {name}: Получил команду подойти к игроку");
+    }
+
+    void ApproachPlayer()
     {
         if (player == null) return;
 
-        float distanceToPlayer = Vector3.Distance(transform.position, player.position);
-
-        // Если дистанция больше stopDistance, двигаемся к игроку
-        if (distanceToPlayer > stopDistance)
-        {
-            Vector3 direction = (player.position - transform.position).normalized;
-            transform.position += direction * moveSpeed * Time.deltaTime;
-
-            // Поворачиваем NPC к игроку
-            if (direction != Vector3.zero)
-            {
-                transform.rotation = Quaternion.LookRotation(new Vector3(direction.x, 0, direction.z));
-            }
-        }
-        else
-        {
-            // Достигли нужной дистанции
-            currentState = NPCState.WaitingForInteraction;
-            stateTimer = 0f;
-            Debug.Log("NPC достиг игрока и ждет взаимодействия");
-        }
-    }
-
-    void MoveToPosition(Vector3 target)
-    {
-        Vector3 direction = (target - transform.position).normalized;
+        // Двигаемся к игроку
+        Vector3 direction = (player.position - transform.position).normalized;
         transform.position += direction * moveSpeed * Time.deltaTime;
 
-        // Поворачиваем NPC к цели
+        // Плавно поворачиваемся к игроку
         if (direction != Vector3.zero)
         {
-            transform.rotation = Quaternion.LookRotation(new Vector3(direction.x, 0, direction.z));
+            Quaternion targetRotation = Quaternion.LookRotation(new Vector3(direction.x, 0, direction.z));
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
         }
-    }
 
-    void StartInteraction()
-    {
-        Debug.Log("Начато взаимодействие с NPC");
+        // Проверяем расстояние до игрока
+        float distance = Vector3.Distance(transform.position, player.position);
 
-        // Запускаем корутину ожидания и возврата к спавну
-        StartCoroutine(WaitAndReturnToSpawn());
-    }
-
-    IEnumerator WaitAndReturnToSpawn()
-    {
-        Debug.Log("NPC ждет 5 секунд перед возвратом...");
-
-        // Ждем 5 секунд
-        yield return new WaitForSeconds(5f);
-
-        // Начинаем возврат к точке спавна
-        currentState = NPCState.ReturningToSpawn;
-        stateTimer = 0f;
-        Debug.Log("NPC возвращается к точке спавна: " + spawnPosition);
-    }
-
-    void GoToRandomPosition()
-    {
-        // Генерируем случайную позицию в радиусе wanderRadius от точки спавна
-        Vector2 randomCircle = Random.insideUnitCircle * wanderRadius;
-        targetPosition = spawnPosition + new Vector3(randomCircle.x, 0, randomCircle.y);
-
-        // Убедимся что позиция на земле
-        RaycastHit hit;
-        if (Physics.Raycast(targetPosition + Vector3.up * 10, Vector3.down, out hit, 20, LayerMask.GetMask("Ground")))
+        if (distance <= stopDistance)
         {
-            targetPosition = hit.point;
+            hasReachedPlayer = true;
+            currentState = NPCState.Waiting;
+            Debug.Log($"NPC {name}: Достиг игрока, начинает ожидание");
+
+            // Начинаем отсчет времени ожидания
+            Invoke("StartLeaving", 5f);
+        }
+    }
+
+    void StartLeaving()
+    {
+        currentState = NPCState.Leaving;
+
+        // Выбираем случайное направление для ухода
+        float randomAngle = Random.Range(0f, 360f);
+        leaveDirection = new Vector3(Mathf.Sin(randomAngle * Mathf.Deg2Rad), 0, Mathf.Cos(randomAngle * Mathf.Deg2Rad));
+
+        Debug.Log($"NPC {name}: Начинает уход");
+    }
+
+    void Leave()
+    {
+        // Двигаемся в выбранном направлении
+        transform.position += leaveDirection * moveSpeed * Time.deltaTime;
+
+        // Поворачиваемся в направлении движения
+        if (leaveDirection != Vector3.zero)
+        {
+            Quaternion targetRotation = Quaternion.LookRotation(new Vector3(leaveDirection.x, 0, leaveDirection.z));
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
         }
 
-        currentState = NPCState.MovingToRandom;
-        stateTimer = 0f;
-        Debug.Log("NPC идет в случайную точку: " + targetPosition);
+        // Через 3 секунды исчезаем
+        Invoke("Disappear", 3f);
+        currentState = NPCState.Disappearing;
     }
 
     void Disappear()
     {
-        currentState = NPCState.Disappearing;
-        Debug.Log("NPC исчезает");
+        Debug.Log($"NPC {name}: Исчезает");
+
+        // Запускаем эффект исчезновения
+        if (disappearEffect != null)
+        {
+            disappearEffect.Play();
+            // Ждем пока эффект проиграется
+            Invoke("DestroyNPC", disappearEffect.main.duration);
+        }
+        else
+        {
+            DestroyNPC();
+        }
+    }
+
+    void DestroyNPC()
+    {
         Destroy(gameObject);
     }
 
-    // Визуальная отладка в редакторе
+    // Публичный метод для ухода (можно вызвать из FishingSpot)
+    public void GoAway()
+    {
+        if (currentState == NPCState.Waiting)
+        {
+            StartLeaving();
+        }
+    }
+
+    public bool HasReachedPlayer()
+    {
+        return hasReachedPlayer;
+    }
+
     void OnDrawGizmos()
     {
-        // Показываем дистанцию остановки
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, stopDistance);
-
-        // Показываем точку спавна
-        if (Application.isPlaying)
+        // Показываем направление к игроку (если есть)
+        if (player != null && currentState == NPCState.Approaching)
         {
             Gizmos.color = Color.green;
-            Gizmos.DrawWireCube(spawnPosition, Vector3.one);
-            Gizmos.DrawLine(transform.position, spawnPosition);
+            Gizmos.DrawLine(transform.position, player.position);
         }
 
-        // Показываем текущую цель
-        if (currentState == NPCState.MovingToRandom)
+        // Показываем направление ухода
+        if (currentState == NPCState.Leaving)
         {
             Gizmos.color = Color.red;
-            Gizmos.DrawWireCube(targetPosition, Vector3.one);
-            Gizmos.DrawLine(transform.position, targetPosition);
+            Gizmos.DrawLine(transform.position, transform.position + leaveDirection * 5f);
         }
-
-        // Показываем радиус блуждания
-        Gizmos.color = Color.cyan;
-        Gizmos.DrawWireSphere(spawnPosition, wanderRadius);
     }
 }
