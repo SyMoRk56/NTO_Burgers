@@ -16,7 +16,8 @@ public class FishWater : MonoBehaviour
 
     [Header("Исчезновение")]
     public float vanishDuration = 1f;
-
+    public AudioSource source;
+    public AudioClip clip;
     void Update()
     {
         if (Input.GetMouseButtonDown(0))
@@ -27,7 +28,7 @@ public class FishWater : MonoBehaviour
             {
                 if (hit.collider.gameObject != gameObject) return;
 
-                SpawnFish(hit.point);
+                SpawnFish(hit.point + new Vector3(Random.Range(-1, 1), 0, Random.Range(-1, 1)));
             }
         }
     }
@@ -78,6 +79,7 @@ public class FishWater : MonoBehaviour
 
         // Запускаем корутину движения
         StartCoroutine(MoveFishManual(fish, startPoint, targetPoint, jumpDuration, jumpHeight, startRot, endRot));
+        source.PlayOneShot(clip);
     }
 
     IEnumerator MoveFishManual(GameObject fish, Vector3 start, Vector3 end, float duration, float height, Quaternion rotStart, Quaternion rotEnd)
