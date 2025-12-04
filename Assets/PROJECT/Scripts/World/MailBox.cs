@@ -44,6 +44,7 @@ public class MailBox : MonoBehaviour
                 dialogueRunner.StartDialogue(false);
             }
         }
+        SaveGameManager.Instance.SaveAuto(true);
     }
 
     // Новый метод для запуска диалога с задержкой

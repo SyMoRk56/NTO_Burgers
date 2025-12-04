@@ -76,12 +76,9 @@ public class FlowerTriggerHandler : MonoBehaviour
 
     void CheckDialogueStatus()
     {
-        print(1);
         if (sequenceTriggered || dialogueRunner == null) return;
         // ѕровер€ем, активен ли диалог
-        print(dialogueRunner.gameObject.name);
         bool isDialogueActive = dialogueRunner.IsDialogueActive;
-        print(2 + (dialogueWasActiveLastFrame).ToString() + isDialogueActive.ToString());
 
         // —охран€ем состо€ние в статической переменной
         if (!dialogueWasActiveLastFrame && isDialogueActive)

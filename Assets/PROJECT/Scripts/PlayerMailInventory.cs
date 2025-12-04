@@ -19,7 +19,10 @@ public class PlayerMailInventory : MonoBehaviour
             Destroy(gameObject);
         }
     }
-
+    public bool LastMail(string id)
+    {
+        return carriedMails[0].id == id;
+    }
     public void AddMailToInventory(Task task)
     {
         if (!ContainsTask(task.id))
