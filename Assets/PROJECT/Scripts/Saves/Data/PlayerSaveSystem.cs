@@ -61,6 +61,11 @@ public class PlayerSaveSystem : MonoBehaviour
         if (data.hasBag && !HasBag())
         {
             CreateBagForPlayer();
+            Destroy(FindFirstObjectByType<BagPickup>().gameObject);
+            foreach(var g in FindObjectsByType<EnterToHouse>(FindObjectsSortMode.None))
+            {
+                g.enabled = true;
+            }
         }
 
     }

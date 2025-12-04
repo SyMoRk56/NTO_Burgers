@@ -70,6 +70,7 @@ public class PlayerInteraction : MonoBehaviour
 
                 if (hit.TryGetComponent(out EnterToHouse enter))
                 {
+                    if (!enter.enabled) return;
                     Debug.Log("Вход в дом");
                     enter.Interact();
                     interactionHandled = true;

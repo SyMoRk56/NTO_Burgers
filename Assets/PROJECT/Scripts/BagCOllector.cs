@@ -27,8 +27,9 @@ public class BagPickup : MonoBehaviour
 
         if (pickupPrompt != null)
             pickupPrompt.SetActive(false);
+        h.enabled = false;
     }
-
+    public EnterToHouse h;
     void Update()
     {
         if (playerInRange && Input.GetKeyDown(pickupKey))
@@ -93,6 +94,8 @@ public class BagPickup : MonoBehaviour
             {
                 SaveGameManager.Instance.SaveAuto(true);
             }
+            h.enabled = true;
+            print("SetH Enabled");
         }
 
         Destroy(gameObject);

@@ -3459,6 +3459,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7485569612471018199, guid: 1cb59b24c04ff5d43b9500d7ac4dfc9e, type: 3}
   m_PrefabInstance: {fileID: 525870613}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &526504595 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8984775089466572716, guid: 7901bb945d734d9459168c46d9569070, type: 3}
+  m_PrefabInstance: {fileID: 8548631049506497561}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8548631049506497566}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e3a13efda208b94fb31b33a20ad4354, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnterToHouse
 --- !u!1 &534907704
 GameObject:
   m_ObjectHideFlags: 0
@@ -14519,6 +14530,10 @@ PrefabInstance:
       propertyPath: trigger
       value: 
       objectReference: {fileID: 8548631049506497570}
+    - target: {fileID: 5987208399509105246, guid: 7901bb945d734d9459168c46d9569070, type: 3}
+      propertyPath: h
+      value: 
+      objectReference: {fileID: 526504595}
     - target: {fileID: 5987208399509105246, guid: 7901bb945d734d9459168c46d9569070, type: 3}
       propertyPath: bagPrefab
       value: 
