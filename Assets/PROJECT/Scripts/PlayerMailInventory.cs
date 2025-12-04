@@ -90,7 +90,7 @@ public class PlayerMailInventory : MonoBehaviour
     {
         if (carriedMails.Count > 0 && TaskUI.Instance != null)
         {
-            TaskUI.Instance.SetTask(carriedMails[0], carriedMails.Count - 1);
+            TaskUI.Instance.SetTask(carriedMails[0], carriedMails.Count);
             Debug.Log($"✓ UI обновлено: {carriedMails[0].recieverName} (+{carriedMails.Count - 1} других)");
         }
         else if (TaskUI.Instance != null)
