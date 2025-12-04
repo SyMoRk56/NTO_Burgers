@@ -154,9 +154,10 @@ public class DeskInteraction : MonoBehaviour
         if (switcher != null)
             switcher.enabled = false;
 
-        CameraManagement cameraManagement = FindObjectOfType<CameraManagement>();
-        if (cameraManagement != null)
-            cameraManagement.enabled = false;
+        // Удаляем или закомментируем эти строки:
+        // CameraManagement cameraManagement = FindObjectOfType<CameraManagement>();
+        // if (cameraManagement != null)
+        //     cameraManagement.enabled = false;
 
         CameraController cameraController = FindObjectOfType<CameraController>();
         if (cameraController != null)
@@ -172,9 +173,10 @@ public class DeskInteraction : MonoBehaviour
         if (switcher != null)
             switcher.enabled = true;
 
-        CameraManagement cameraManagement = FindObjectOfType<CameraManagement>();
-        if (cameraManagement != null)
-            cameraManagement.enabled = true;
+        // Удаляем или закомментируем эти строки:
+        // CameraManagement cameraManagement = FindObjectOfType<CameraManagement>();
+        // if (cameraManagement != null)
+        //     cameraManagement.enabled = true;
 
         CameraController cameraController = FindObjectOfType<CameraController>();
         if (cameraController != null)
