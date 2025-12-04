@@ -20,7 +20,6 @@ public class PlayerMovement : MonoBehaviour
 
     public playerAnimations animScript;
 
-
     public float idleTimeThreshold = 60f; // 1 минута
     public ParticleSystem idleVFX; // Ссылка на VFX компонент
     public Transform vfxSpawnPoint; // Точка появления VFX (опционально)
@@ -61,108 +60,9 @@ public class PlayerMovement : MonoBehaviour
     private Terrain terrain;
     private TerrainData terrainData;
     public AudioClip defaultStepSound;
-    public void PlayStepSound()
-    {
-        if (!isGrounded)
-            return;
 
-        // Проверка поверхности под ногами
-        if (TryGetGroundCollider(out Collider ground))
-        {
-            // Если это Terrain
-            if (ground is TerrainCollider)
-            {
-                AudioClip clip = GetFootstepSound();
-                if (clip != null)
-                {
-                    step.PlayOneShot(clip, 1f);
-                    return;
-                }
-            }
-        }
-
-        // Если НЕ террейн — играем другой звук
-        if (defaultStepSound != null)
-            step.PlayOneShot(defaultStepSound, 1f);
-    }
-    private bool TryGetGroundCollider(out Collider col)
-    {
-        col = null;
-
-        float rayLength = 2 * 0.6f + 0.3f;
-        Vector3 start = transform.position + Vector3.up * 0.1f;
-
-        if (Physics.Raycast(start, Vector3.down, out RaycastHit hit, rayLength))
-        {
-            col = hit.collider;
-            return true;
-        }
-
-        return false;
-    }
-
-
-    private AudioClip GetFootstepSound()
-    {
-        int tex = GetMainTexture(transform.position);
-
-        AudioClip[] targetArray = null;
-
-        switch (tex)
-        {
-            case 1: // Sand / Wood
-                targetArray = woodSteps;
-                break;
-
-            case 2: // Grass
-                targetArray = grassSteps;
-                break;
-
-            case 3: // Stone
-                targetArray = stoneSteps;
-                break;
-
-            // 0 — пустой террейн: можно возвращать null или подставлять дефолтный звук
-            case 0:
-            default:
-                return null;
-        }
-
-        if (targetArray == null || targetArray.Length == 0)
-            return null;
-
-        return targetArray[Random.Range(0, targetArray.Length)];
-    }
-
-
-    private int GetMainTexture(Vector3 worldPos)
-    {
-        if (terrainData == null) return 0;
-
-        Vector3 terrainPos = worldPos - terrain.transform.position;
-
-        float x = terrainPos.x / terrainData.size.x;
-        float z = terrainPos.z / terrainData.size.z;
-
-        int mapX = Mathf.Clamp((int)(x * terrainData.alphamapWidth), 0, terrainData.alphamapWidth - 1);
-        int mapZ = Mathf.Clamp((int)(z * terrainData.alphamapHeight), 0, terrainData.alphamapHeight - 1);
-
-        float[,,] splatmap = terrainData.GetAlphamaps(mapX, mapZ, 1, 1);
-
-        int best = 0;
-        float max = 0f;
-
-        for (int i = 0; i < splatmap.GetLength(2); i++)
-        {
-            if (splatmap[0, 0, i] > max)
-            {
-                best = i;
-                max = splatmap[0, 0, i];
-            }
-        }
-
-        return best;
-    }
+    [Header("Состояние переноски")]
+    public bool isCarrying = false; // Глобальная переменная для отслеживания переноски
 
     void Start()
     {
@@ -195,7 +95,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (!manager.CanMove)
         {
-            animScript.HeroIdleAnim();
+            animScript.HeroIdleAnim(isCarrying);
             ResetIdleTimer();
             return;
         }
@@ -209,12 +109,13 @@ public class PlayerMovement : MonoBehaviour
             jumpRequested = true;
             ResetIdleTimer(); // Сброс таймера при прыжке
         }
-
     }
+
     private void OnDisable()
     {
-        animScript.HeroIdleAnim();
+        animScript.HeroIdleAnim(isCarrying);
     }
+
     void FixedUpdate()
     {
         if (!manager.CanMove || !GameManager.Instance.isGameGoing)
@@ -222,6 +123,7 @@ public class PlayerMovement : MonoBehaviour
             ResetIdleTimer();
             return;
         }
+
         CheckGrounded();
         HandleMovement();
         ApplyFriction();
@@ -229,6 +131,11 @@ public class PlayerMovement : MonoBehaviour
         if (jumpRequested && isGrounded)
         {
             ExecuteJump();
+            // Обновляем анимацию прыжка с учетом переноски
+            if (animScript != null)
+            {
+                animScript.HeroJumpAnim(isCarrying);
+            }
         }
         jumpRequested = false;
     }
@@ -239,23 +146,23 @@ public class PlayerMovement : MonoBehaviour
         if (Keyboard.current.wKey.isPressed)
         {
             moveInput.y += 1;
-            animScript.HeroWalkAnim();
+            animScript.HeroWalkAnim(isCarrying);
         }
         if (Keyboard.current.sKey.isPressed)
         {
             moveInput.y -= 1;
-            animScript.HeroWalkAnim();
+            animScript.HeroWalkAnim(isCarrying);
         }
         if (Keyboard.current.aKey.isPressed)
         {
             moveInput.x -= 1;
-            animScript.HeroWalkAnim();
+            animScript.HeroWalkAnim(isCarrying);
         }
 
-        if (Keyboard.current.dKey.isPressed) 
+        if (Keyboard.current.dKey.isPressed)
         {
-            moveInput.x += 1; 
-            animScript.HeroWalkAnim();
+            moveInput.x += 1;
+            animScript.HeroWalkAnim(isCarrying);
         }
 
         moveInput = Vector2.ClampMagnitude(moveInput, 1f);
@@ -263,6 +170,12 @@ public class PlayerMovement : MonoBehaviour
         isRunning = Keyboard.current.leftShiftKey.isPressed;
 
         lookInput = Mouse.current.delta.ReadValue() * mouseSensitivity * 0.1f;
+
+        // Если не двигаемся и не прыгаем - idle анимация
+        if (moveInput.magnitude < 0.1f && isGrounded && !jumpRequested)
+        {
+            animScript.HeroIdleAnim(isCarrying);
+        }
     }
 
     void HandleLook()
@@ -277,8 +190,6 @@ public class PlayerMovement : MonoBehaviour
 
     void HandleMovement()
     {
-
-
         Vector3 wishDir = (forwardVector.forward * moveInput.y + forwardVector.right * moveInput.x).normalized;
 
         float targetSpeed = GetTargetSpeed();
@@ -351,6 +262,108 @@ public class PlayerMovement : MonoBehaviour
         return baseSpeed * massSpeedFactor;
     }
 
+    public void PlayStepSound()
+    {
+        if (!isGrounded)
+            return;
+
+        // Проверка поверхности под ногами
+        if (TryGetGroundCollider(out Collider ground))
+        {
+            // Если это Terrain
+            if (ground is TerrainCollider)
+            {
+                AudioClip clip = GetFootstepSound();
+                if (clip != null)
+                {
+                    step.PlayOneShot(clip, 1f);
+                    return;
+                }
+            }
+        }
+
+        // Если НЕ террейн — играем другой звук
+        if (defaultStepSound != null)
+            step.PlayOneShot(defaultStepSound, 1f);
+    }
+
+    private bool TryGetGroundCollider(out Collider col)
+    {
+        col = null;
+
+        float rayLength = 2 * 0.6f + 0.3f;
+        Vector3 start = transform.position + Vector3.up * 0.1f;
+
+        if (Physics.Raycast(start, Vector3.down, out RaycastHit hit, rayLength))
+        {
+            col = hit.collider;
+            return true;
+        }
+
+        return false;
+    }
+
+    private AudioClip GetFootstepSound()
+    {
+        int tex = GetMainTexture(transform.position);
+
+        AudioClip[] targetArray = null;
+
+        switch (tex)
+        {
+            case 1: // Sand / Wood
+                targetArray = woodSteps;
+                break;
+
+            case 2: // Grass
+                targetArray = grassSteps;
+                break;
+
+            case 3: // Stone
+                targetArray = stoneSteps;
+                break;
+
+            // 0 — пустой террейн: можно возвращать null или подставлять дефолтный звук
+            case 0:
+            default:
+                return null;
+        }
+
+        if (targetArray == null || targetArray.Length == 0)
+            return null;
+
+        return targetArray[Random.Range(0, targetArray.Length)];
+    }
+
+    private int GetMainTexture(Vector3 worldPos)
+    {
+        if (terrainData == null) return 0;
+
+        Vector3 terrainPos = worldPos - terrain.transform.position;
+
+        float x = terrainPos.x / terrainData.size.x;
+        float z = terrainPos.z / terrainData.size.z;
+
+        int mapX = Mathf.Clamp((int)(x * terrainData.alphamapWidth), 0, terrainData.alphamapWidth - 1);
+        int mapZ = Mathf.Clamp((int)(z * terrainData.alphamapHeight), 0, terrainData.alphamapHeight - 1);
+
+        float[,,] splatmap = terrainData.GetAlphamaps(mapX, mapZ, 1, 1);
+
+        int best = 0;
+        float max = 0f;
+
+        for (int i = 0; i < splatmap.GetLength(2); i++)
+        {
+            if (splatmap[0, 0, i] > max)
+            {
+                best = i;
+                max = splatmap[0, 0, i];
+            }
+        }
+
+        return best;
+    }
+
     // Методы для отслеживания бездействия и управления VFX
     void UpdateIdleTimer()
     {
@@ -367,7 +380,7 @@ public class PlayerMovement : MonoBehaviour
         {
             idleTimer += Time.deltaTime;
 
-            animScript.HeroIdleAnim();
+            animScript.HeroIdleAnim(isCarrying);
 
             if (idleTimer >= idleTimeThreshold && !isIdleVFXActive)
             {

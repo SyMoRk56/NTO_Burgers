@@ -1,264 +1,412 @@
 using UnityEngine;
-using System.Collections;
+using System.Collections.Generic;
 
 public class ObjectMovement : MonoBehaviour
 {
-    // Массив точек для перемещения
-    public Vector3[] waypoints = new Vector3[]
+    [System.Serializable]
+    public class DropZoneData
     {
-        new Vector3(127f, 0f, 50f),  // Стартовая точка (телепортация)
-        new Vector3(130f, 0f, 50f),  // Точка 1
-        new Vector3(130f, 0f, 55f),  // Точка 2
-        new Vector3(135f, 0f, 60f)   // Точка 3
-    };
+        public GameObject dropZoneObject; // Ссылка на GameObject зоны
+        public Vector3 spawnPoint;        // Точка, куда телепортируется объект
+        public Vector3[] waypoints;       // Маршрут движения
+    }
 
     [Header("Настройки движения")]
     public float moveSpeed = 0.5f;
-    public bool teleportToStart = true;
     public bool loopMovement = false;
 
     [Header("Настройки взаимодействия")]
     public float interactionRange = 3f;
-    public KeyCode interactionKey = KeyCode.E;
-    public bool showDebugRadius = true;
+    public KeyCode pickUpKey = KeyCode.E;
+    public KeyCode dropKey = KeyCode.Q;
+
+    [Header("Позиция в руках")]
+    public Vector3 heldPosition = new Vector3(0, 1, 2);
+    public float pickUpSpeed = 5f;
+
+    [Header("Зоны сброса и маршруты")]
+    public List<DropZoneData> dropZones = new List<DropZoneData>();
 
     [Header("Визуальные настройки")]
-    public GameObject interactionIndicator; // Опциональный индикатор
+    public GameObject interactionIndicator;
 
+    [Header("Настройки зоны")]
+    public float dropZoneRadius = 5f; // Радиус для проверки зоны
+
+    // Состояния
+    private enum State { Idle, Held, Moving }
+    private State currentState = State.Idle;
+
+    private Transform player; // Основной объект игрока
+    private Transform playerModel; // Модель игрока с тегом "Model"
+    private PlayerMovement playerMovement; // Добавляем ссылку на PlayerMovement
     private int currentWaypointIndex = 0;
-    private bool isMoving = false;
-    private bool hasInteracted = false;
-    private Transform playerTransform;
+    private Vector3[] currentWaypoints;
     private SphereCollider interactionCollider;
+    private Rigidbody rb;
+    private DropZoneData currentDropZone;
+    private bool playerInDropZone = false;
+    private Transform originalParent; // Оригинальный родитель
+    private Vector3 originalScale; // Оригинальный масштаб
 
-    private void Start()
+    void Start()
     {
-        // Находим игрока
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
-        if (player != null)
+        // Находим основной объект игрока
+        GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+        if (playerObj != null)
         {
-            playerTransform = player.transform;
+            player = playerObj.transform;
+            // Получаем компонент PlayerMovement
+            playerMovement = playerObj.GetComponent<PlayerMovement>();
+            if (playerMovement == null)
+            {
+                Debug.LogWarning("PlayerMovement не найден на игроке!");
+            }
         }
         else
         {
             Debug.LogWarning("Игрок не найден! Убедитесь, что у игрока есть тег 'Player'");
         }
 
-        // Создаем коллайдер для зоны взаимодействия
+        // Находим модель игрока по тегу "model"
+        GameObject modelObj = GameObject.FindGameObjectWithTag("model");
+        if (modelObj != null)
+        {
+            playerModel = modelObj.transform;
+        }
+        else
+        {
+            Debug.LogWarning("Модель игрока не найдена! Убедитесь, что у модели есть тег 'model'");
+            playerModel = player;
+        }
+
+        // Сохраняем оригинальные параметры
+        originalParent = transform.parent;
+        originalScale = transform.localScale;
+
+        // Настройка коллайдера для взаимодействия
         interactionCollider = gameObject.AddComponent<SphereCollider>();
         interactionCollider.isTrigger = true;
         interactionCollider.radius = interactionRange;
 
-        // Добавляем Rigidbody если нужно для триггера
-        Rigidbody rb = GetComponent<Rigidbody>();
-        if (rb == null)
-        {
-            rb = gameObject.AddComponent<Rigidbody>();
-            rb.isKinematic = true;
-            rb.useGravity = false;
-        }
-
-        // Скрываем индикатор если он есть
-        if (interactionIndicator != null)
-        {
-            interactionIndicator.SetActive(false);
-        }
-    }
-
-    private void Update()
-    {
-        // Проверяем расстояние до игрока
-        if (playerTransform != null && !hasInteracted)
-        {
-            float distanceToPlayer = Vector3.Distance(transform.position, playerTransform.position);
-
-            // Показываем/скрываем индикатор
-            if (interactionIndicator != null)
-            {
-                interactionIndicator.SetActive(distanceToPlayer <= interactionRange);
-            }
-
-            // Проверяем взаимодействие
-            if (distanceToPlayer <= interactionRange && Input.GetKeyDown(interactionKey))
-            {
-                OnInteract();
-            }
-        }
-
-        // Обрабатываем движение
-        if (isMoving && currentWaypointIndex < waypoints.Length)
-        {
-            MoveToWaypoint();
-        }
-        else if (isMoving && currentWaypointIndex >= waypoints.Length)
-        {
-            if (loopMovement)
-            {
-                RestartMovement();
-            }
-            else
-            {
-                isMoving = false;
-                Debug.Log("Движение завершено");
-            }
-        }
-    }
-
-    private void OnInteract()
-    {
-        if (hasInteracted) return;
-
-        hasInteracted = true;
-        Debug.Log("Объект взаимодействует, начинаем движение!");
+        // Настройка физики
+        rb = GetComponent<Rigidbody>();
+        if (rb == null) rb = gameObject.AddComponent<Rigidbody>();
+        rb.isKinematic = true;
+        rb.useGravity = false;
 
         // Скрываем индикатор
         if (interactionIndicator != null)
-        {
             interactionIndicator.SetActive(false);
-        }
-
-        // Отключаем коллайдер взаимодействия
-        if (interactionCollider != null)
-        {
-            interactionCollider.enabled = false;
-        }
-
-        // Начинаем движение
-        StartMovement();
     }
 
-    private void MoveToWaypoint()
+    void Update()
     {
-        Vector3 targetPosition = waypoints[currentWaypointIndex];
-
-        // Плавное перемещение к точке
-        transform.position = Vector3.MoveTowards(
-            transform.position,
-            targetPosition,
-            moveSpeed * Time.deltaTime
-        );
-
-        // Поворачиваем объект в сторону движения (опционально)
-        if (Vector3.Distance(transform.position, targetPosition) > 0.1f)
+        // Проверка взаимодействия с игроком
+        if (player != null && currentState == State.Idle)
         {
-            Vector3 direction = (targetPosition - transform.position).normalized;
-            if (direction != Vector3.zero)
+            float distance = Vector3.Distance(transform.position, player.position);
+
+            if (interactionIndicator != null)
+                interactionIndicator.SetActive(distance <= interactionRange);
+
+            if (distance <= interactionRange && Input.GetKeyDown(pickUpKey))
+                PickUp();
+        }
+
+        // Сброс объекта
+        if (currentState == State.Held && Input.GetKeyDown(dropKey))
+            Drop();
+
+        // Проверка находится ли игрок в зоне сброса
+        CheckPlayerInDropZone();
+
+        // ПРЯМОЙ ЗАПУСК ПРИ ПОСТАНОВКЕ В ЗОНУ
+        if (currentState == State.Held && playerInDropZone && Input.GetKeyDown(pickUpKey))
+        {
+            LaunchImmediately();
+        }
+
+        // Движение по точкам
+        if (currentState == State.Moving)
+            MoveAlongWaypoints();
+    }
+
+    void CheckPlayerInDropZone()
+    {
+        if (player == null) return;
+
+        playerInDropZone = false;
+        currentDropZone = null;
+
+        foreach (var zone in dropZones)
+        {
+            if (zone.dropZoneObject == null) continue;
+
+            float playerZoneDistance = Vector3.Distance(player.position, zone.dropZoneObject.transform.position);
+
+            if (playerZoneDistance <= dropZoneRadius)
             {
-                Quaternion targetRotation = Quaternion.LookRotation(direction);
-                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * 2f);
+                playerInDropZone = true;
+                currentDropZone = zone;
+                break;
+            }
+        }
+    }
+
+    void PickUp()
+    {
+        if (playerModel == null) return;
+
+        currentState = State.Held;
+        interactionCollider.enabled = false;
+
+        // Делаем объект дочерним к модели игрока
+        transform.SetParent(playerModel);
+        transform.localPosition = heldPosition;
+        transform.localRotation = Quaternion.identity;
+        transform.localScale = originalScale;
+
+        // Выключаем гравитацию и включаем кинематику
+        rb.isKinematic = true;
+        rb.useGravity = false;
+
+        // Устанавливаем флаг переноски в PlayerMovement
+        if (playerMovement != null)
+        {
+            playerMovement.isCarrying = true;
+            // Обновляем анимацию сразу на idle с переноской
+            if (playerMovement.animScript != null)
+            {
+                playerMovement.animScript.HeroIdleAnim(true);
             }
         }
 
-        // Проверяем, достигли ли точки
-        if (Vector3.Distance(transform.position, targetPosition) < 0.01f)
+        Debug.Log("Объект взят в руки и прикреплен к модели игрока");
+    }
+
+    void Drop()
+    {
+        currentState = State.Idle;
+
+        // Открепляем от модели игрока и возвращаем в оригинального родителя
+        transform.SetParent(originalParent);
+        transform.localScale = originalScale;
+
+        // Включаем гравитацию - объект упадет
+        rb.isKinematic = false;
+        rb.useGravity = true;
+
+        // Включаем коллайдер обратно
+        interactionCollider.enabled = true;
+
+        // Сбрасываем флаг переноски в PlayerMovement
+        if (playerMovement != null)
         {
-            Debug.Log($"Достигнута точка {currentWaypointIndex + 1}");
+            playerMovement.isCarrying = false;
+            // Обновляем анимацию на обычный idle
+            if (playerMovement.animScript != null)
+            {
+                playerMovement.animScript.HeroIdleAnim(false);
+            }
+        }
+
+        Debug.Log("Объект отпущен, падает...");
+    }
+
+    void LaunchImmediately()
+    {
+        if (currentDropZone == null) return;
+
+        // ПРОВЕРЯЕМ, ЧТО spawnPoint НЕ НУЛЕВОЙ
+        if (currentDropZone.spawnPoint == Vector3.zero)
+        {
+            Debug.LogError($"spawnPoint не задан для зоны: {currentDropZone.dropZoneObject.name}!");
+            return;
+        }
+
+        // Проверяем наличие точек маршрута
+        if (currentDropZone.waypoints == null || currentDropZone.waypoints.Length == 0)
+        {
+            Debug.LogWarning("Нет маршрута для этой зоны!");
+            return;
+        }
+
+        // Открепляем от модели игрока
+        transform.SetParent(originalParent);
+        transform.localScale = originalScale;
+
+        // ПРЯМОЙ СТАРТ - телепортируем к первой точке маршрута и сразу начинаем движение
+        currentState = State.Moving;
+        currentWaypoints = currentDropZone.waypoints;
+        currentWaypointIndex = 0;
+
+        // Телепортируем к первой точке маршрута (или spawnPoint)
+        if (currentWaypoints.Length > 0)
+        {
+            // Используем первую точку маршрута как стартовую позицию
+            Vector3 startPosition = currentDropZone.spawnPoint;
+            transform.position = startPosition;
+
+            // Если есть хотя бы 2 точки, начинаем движение ко второй
+            if (currentWaypoints.Length > 1)
+            {
+                currentWaypointIndex = 1;
+                Debug.Log($"Объект поставлен в зону и начал движение к точке {currentWaypointIndex}");
+            }
+            else
+            {
+                // Если только 1 точка, просто остаемся в ней
+                Debug.Log("Объект поставлен в зону, но только 1 точка маршрута");
+            }
+        }
+
+        // Настраиваем физику для движения
+        rb.isKinematic = true;
+        rb.useGravity = false;
+
+        // Включаем коллайдер взаимодействия
+        interactionCollider.enabled = true;
+
+        // Сбрасываем флаг переноски в PlayerMovement
+        if (playerMovement != null)
+        {
+            playerMovement.isCarrying = false;
+            // Обновляем анимацию на обычный idle
+            if (playerMovement.animScript != null)
+            {
+                playerMovement.animScript.HeroIdleAnim(false);
+            }
+        }
+
+        Debug.Log($"Объект запущен из зоны: {currentDropZone.dropZoneObject.name}");
+        Debug.Log($"Количество точек маршрута: {currentWaypoints.Length}");
+    }
+
+    void MoveAlongWaypoints()
+    {
+        if (currentWaypoints == null || currentWaypoints.Length == 0)
+        {
+            currentState = State.Idle;
+            rb.isKinematic = false;
+            rb.useGravity = true;
+            return;
+        }
+
+        // Проверяем, что currentWaypointIndex в пределах массива
+        if (currentWaypointIndex < 0 || currentWaypointIndex >= currentWaypoints.Length)
+        {
+            CompleteRoute();
+            return;
+        }
+
+        Vector3 target = currentWaypoints[currentWaypointIndex];
+
+        // Проверяем, что точка не нулевая
+        if (target == Vector3.zero)
+        {
+            Debug.LogWarning($"Точка {currentWaypointIndex} равна (0,0,0)! Пропускаем.");
             currentWaypointIndex++;
+            return;
+        }
+
+        // Движение к точке
+        transform.position = Vector3.MoveTowards(
+            transform.position,
+            target,
+            moveSpeed * Time.deltaTime
+        );
+
+        // Поворот в сторону движения
+        Vector3 direction = (target - transform.position).normalized;
+        if (direction != Vector3.zero)
+        {
+            Quaternion lookRotation = Quaternion.LookRotation(direction);
+            transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 2f);
+        }
+
+        // Проверка достижения точки
+        if (Vector3.Distance(transform.position, target) < 0.1f)
+        {
+            currentWaypointIndex++;
+
+            // Проверка завершения маршрута
+            if (currentWaypointIndex >= currentWaypoints.Length)
+            {
+                CompleteRoute();
+            }
         }
     }
 
-    private void StartMovement()
+    void CompleteRoute()
     {
-        isMoving = true;
-
-        if (teleportToStart && waypoints.Length > 0)
+        if (loopMovement)
         {
-            // Мгновенная телепортация к первой точке
-            transform.position = waypoints[0];
-            Debug.Log($"Телепортирован в точку: {waypoints[0]}");
-
-            // Начинаем движение ко второй точке
-            currentWaypointIndex = 1;
+            currentWaypointIndex = 0;
+            Debug.Log("Маршрут завершен, начинаем заново");
         }
         else
         {
-            // Двигаемся от текущей позиции
-            currentWaypointIndex = 0;
+            currentState = State.Idle;
+            rb.isKinematic = false;
+            rb.useGravity = true;
+            Debug.Log("Маршрут завершен");
         }
     }
 
-    public void RestartMovement()
+    void LateUpdate()
     {
-        hasInteracted = false;
-        isMoving = false;
-        currentWaypointIndex = 0;
-
-        // Включаем коллайдер обратно
-        if (interactionCollider != null)
+        // Объект следует за моделью игрока когда в руках
+        if (currentState == State.Held && playerModel != null)
         {
-            interactionCollider.enabled = true;
+            transform.localPosition = heldPosition;
+            transform.localRotation = Quaternion.identity;
         }
-
-        Debug.Log("Движение перезапущено");
     }
 
-    public void SetNewWaypoints(Vector3[] newWaypoints)
+    void OnDestroy()
     {
-        waypoints = newWaypoints;
-        RestartMovement();
-    }
-
-    // Для отладки: рисуем радиус взаимодействия в редакторе
-    private void OnDrawGizmosSelected()
-    {
-        if (showDebugRadius)
+        // При уничтожении объекта сбрасываем флаг переноски
+        if (playerMovement != null)
         {
-            Gizmos.color = new Color(0, 1, 0, 0.3f);
-            Gizmos.DrawWireSphere(transform.position, interactionRange);
+            playerMovement.isCarrying = false;
+            if (playerMovement.animScript != null)
+            {
+                playerMovement.animScript.HeroIdleAnim(false);
+            }
+        }
+    }
 
-            // Рисуем точки маршрута
-            if (waypoints != null && waypoints.Length > 0)
+    void OnDrawGizmosSelected()
+    {
+        // Визуализация зон сброса
+        foreach (var zone in dropZones)
+        {
+            if (zone.dropZoneObject == null) continue;
+
+            Gizmos.color = Color.cyan;
+            Gizmos.DrawWireSphere(zone.dropZoneObject.transform.position, dropZoneRadius);
+
+            Gizmos.color = Color.magenta;
+            Gizmos.DrawSphere(zone.spawnPoint, 0.5f);
+            Gizmos.DrawLine(zone.dropZoneObject.transform.position, zone.spawnPoint);
+
+            if (zone.waypoints != null && zone.waypoints.Length > 0)
             {
                 Gizmos.color = Color.yellow;
-                for (int i = 0; i < waypoints.Length; i++)
+                for (int i = 0; i < zone.waypoints.Length; i++)
                 {
-                    Gizmos.DrawSphere(waypoints[i], 0.5f);
-
-                    if (i < waypoints.Length - 1)
+                    Gizmos.DrawSphere(zone.waypoints[i], 0.3f);
+                    if (i < zone.waypoints.Length - 1)
                     {
-                        Gizmos.DrawLine(waypoints[i], waypoints[i + 1]);
+                        Gizmos.DrawLine(zone.waypoints[i], zone.waypoints[i + 1]);
                     }
-
-                    // Подписываем точки
-#if UNITY_EDITOR
-                    UnityEditor.Handles.Label(waypoints[i] + Vector3.up, $"Точка {i + 1}");
-#endif
                 }
             }
         }
     }
 
-    // Триггер для взаимодействия (альтернативный метод)
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.CompareTag("Player") && !hasInteracted)
-        {
-            playerTransform = other.transform;
-            Debug.Log("Игрок вошел в зону взаимодействия");
-        }
-    }
-
-    private void OnTriggerExit(Collider other)
-    {
-        if (other.CompareTag("Player"))
-        {
-            Debug.Log("Игрок вышел из зоны взаимодействия");
-        }
-    }
-
-    // Публичные методы для управления из других скриптов
-    public void ForceStartMovement()
-    {
-        OnInteract();
-    }
-
-    public bool IsMoving()
-    {
-        return isMoving;
-    }
-
-    public bool HasInteracted()
-    {
-        return hasInteracted;
-    }
+    public bool IsHeld() => currentState == State.Held;
+    public bool IsMoving() => currentState == State.Moving;
+    public bool IsIdle() => currentState == State.Idle;
 }
