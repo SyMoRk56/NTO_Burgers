@@ -59,7 +59,7 @@ public class DialogueRunner : MonoBehaviour
                 Debug.LogError($"No dialogues found for type: letter={letter}");
                 return;
             }
-
+            dialogueUI = GetComponentInChildren<DialogueUI>(true);
             dialogueUI.gameObject.SetActive(true);
             ShowCurrentPhrase();
             isRunning = true;
@@ -168,5 +168,9 @@ public class DialogueRunner : MonoBehaviour
 
         if (dialogueUI != null)
             dialogueUI.ForceHide();
+    }
+    private void Start()
+    {
+        dialogueUI = GetComponentInChildren<DialogueUI>(true);
     }
 }
