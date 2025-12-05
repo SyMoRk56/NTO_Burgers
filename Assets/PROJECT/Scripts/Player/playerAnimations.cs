@@ -1,8 +1,21 @@
-using UnityEngine;
+п»їusing UnityEngine;
+
+public enum States
+{
+    idle,           // 0
+    walk,           // 1  
+    jump,           // 2
+    carry_idle,     // 3
+    carry_walk,     // 4
+    carry_jump,     // 5
+    fishing_bros,   // 6 в†ђ Р”РћР‘РђР’РР›Р
+    fishing_idle    // 7 в†ђ Р”РћР‘РђР’РР›Р
+}
 
 public class playerAnimations : MonoBehaviour
 {
     public Animator anim;
+
     private void Awake()
     {
         anim = GetComponentInChildren<Animator>();
@@ -14,50 +27,38 @@ public class playerAnimations : MonoBehaviour
         set { anim.SetInteger("hamsterState", (int)value); }
     }
 
-    // Добавляем перегрузку методов с параметром isCarrying
+    // === РњР•РўРћР”Р« Р”Р›РЇ Р Р«Р‘РђР›РљР ===
+    public void StartFishing()
+    {
+        State = States.fishing_bros;
+        Debug.Log("РђРЅРёРјР°С†РёСЏ: fishing_bros (6)");
+    }
+
+    public void FishingIdle()
+    {
+        State = States.fishing_idle;
+        Debug.Log("РђРЅРёРјР°С†РёСЏ: fishing_idle (7)");
+    }
+
+    public void EndFishing()
+    {
+        State = States.idle;
+        Debug.Log("РђРЅРёРјР°С†РёСЏ: idle (0)");
+    }
+
+    // === РЎРўРђР Р«Р• РњР•РўРћР”Р« ===
     public void HeroIdleAnim(bool isCarrying = false)
     {
-        if (isCarrying)
-            State = States.carry_idle;
-        else
-            State = States.idle;
+        State = isCarrying ? States.carry_idle : States.idle;
     }
 
     public void HeroWalkAnim(bool isCarrying = false)
     {
-        print("SET WALK");
-        if (isCarrying)
-            State = States.carry_walk;
-        else
-            State = States.walk;
+        State = isCarrying ? States.carry_walk : States.walk;
     }
 
     public void HeroJumpAnim(bool isCarrying = false)
     {
-        if (isCarrying)
-            State = States.carry_jump;
-        else
-            State = States.jump;
+        State = isCarrying ? States.carry_jump : States.jump;
     }
-
-    public void DelaySetStateIdle()
-    {
-
-    }
-
-    void S()
-    {
-        State = States.idle;
-    }
-}
-
-// Расширяем enum для поддержки анимаций с переноской
-public enum States
-{
-    idle,
-    walk,
-    jump,
-    carry_idle,    // Стоит с объектом
-    carry_walk,    // Идет с объектом
-    carry_jump     // Прыгает с объектом
 }

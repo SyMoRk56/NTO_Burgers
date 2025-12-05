@@ -3,310 +3,304 @@ using System.Collections;
 
 public class FishingSpot : MonoBehaviour
 {
-    [Header("Ссылки")]
-    public GameObject fishingUI;
-    public GameObject fishPrefab;
-    public GameObject npcPrefab; // Префаб NPC, который появится
+    [Header("References")]
+    [SerializeField] private Transform fishingRod;
+    [SerializeField] private GameObject fishPrefab;
+    [SerializeField] private Transform fishSpawnPoint;
 
-    [Header("Настройки рыбалки")]
-    [Range(0f, 1f)] public float successChance = 0.8f; // 80% шанс поймать рыбу
-    [Range(0f, 1f)] public float npcSpawnChance = 0.2f; // 20% шанс появления NPC
+    [Header("Settings")]
+    [SerializeField] private Vector3 rodCastRotation = new Vector3(-30f, 0f, 0f);
+    [SerializeField] private Vector3 rodIdleRotation = Vector3.zero;
+    [SerializeField] private float fishFlyDuration = 2f;
+    [SerializeField] private float fishSpawnDelay = 0.5f;
 
-    [Header("Точка появления NPC")]
-    public Transform npcSpawnPoint; // Точка, где появится NPC
+    // Состояния
+    private bool isPlayerInRange = false;
+    private bool isFishingActive = false;
+    private bool isRodCast = false;
+    private GameObject currentPlayer;
 
-    [Header("Тайминги")]
-    public float fishingTime = 2f; // Время рыбалки
-    public float fishAttachTime = 2f; // Время перемещения рыбы к игроку
-    public float npcWaitTime = 5f; // Время ожидания NPC у игрока
-
-    // Приватные переменные
-    private bool isPlayerNear = false;
-    private bool isFishing = false;
-    private GameObject spawnedFish;
-    private NPCController currentNPC;
-    private PlayerMovement playerMovement;
+    // Компоненты игрока
+    private playerAnimations playerAnim;
+    private PlayerManager playerManager;
+    private CharacterController characterController;
+    private Transform playerModel; // Модель игрока (дочерний объект)
 
     void Start()
     {
-        Debug.Log($"FishingSpot: Инициализирован на {gameObject.name}");
-
-        // Находим компонент движения игрока
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
-        if (player != null)
+        // Автоматически находим удочку по тегу
+        if (fishingRod == null)
         {
-            playerMovement = player.GetComponent<PlayerMovement>();
-            Debug.Log($"FishingSpot: Найден игрок - {player.name}");
-        }
-        else
-        {
-            Debug.LogError("FishingSpot: Игрок не найден!");
+            Transform rod = FindChildWithTag(transform, "fishrod");
+            if (rod != null) fishingRod = rod;
         }
     }
 
     void Update()
     {
-        // Проверяем, можно ли начать рыбалку
-        if (isPlayerNear && !isFishing)
+        if (!isPlayerInRange || currentPlayer == null) return;
+
+        if (Input.GetKeyDown(KeyCode.E))
         {
-            if (Input.GetKeyDown(KeyCode.E))
+            if (!isFishingActive)
             {
                 StartFishing();
             }
-        }
-
-        // Для теста: нажмите F для принудительного запуска
-        if (Input.GetKeyDown(KeyCode.F))
-        {
-            Debug.Log("Тест: принудительный запуск полной последовательности");
-            StartCoroutine(TestFullSequence());
-        }
-    }
-
-    void StartFishing()
-    {
-        if (isFishing) return;
-
-        isFishing = true;
-        Debug.Log("FishingSpot: Начало рыбалки...");
-
-        if (fishingUI != null)
-        {
-            fishingUI.SetActive(false);
-        }
-
-        StartCoroutine(FishingProcess());
-    }
-
-    IEnumerator FishingProcess()
-    {
-        // Ждем время рыбалки
-        yield return new WaitForSeconds(fishingTime);
-
-        // Проверяем успешность рыбалки (80% шанс)
-        bool catchSuccess = Random.Range(0f, 1f) <= successChance;
-
-        if (catchSuccess)
-        {
-            Debug.Log("FishingSpot: Рыба поймана!");
-
-            // Показываем рыбу у игрока на 2 секунды
-            yield return StartCoroutine(ShowFishAtPlayer());
-
-            // Проверяем шанс появления NPC (20%)
-            bool spawnNPC = Random.Range(0f, 1f) <= npcSpawnChance;
-
-            if (spawnNPC && npcPrefab != null && npcSpawnPoint != null)
+            else if (!isRodCast)
             {
-                Debug.Log("FishingSpot: Случилось чудо! Появится NPC!");
-                yield return StartCoroutine(SpawnNPCAndWait());
+                CastRod();
             }
             else
             {
-                Debug.Log("FishingSpot: NPC не появился (не выпал шанс или нет префаба)");
+                ReelRod();
             }
-        }
-        else
-        {
-            Debug.Log("FishingSpot: Рыба сорвалась!");
-        }
-
-        isFishing = false;
-
-        if (fishingUI != null && isPlayerNear)
-        {
-            fishingUI.SetActive(true);
         }
     }
 
-    IEnumerator ShowFishAtPlayer()
+    private void StartFishing()
     {
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
-        if (player != null && fishPrefab != null)
-        {
-            // Создаем рыбу у игрока
-            spawnedFish = Instantiate(fishPrefab, player.transform);
-            spawnedFish.transform.localPosition = Vector3.up * 2f;
-            Debug.Log("FishingSpot: Рыба появилась у игрока");
+        // Получаем компоненты
+        playerAnim = currentPlayer.GetComponent<playerAnimations>();
+        playerManager = currentPlayer.GetComponent<PlayerManager>();
+        characterController = currentPlayer.GetComponent<CharacterController>();
 
-            // Теперь НИКАКОГО Destroy(spawnedFish)!
-            // Рыба должна остаться до прихода NPC
+        // Находим модель игрока по тегу
+        playerModel = FindChildWithTag(currentPlayer.transform, "model");
+
+        if (playerAnim == null)
+        {
+            Debug.LogError("Нет компонента playerAnimations!");
+            return;
+        }
+
+        if (playerManager == null)
+        {
+            Debug.LogError("Нет компонента PlayerManager!");
+            return;
+        }
+
+        // 1. Блокируем движение
+        playerManager.CanMove = false;
+
+        // 2. Отключаем CharacterController
+        if (characterController != null)
+        {
+            characterController.enabled = false;
+        }
+
+        // 3. Позиционируем ИГРОКА (родителя) в точку рыбалки
+        currentPlayer.transform.position = transform.position;
+
+        // 4. Поворачиваем только МОДЕЛЬ (дочерний объект)
+        if (playerModel != null)
+        {
+            playerModel.rotation = transform.rotation;
+            Debug.Log("Повернули модель игрока");
+        }
+        else
+        {
+            // Если нет модели, поворачиваем весь объект
+            currentPlayer.transform.rotation = transform.rotation;
+            Debug.LogWarning("Не найдена модель игрока (тег 'model'). Поворачиваем весь объект.");
+        }
+
+        // 5. Включаем анимацию fishing_bros
+        playerAnim.StartFishing();
+
+        isFishingActive = true;
+        isRodCast = false;
+
+        Debug.Log("Рыбалка начата! Нажми E для заброса");
+    }
+
+    private void CastRod()
+    {
+        // 1. Поворачиваем удочку
+        if (fishingRod != null)
+        {
+            fishingRod.localEulerAngles = rodCastRotation;
+            Debug.Log("Удочка повернута");
+        }
+
+        // 2. Меняем анимацию на fishing_idle
+        if (playerAnim != null)
+        {
+            playerAnim.FishingIdle();
+        }
+
+        isRodCast = true;
+        Debug.Log("Удочка заброшена! Нажми E чтобы вытащить");
+    }
+
+    private void ReelRod()
+    {
+        // 1. Возвращаем удочку в исходное положение
+        if (fishingRod != null)
+        {
+            fishingRod.localEulerAngles = rodIdleRotation;
+        }
+
+        // 2. Возвращаем анимацию fishing_bros
+        if (playerAnim != null)
+        {
+            playerAnim.StartFishing();
+        }
+
+        // 3. Создаем рыбу с задержкой
+        if (fishPrefab != null && fishSpawnPoint != null)
+        {
+            Invoke(nameof(SpawnFish), fishSpawnDelay);
+        }
+
+        isRodCast = false;
+
+        // 4. Завершаем рыбалку через 1 секунду
+        Invoke(nameof(EndFishing), fishSpawnDelay + 1f);
+    }
+
+    private void SpawnFish()
+    {
+        if (fishPrefab != null && fishSpawnPoint != null)
+        {
+            GameObject fish = Instantiate(fishPrefab, fishSpawnPoint.position, Quaternion.identity);
+            StartCoroutine(FlyFish(fish));
+            Destroy(fish, 5f);
+            Debug.Log("Рыба создана!");
+        }
+    }
+
+    private IEnumerator FlyFish(GameObject fish)
+    {
+        float time = 0f;
+        Vector3 startPos = fish.transform.position;
+
+        // Цель - перед игроком на высоте груди
+        Vector3 targetPos = currentPlayer.transform.position +
+                           (playerModel != null ? playerModel.forward : currentPlayer.transform.forward) * 1f +
+                           Vector3.up * 0.8f;
+
+        while (time < fishFlyDuration)
+        {
+            if (fish == null) yield break;
+
+            fish.transform.position = Vector3.Lerp(startPos, targetPos, time / fishFlyDuration);
+
+            // Поворачиваем рыбу в направлении движения
+            if (time > 0.1f)
+            {
+                Vector3 direction = (targetPos - fish.transform.position).normalized;
+                if (direction != Vector3.zero)
+                {
+                    fish.transform.rotation = Quaternion.LookRotation(direction);
+                }
+            }
+
+            time += Time.deltaTime;
             yield return null;
         }
     }
 
-
-    IEnumerator SpawnNPCAndWait()
+    private void EndFishing()
     {
-        // 1. Блокируем движение игрока
-        if (playerMovement != null)
+        // 1. Разрешаем движение
+        if (playerManager != null)
         {
-            playerMovement.enabled = false;
-            Debug.Log("FishingSpot: Движение игрока заблокировано");
+            playerManager.CanMove = true;
         }
 
-        // 2. Создаем NPC в указанной точке
-        GameObject npcObject = Instantiate(npcPrefab, npcSpawnPoint.position, npcSpawnPoint.rotation);
-        currentNPC = npcObject.GetComponent<NPCController>();
-
-        if (currentNPC == null)
+        // 2. Включаем CharacterController
+        if (characterController != null)
         {
-            currentNPC = npcObject.AddComponent<NPCController>();
+            characterController.enabled = true;
         }
 
-        Debug.Log($"FishingSpot: NPC создан в точке {npcSpawnPoint.position}");
-
-        // 3. Заставляем NPC подойти к игроку
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
-        if (player != null)
+        // 3. Выключаем анимацию рыбалки
+        if (playerAnim != null)
         {
-            currentNPC.StartApproach(player.transform);
-
-            // Ждем, пока NPC подойдет к игроку
-            yield return new WaitUntil(() => currentNPC.HasReachedPlayer());
-            Debug.Log("FishingSpot: NPC подошел к игроку");
-
-            // ============================
-            //     ВОТ СЮДА ВСТАВЛЯТЬ !!!
-            // ============================
-
-            // === УДАЛЯЕМ РЫБУ ТОЛЬКО СЕЙЧАС ===
-            if (spawnedFish != null)
-            {
-                Destroy(spawnedFish);
-                spawnedFish = null;
-                Debug.Log("FishingSpot: Рыба забрана NPC");
-            }
+            playerAnim.EndFishing();
         }
 
-        // 4. NPC стоит 5 секунд
-        Debug.Log($"FishingSpot: NPC стоит у игрока {npcWaitTime} секунд");
-        yield return new WaitForSeconds(npcWaitTime);
+        // 4. Сбрасываем состояния
+        isFishingActive = false;
+        isRodCast = false;
 
-        // 5. NPC уходит
-        Debug.Log("FishingSpot: NPC уходит");
-        currentNPC.GoAway();
+        Debug.Log("Рыбалка завершена!");
+    }
 
-        // Ждем пока NPC уйдет
-        yield return new WaitForSeconds(2f);
-
-        // 6. Разрешаем игроку ходить
-        if (playerMovement != null)
+    private void CancelFishing()
+    {
+        if (isFishingActive)
         {
-            playerMovement.enabled = true;
-            Debug.Log("FishingSpot: Движение игрока восстановлено");
+            CancelInvoke(nameof(EndFishing));
+            CancelInvoke(nameof(SpawnFish));
+            EndFishing();
         }
     }
 
-
-    IEnumerator TestFullSequence()
+    private Transform FindChildWithTag(Transform parent, string tag)
     {
-        Debug.Log("=== ТЕСТ ПОЛНОЙ ПОСЛЕДОВАТЕЛЬНОСТИ ===");
-
-        // Блокируем движение
-        if (playerMovement != null)
+        foreach (Transform child in parent)
         {
-            playerMovement.enabled = false;
+            if (child.CompareTag(tag))
+                return child;
+
+            Transform result = FindChildWithTag(child, tag);
+            if (result != null)
+                return result;
         }
-
-        // Создаем NPC для теста
-        if (npcPrefab != null && npcSpawnPoint != null)
-        {
-            GameObject npcObject = Instantiate(npcPrefab, npcSpawnPoint.position, npcSpawnPoint.rotation);
-            currentNPC = npcObject.GetComponent<NPCController>();
-
-            if (currentNPC == null)
-            {
-                currentNPC = npcObject.AddComponent<NPCController>();
-            }
-
-            Debug.Log("Тест: NPC создан");
-
-            // NPC подходит к игроку
-            GameObject player = GameObject.FindGameObjectWithTag("Player");
-            if (player != null)
-            {
-                currentNPC.StartApproach(player.transform);
-
-                yield return new WaitUntil(() => currentNPC.HasReachedPlayer());
-                Debug.Log("Тест: NPC подошел к игроку");
-
-                // Ждем 5 секунд
-                yield return new WaitForSeconds(5f);
-
-                // NPC уходит
-                currentNPC.GoAway();
-
-                yield return new WaitForSeconds(2f);
-            }
-        }
-
-        // Восстанавливаем движение
-        if (playerMovement != null)
-        {
-            playerMovement.enabled = true;
-        }
-
-        Debug.Log("=== ТЕСТ ЗАВЕРШЕН ===");
+        return null;
     }
 
-    void OnTriggerEnter(Collider other)
+    private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Player"))
         {
-            isPlayerNear = true;
-            if (fishingUI != null)
-                fishingUI.SetActive(true);
-
-            Debug.Log("FishingSpot: Игрок вошел в зону рыбалки");
+            isPlayerInRange = true;
+            currentPlayer = other.gameObject;
+            Debug.Log("Игрок в зоне рыбалки");
         }
     }
 
-    void OnTriggerExit(Collider other)
+    private void OnTriggerExit(Collider other)
     {
         if (other.CompareTag("Player"))
         {
-            isPlayerNear = false;
-            if (fishingUI != null)
-                fishingUI.SetActive(false);
+            isPlayerInRange = false;
 
-            // Сбрасываем рыбалку, если игрок ушел
-            if (isFishing)
+            if (isFishingActive)
             {
-                isFishing = false;
-                StopAllCoroutines();
-
-                // Уничтожаем рыбу, если она была
-                if (spawnedFish != null)
-                {
-                    Destroy(spawnedFish);
-                }
-
-                // Уничтожаем NPC, если он был
-                if (currentNPC != null)
-                {
-                    Destroy(currentNPC.gameObject);
-                }
-
-                // Восстанавливаем движение
-                if (playerMovement != null)
-                {
-                    playerMovement.enabled = true;
-                }
-
-                Debug.Log("FishingSpot: Рыбалка прервана - игрок ушел");
+                CancelFishing();
             }
+
+            currentPlayer = null;
         }
     }
 
-    void OnDrawGizmosSelected()
+    private void OnDestroy()
     {
-        // Показываем точку появления NPC
-        if (npcSpawnPoint != null)
+        CancelFishing();
+    }
+
+    // Отладка
+    private void OnDrawGizmos()
+    {
+        if (isPlayerInRange)
         {
-            Gizmos.color = Color.yellow;
-            Gizmos.DrawWireSphere(npcSpawnPoint.position, 1f);
-            Gizmos.DrawLine(transform.position, npcSpawnPoint.position);
+            Gizmos.color = Color.green;
+            Gizmos.DrawWireSphere(transform.position, 0.5f);
+        }
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, GetComponent<Collider>().bounds.extents.magnitude);
+
+        if (fishSpawnPoint != null)
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawSphere(fishSpawnPoint.position, 0.1f);
+            Gizmos.DrawWireSphere(fishSpawnPoint.position, 0.3f);
         }
     }
 }
