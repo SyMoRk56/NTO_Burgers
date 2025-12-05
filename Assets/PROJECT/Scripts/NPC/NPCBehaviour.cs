@@ -18,7 +18,16 @@ public class NPCBehaviour : MonoBehaviour
     {
         animator = GetComponentInChildren<Animator>();
         if (agent == null) agent = GetComponent<NavMeshAgent>();
+
+        // Отключаем встроенный поворот агента
+        agent.updateRotation = false;
+
         StartCoroutine(ActionRoutine());
+    }
+
+    private void Update()
+    {
+        RotateTowardsMovementDirection();
     }
 
     private IEnumerator ActionRoutine()
@@ -53,16 +62,24 @@ public class NPCBehaviour : MonoBehaviour
 
         agent.isStopped = false;
         agent.SetDestination(target.position);
+        animator = GetComponentInChildren<Animator>();
+        if(animator != null)
         animator.SetBool(moveAnimParameter, true);
+
         print("Move " + name);
-        while (Vector3.Distance(new Vector3(transform.position.x, 0, transform.position.z), new Vector3(target.position.x, 0, target.position.z)) > agent.stoppingDistance)
+
+        while (agent.pathPending ||
+       agent.remainingDistance > agent.stoppingDistance ||
+       agent.velocity.sqrMagnitude > 0.01f)
         {
             yield return null;
         }
 
+        if(animator != null)
         animator.SetBool(moveAnimParameter, false);
         print("EndMoving");
-        var r = Random.Range(waitRange.x, waitRange.y);
+
+        float r = Random.Range(waitRange.x, waitRange.y);
         print(r);
         yield return new WaitForSeconds(r);
     }
@@ -78,7 +95,10 @@ public class NPCBehaviour : MonoBehaviour
         agent.SetDestination(act.interactObject.position);
         animator.SetBool(moveAnimParameter, true);
 
-        while (Vector3.Distance(new Vector3(transform.position.x, 0, transform.position.z), new Vector3(act.interactObject.position.x, 0, act.interactObject.position.z)) > act.interactionDistance)
+        while (Vector3.Distance(
+            new Vector3(transform.position.x, 0, transform.position.z),
+            new Vector3(act.interactObject.position.x, 0, act.interactObject.position.z)
+        ) > act.interactionDistance)
         {
             yield return null;
         }
@@ -91,6 +111,27 @@ public class NPCBehaviour : MonoBehaviour
         yield return new WaitForSeconds(act.interactionDuration);
 
         agent.isStopped = false;
+    }
+
+    // -------------------------------------------
+    //   ROTATION TO MOVEMENT DIRECTION
+    // -------------------------------------------
+    private void RotateTowardsMovementDirection()
+    {
+        if (agent.velocity.sqrMagnitude < 0.01f) return;
+
+        Vector3 dir = agent.velocity.normalized;
+        dir.y = 0;
+
+        if (dir == Vector3.zero) return;
+
+        Quaternion targetRot = Quaternion.LookRotation(dir);
+
+        transform.rotation = Quaternion.Slerp(
+            transform.rotation,
+            targetRot,
+            Time.deltaTime * 8f   // скорость поворота, можешь менять
+        );
     }
 }
 
