@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 
 public class FishingSpot : MonoBehaviour
@@ -7,38 +8,87 @@ public class FishingSpot : MonoBehaviour
     [SerializeField] private Transform fishingRod;
     [SerializeField] private GameObject fishPrefab;
     [SerializeField] private Transform fishSpawnPoint;
+    [SerializeField] private Text cooldownText; // UI текст для отображения кулдауна
 
-    [Header("Settings")]
-    [SerializeField] private Vector3 rodCastRotation = new Vector3(-30f, 0f, 0f);
-    [SerializeField] private Vector3 rodIdleRotation = Vector3.zero;
+    [Header("Настройки удочки")]
+    [SerializeField] private Vector3 rodStartRotation = new Vector3(0f, 0f, 20f);
+    [SerializeField] private Vector3 rodStartPosition = Vector3.zero;
+    [SerializeField] private Vector3 rodCastRotation = new Vector3(-30f, 0f, -15f);
+    [SerializeField] private Vector3 rodCastPosition = new Vector3(0f, 0.1f, 0f);
+    [SerializeField] private Vector3 rodIdleRotation = new Vector3(-45f, 0f, 0f);
+    [SerializeField] private Vector3 rodIdlePosition = new Vector3(0f, -0.05f, 0f);
+    [SerializeField] private float rodAnimationDuration = 0.3f;
+
+    [Header("Настройки рыбы")]
     [SerializeField] private float fishFlyDuration = 2f;
     [SerializeField] private float fishSpawnDelay = 0.5f;
+    [SerializeField] private float minFishSize = 0.2f; // Минимальный размер рыбы
+    [SerializeField] private float maxFishSize = 3f;   // Максимальный размер рыбы
+    [SerializeField] private float maxGrowthTime = 10f; // Время для достижения максимального размера
+
+    [Header("Настройки кулдауна")]
+    [SerializeField] private float cooldownDuration = 30f; // Кулдаун в секундах
+    [SerializeField] private Color activeColor = Color.white;
+    [SerializeField] private Color cooldownColor = Color.red;
 
     // Состояния
     private bool isPlayerInRange = false;
     private bool isFishingActive = false;
     private bool isRodCast = false;
+    private bool isOnCooldown = false;
     private GameObject currentPlayer;
+
+    // Таймеры
+    private float fishingStartTime; // Время начала рыбалки (заброса)
+    private float cooldownEndTime; // Время окончания кулдауна
+    private float fishGrowthTime; // Время роста рыбы
 
     // Компоненты игрока
     private playerAnimations playerAnim;
     private PlayerManager playerManager;
     private CharacterController characterController;
-    private Transform playerModel; // Модель игрока (дочерний объект)
+    private Transform playerModel;
+
+    // Ссылка на корутину анимации удочки
+    private Coroutine rodAnimationCoroutine;
 
     void Start()
     {
         // Автоматически находим удочку по тегу
         if (fishingRod == null)
         {
-            Transform rod = FindChildWithTag(transform, "fishrod");
-            if (rod != null) fishingRod = rod;
+            fishingRod = FindChildWithTag(transform, "fishrod");
+        }
+
+        // Устанавливаем удочку в начальное положение
+        if (fishingRod != null)
+        {
+            fishingRod.localEulerAngles = rodStartRotation;
+            fishingRod.localPosition = rodStartPosition;
+        }
+
+        // Скрываем текст кулдауна
+        if (cooldownText != null)
+        {
+            cooldownText.gameObject.SetActive(false);
         }
     }
 
     void Update()
     {
+        if (isOnCooldown)
+        {
+            UpdateCooldownUI();
+        }
+
         if (!isPlayerInRange || currentPlayer == null) return;
+
+        // Если кулдаун активен, не разрешаем начинать новую рыбалку
+        if (isOnCooldown && !isFishingActive)
+        {
+            Debug.Log("Кулдаун активен, подождите");
+            return;
+        }
 
         if (Input.GetKeyDown(KeyCode.E))
         {
@@ -88,23 +138,36 @@ public class FishingSpot : MonoBehaviour
             characterController.enabled = false;
         }
 
-        // 3. Позиционируем ИГРОКА (родителя) в точку рыбалки
+        // 3. Позиционируем игрока
         currentPlayer.transform.position = transform.position;
+        currentPlayer.transform.Rotate(0, -100, 0, Space.World);
+        playerModel.transform.Rotate(0, -100, 0, Space.World);
 
-        // 4. Поворачиваем только МОДЕЛЬ (дочерний объект)
-        if (playerModel != null)
+
+        //4.Поворачиваем модель игрока
+        //if (playerModel != null)
+        //{
+        //    playerModel.rotation = transform.rotation;
+        //}
+        //else
+        //{
+        //    currentPlayer.transform.rotation = transform.rotation;
+        //}
+
+        // 5. Устанавливаем удочку в начальное положение
+        if (fishingRod != null)
         {
-            playerModel.rotation = transform.rotation;
-            Debug.Log("Повернули модель игрока");
-        }
-        else
-        {
-            // Если нет модели, поворачиваем весь объект
-            currentPlayer.transform.rotation = transform.rotation;
-            Debug.LogWarning("Не найдена модель игрока (тег 'model'). Поворачиваем весь объект.");
+            if (rodAnimationCoroutine != null)
+                StopCoroutine(rodAnimationCoroutine);
+
+            rodAnimationCoroutine = StartCoroutine(AnimateRod(
+                rodStartRotation,
+                rodStartPosition,
+                rodAnimationDuration
+            ));
         }
 
-        // 5. Включаем анимацию fishing_bros
+        // 6. Включаем анимацию fishing_bros
         playerAnim.StartFishing();
 
         isFishingActive = true;
@@ -115,14 +178,23 @@ public class FishingSpot : MonoBehaviour
 
     private void CastRod()
     {
-        // 1. Поворачиваем удочку
+        // Запоминаем время начала рыбалки (для расчета размера рыбы)
+        fishingStartTime = Time.time;
+
+        // 1. Анимируем удочку - плавный заброс
         if (fishingRod != null)
         {
-            fishingRod.localEulerAngles = rodCastRotation;
-            Debug.Log("Удочка повернута");
+            if (rodAnimationCoroutine != null)
+                StopCoroutine(rodAnimationCoroutine);
+
+            rodAnimationCoroutine = StartCoroutine(AnimateRod(
+                rodCastRotation,
+                rodCastPosition,
+                rodAnimationDuration
+            ));
         }
 
-        // 2. Меняем анимацию на fishing_idle
+        // 2. Меняем анимацию игрока на fishing_idle
         if (playerAnim != null)
         {
             playerAnim.FishingIdle();
@@ -134,10 +206,26 @@ public class FishingSpot : MonoBehaviour
 
     private void ReelRod()
     {
-        // 1. Возвращаем удочку в исходное положение
+        // Вычисляем время, которое удочка была заброшена
+        fishGrowthTime = Time.time - fishingStartTime;
+
+        // Ограничиваем время роста максимальным значением
+        if (fishGrowthTime > maxGrowthTime)
+            fishGrowthTime = maxGrowthTime;
+
+        Debug.Log($"Рыба росла {fishGrowthTime:F1} секунд");
+
+        // 1. Возвращаем удочку в начальное положение
         if (fishingRod != null)
         {
-            fishingRod.localEulerAngles = rodIdleRotation;
+            if (rodAnimationCoroutine != null)
+                StopCoroutine(rodAnimationCoroutine);
+
+            rodAnimationCoroutine = StartCoroutine(AnimateRod(
+                rodStartRotation,
+                rodStartPosition,
+                rodAnimationDuration
+            ));
         }
 
         // 2. Возвращаем анимацию fishing_bros
@@ -146,16 +234,16 @@ public class FishingSpot : MonoBehaviour
             playerAnim.StartFishing();
         }
 
-        // 3. Создаем рыбу с задержкой
+        // 3. Создаем рыбу с задержкой, передавая время роста
         if (fishPrefab != null && fishSpawnPoint != null)
         {
             Invoke(nameof(SpawnFish), fishSpawnDelay);
         }
 
-        isRodCast = false;
-
-        // 4. Завершаем рыбалку через 1 секунду
+        // 4. Завершаем рыбалку
         Invoke(nameof(EndFishing), fishSpawnDelay + 1f);
+
+        isRodCast = false;
     }
 
     private void SpawnFish()
@@ -163,27 +251,48 @@ public class FishingSpot : MonoBehaviour
         if (fishPrefab != null && fishSpawnPoint != null)
         {
             GameObject fish = Instantiate(fishPrefab, fishSpawnPoint.position, Quaternion.identity);
-            StartCoroutine(FlyFish(fish));
+
+            // Рассчитываем размер рыбы на основе времени роста
+            float fishSize = CalculateFishSize(fishGrowthTime);
+            fish.transform.localScale = Vector3.one * fishSize;
+
+            Debug.Log($"Размер рыбы: {fishSize:F2}x");
+
+            StartCoroutine(FlyFish(fish, fishSize));
             Destroy(fish, 5f);
-            Debug.Log("Рыба создана!");
         }
     }
 
-    private IEnumerator FlyFish(GameObject fish)
+    private float CalculateFishSize(float growthTime)
+    {
+        // Рассчитываем размер от minFishSize до maxFishSize в зависимости от времени
+        // Линейная интерполяция: размер = min + (growthTime/maxGrowthTime) * (max-min)
+        float normalizedTime = Mathf.Clamp01(growthTime / maxGrowthTime);
+        float size = minFishSize + normalizedTime * (maxFishSize - minFishSize);
+
+        // Можно добавить небольшую случайность (например, ±10%)
+        float randomFactor = Random.Range(0.9f, 1.1f);
+        return size * randomFactor;
+    }
+
+    private IEnumerator FlyFish(GameObject fish, float fishSize)
     {
         float time = 0f;
         Vector3 startPos = fish.transform.position;
 
-        // Цель - перед игроком на высоте груди
+        // Цель - немного перед игроком
         Vector3 targetPos = currentPlayer.transform.position +
                            (playerModel != null ? playerModel.forward : currentPlayer.transform.forward) * 1f +
-                           Vector3.up * 0.8f;
+                           Vector3.up * 1f;
 
         while (time < fishFlyDuration)
         {
             if (fish == null) yield break;
 
-            fish.transform.position = Vector3.Lerp(startPos, targetPos, time / fishFlyDuration);
+            float t = time / fishFlyDuration;
+            float smoothT = Mathf.SmoothStep(0f, 1f, t);
+
+            fish.transform.position = Vector3.Lerp(startPos, targetPos, smoothT);
 
             // Поворачиваем рыбу в направлении движения
             if (time > 0.1f)
@@ -197,6 +306,12 @@ public class FishingSpot : MonoBehaviour
 
             time += Time.deltaTime;
             yield return null;
+        }
+
+        // Гарантируем конечную позицию
+        if (fish != null)
+        {
+            fish.transform.position = targetPos;
         }
     }
 
@@ -224,13 +339,105 @@ public class FishingSpot : MonoBehaviour
         isFishingActive = false;
         isRodCast = false;
 
-        Debug.Log("Рыбалка завершена!");
+        // 5. Запускаем кулдаун
+        StartCooldown();
+
+        Debug.Log("Рыбалка завершена! Кулдаун 30 секунд.");
+    }
+
+    private void StartCooldown()
+    {
+        isOnCooldown = true;
+        cooldownEndTime = Time.time + cooldownDuration;
+
+        // Показываем UI кулдауна
+        if (cooldownText != null)
+        {
+            cooldownText.gameObject.SetActive(true);
+            cooldownText.color = cooldownColor;
+        }
+
+        // Запускаем проверку окончания кулдауна
+        StartCoroutine(CheckCooldown());
+    }
+
+    private IEnumerator CheckCooldown()
+    {
+        while (isOnCooldown && Time.time < cooldownEndTime)
+        {
+            UpdateCooldownUI();
+            yield return new WaitForSeconds(1f);
+        }
+
+        // Кулдаун закончился
+        isOnCooldown = false;
+
+        // Скрываем UI кулдауна
+        if (cooldownText != null)
+        {
+            cooldownText.gameObject.SetActive(false);
+        }
+
+        Debug.Log("Кулдаун завершен! Можно рыбачить снова.");
+    }
+
+    private void UpdateCooldownUI()
+    {
+        if (cooldownText == null || !isOnCooldown) return;
+
+        float timeLeft = cooldownEndTime - Time.time;
+
+        if (timeLeft <= 0)
+        {
+            cooldownText.text = "Можно рыбачить!";
+            cooldownText.color = activeColor;
+        }
+        else
+        {
+            int secondsLeft = Mathf.CeilToInt(timeLeft);
+            cooldownText.text = $"До следующей рыбалки: {secondsLeft} сек.";
+            cooldownText.color = cooldownColor;
+        }
+    }
+
+    // Корутина для плавной анимации удочки
+    private IEnumerator AnimateRod(Vector3 targetRotation, Vector3 targetPosition, float duration)
+    {
+        if (fishingRod == null) yield break;
+
+        Vector3 startRotation = fishingRod.localEulerAngles;
+        Vector3 startPosition = fishingRod.localPosition;
+
+        float time = 0f;
+
+        while (time < duration)
+        {
+            float t = time / duration;
+            float smoothT = Mathf.SmoothStep(0f, 1f, t);
+
+            fishingRod.localEulerAngles = Vector3.Lerp(startRotation, targetRotation, smoothT);
+            fishingRod.localPosition = Vector3.Lerp(startPosition, targetPosition, smoothT);
+
+            time += Time.deltaTime;
+            yield return null;
+        }
+
+        fishingRod.localEulerAngles = targetRotation;
+        fishingRod.localPosition = targetPosition;
+        rodAnimationCoroutine = null;
     }
 
     private void CancelFishing()
     {
         if (isFishingActive)
         {
+            // Останавливаем все корутины
+            if (rodAnimationCoroutine != null)
+            {
+                StopCoroutine(rodAnimationCoroutine);
+                rodAnimationCoroutine = null;
+            }
+
             CancelInvoke(nameof(EndFishing));
             CancelInvoke(nameof(SpawnFish));
             EndFishing();
@@ -257,6 +464,13 @@ public class FishingSpot : MonoBehaviour
         {
             isPlayerInRange = true;
             currentPlayer = other.gameObject;
+
+            // Показываем UI, если активен кулдаун
+            if (isOnCooldown && cooldownText != null)
+            {
+                cooldownText.gameObject.SetActive(true);
+            }
+
             Debug.Log("Игрок в зоне рыбалки");
         }
     }
@@ -266,6 +480,12 @@ public class FishingSpot : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             isPlayerInRange = false;
+
+            // Скрываем UI кулдауна при выходе из зоны
+            if (cooldownText != null && !isFishingActive)
+            {
+                cooldownText.gameObject.SetActive(false);
+            }
 
             if (isFishingActive)
             {
@@ -281,16 +501,7 @@ public class FishingSpot : MonoBehaviour
         CancelFishing();
     }
 
-    // Отладка
-    private void OnDrawGizmos()
-    {
-        if (isPlayerInRange)
-        {
-            Gizmos.color = Color.green;
-            Gizmos.DrawWireSphere(transform.position, 0.5f);
-        }
-    }
-
+    // Отладка в редакторе
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.yellow;

@@ -8,8 +8,8 @@ public enum States
     carry_idle,     // 3
     carry_walk,     // 4
     carry_jump,     // 5
-    fishing_bros,   // 6 ← ДОБАВИЛИ
-    fishing_idle    // 7 ← ДОБАВИЛИ
+    fishing_bros,   // 6
+    fishing_idle    // 7 
 }
 
 public class playerAnimations : MonoBehaviour
