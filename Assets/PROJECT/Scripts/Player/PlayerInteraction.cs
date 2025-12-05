@@ -76,6 +76,12 @@ public class PlayerInteraction : MonoBehaviour
                     interactionHandled = true;
                     break;
                 }
+                if(hit.TryGetComponent(out Appletree applet))
+                {
+                    applet.Interact();
+                    interactionHandled = true;
+                    break;
+                }
             }
 
             if (!interactionHandled)
