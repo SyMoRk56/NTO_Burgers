@@ -22,7 +22,7 @@ public class AdressListMenu : MonoBehaviour
     }
     private void Start()
     {
-        label.GetComponent<RectTransform>().offsetMin = new Vector2(0, 1000 - 229.6246f * tasksParent.transform.childCount);
+        label.GetComponent<RectTransform>().offsetMin = new Vector2(240, 1000 - 229.6246f * tasksParent.transform.childCount);
     }
     void UpdateTasks()
     {
