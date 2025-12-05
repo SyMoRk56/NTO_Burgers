@@ -114,6 +114,13 @@ public class FishingSpot : MonoBehaviour
         playerManager = currentPlayer.GetComponent<PlayerManager>();
         characterController = currentPlayer.GetComponent<CharacterController>();
 
+        // Получаем PlayerMovement и ставим флаг рыбалки
+        PlayerMovement playerMovement = currentPlayer.GetComponent<PlayerMovement>();
+        if (playerMovement != null)
+        {
+            playerMovement.StartFishing();
+        }
+
         // Находим модель игрока по тегу
         playerModel = FindChildWithTag(currentPlayer.transform, "model");
 
@@ -140,19 +147,7 @@ public class FishingSpot : MonoBehaviour
 
         // 3. Позиционируем игрока
         currentPlayer.transform.position = transform.position;
-        currentPlayer.transform.Rotate(0, -100, 0, Space.World);
-        playerModel.transform.Rotate(0, -100, 0, Space.World);
-
-
-        //4.Поворачиваем модель игрока
-        //if (playerModel != null)
-        //{
-        //    playerModel.rotation = transform.rotation;
-        //}
-        //else
-        //{
-        //    currentPlayer.transform.rotation = transform.rotation;
-        //}
+        currentPlayer.transform.rotation = transform.rotation;
 
         // 5. Устанавливаем удочку в начальное положение
         if (fishingRod != null)
@@ -314,9 +309,15 @@ public class FishingSpot : MonoBehaviour
             fish.transform.position = targetPos;
         }
     }
-
     private void EndFishing()
     {
+        // Получаем PlayerMovement и снимаем флаг рыбалки
+        PlayerMovement playerMovement = currentPlayer.GetComponent<PlayerMovement>();
+        if (playerMovement != null)
+        {
+            playerMovement.EndFishing();
+        }
+
         // 1. Разрешаем движение
         if (playerManager != null)
         {
@@ -329,11 +330,8 @@ public class FishingSpot : MonoBehaviour
             characterController.enabled = true;
         }
 
-        // 3. Выключаем анимацию рыбалки
-        if (playerAnim != null)
-        {
-            playerAnim.EndFishing();
-        }
+        // 3. Выключаем анимацию рыбалки (через PlayerMovement.EndFishing())
+        // playerAnim.EndFishing(); // Уже вызывается в PlayerMovement.EndFishing()
 
         // 4. Сбрасываем состояния
         isFishingActive = false;

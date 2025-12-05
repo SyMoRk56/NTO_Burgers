@@ -20,9 +20,9 @@ public class PlayerMovement : MonoBehaviour
 
     public playerAnimations animScript;
 
-    public float idleTimeThreshold = 60f; // 1 минута
-    public ParticleSystem idleVFX; // Ссылка на VFX компонент
-    public Transform vfxSpawnPoint; // Точка появления VFX (опционально)
+    public float idleTimeThreshold = 60f;
+    public ParticleSystem idleVFX;
+    public Transform vfxSpawnPoint;
 
     private Rigidbody rb;
     private CapsuleCollider col;
@@ -54,7 +54,7 @@ public class PlayerMovement : MonoBehaviour
     public AudioClip[] woodSteps;
     public AudioClip[] stoneSteps;
 
-    public float stepInterval = 0.45f; // задержка между шагами
+    public float stepInterval = 0.45f;
     private float stepTimer = 0f;
 
     private Terrain terrain;
@@ -62,7 +62,10 @@ public class PlayerMovement : MonoBehaviour
     public AudioClip defaultStepSound;
 
     [Header("Состояние переноски")]
-    public bool isCarrying = false; // Глобальная переменная для отслеживания переноски
+    public bool isCarrying = false;
+
+    [Header("Рыбалка")]
+    public bool isFishing = false; // Новый флаг для рыбалки
 
     void Start()
     {
@@ -82,22 +85,27 @@ public class PlayerMovement : MonoBehaviour
         if (cameraTransform == null)
             cameraTransform = Camera.main.transform;
 
-        // Инициализация отслеживания бездействия
         lastPosition = transform.position;
         lastLookInput = Vector2.zero;
 
-        // Выключаем VFX на старте
         if (idleVFX != null && idleVFX.isPlaying)
             idleVFX.Stop();
     }
 
     void Update()
     {
+        // НЕ ВЫХОДИМ из Update при блокировке движения - проверяем рыбалку
         if (!manager.CanMove)
         {
-            animScript.HeroIdleAnim(isCarrying);
+            // Если мы в рыбалке - не меняем анимацию на idle
+            if (!isFishing)
+            {
+                animScript.HeroIdleAnim(isCarrying);
+            }
             ResetIdleTimer();
-            return;
+
+            // Выходим только если не рыбалка
+            if (!isFishing) return;
         }
 
         GetInput();
@@ -107,18 +115,23 @@ public class PlayerMovement : MonoBehaviour
         if (isGrounded && Keyboard.current.spaceKey.wasPressedThisFrame)
         {
             jumpRequested = true;
-            ResetIdleTimer(); // Сброс таймера при прыжке
+            ResetIdleTimer();
         }
     }
 
     private void OnDisable()
     {
-        animScript.HeroIdleAnim(isCarrying);
+        // Не меняем анимацию при отключении если мы в рыбалке
+        if (!isFishing)
+        {
+            animScript.HeroIdleAnim(isCarrying);
+        }
     }
 
     void FixedUpdate()
     {
-        if (!manager.CanMove || !GameManager.Instance.isGameGoing)
+        // Если движение заблокировано и не рыбалка - выходим
+        if ((!manager.CanMove || !GameManager.Instance.isGameGoing) && !isFishing)
         {
             ResetIdleTimer();
             return;
@@ -131,8 +144,7 @@ public class PlayerMovement : MonoBehaviour
         if (jumpRequested && isGrounded)
         {
             ExecuteJump();
-            // Обновляем анимацию прыжка с учетом переноски
-            if (animScript != null)
+            if (animScript != null && !isFishing)
             {
                 animScript.HeroJumpAnim(isCarrying);
             }
@@ -142,6 +154,13 @@ public class PlayerMovement : MonoBehaviour
 
     void GetInput()
     {
+        // Если рыбалка - игнорируем ввод движения
+        if (isFishing)
+        {
+            moveInput = Vector2.zero;
+            return;
+        }
+
         moveInput = Vector2.zero;
         if (Keyboard.current.wKey.isPressed)
         {
@@ -171,8 +190,8 @@ public class PlayerMovement : MonoBehaviour
 
         lookInput = Mouse.current.delta.ReadValue() * mouseSensitivity * 0.1f;
 
-        // Если не двигаемся и не прыгаем - idle анимация
-        if (moveInput.magnitude < 0.1f && isGrounded && !jumpRequested)
+        // Если не двигаемся и не прыгаем - idle анимация (кроме рыбалки)
+        if (moveInput.magnitude < 0.1f && isGrounded && !jumpRequested && !isFishing)
         {
             animScript.HeroIdleAnim(isCarrying);
         }
@@ -180,16 +199,18 @@ public class PlayerMovement : MonoBehaviour
 
     void HandleLook()
     {
-        //xRotation -= lookInput.y;
-        //xRotation = Mathf.Clamp(xRotation, -maxViewAngle, maxViewAngle);
-
-        //cameraTransform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
-
-        //transform.Rotate(Vector3.up * lookInput.x);
+        // Оставляем пустым или реализуй поворот камеры
     }
 
     void HandleMovement()
     {
+        // Если рыбалка - не двигаемся
+        if (isFishing)
+        {
+            rb.linearVelocity = new Vector3(0, rb.linearVelocity.y, 0);
+            return;
+        }
+
         Vector3 wishDir = (forwardVector.forward * moveInput.y + forwardVector.right * moveInput.x).normalized;
 
         float targetSpeed = GetTargetSpeed();
@@ -209,7 +230,7 @@ public class PlayerMovement : MonoBehaviour
 
     void ApplyFriction()
     {
-        if (isGrounded && moveInput.magnitude < 0.1f)
+        if (isGrounded && moveInput.magnitude < 0.1f && !isFishing)
         {
             Vector3 frictionVelocity = rb.linearVelocity;
             frictionVelocity.x *= 1f - friction * Time.fixedDeltaTime;
@@ -262,15 +283,27 @@ public class PlayerMovement : MonoBehaviour
         return baseSpeed * massSpeedFactor;
     }
 
+    // Методы для управления рыбалкой
+    public void StartFishing()
+    {
+        isFishing = true;
+        isCarrying = true; // В рыбалке мы "переносим" удочку
+    }
+
+    public void EndFishing()
+    {
+        isFishing = false;
+        isCarrying = false;
+        animScript.EndFishing();
+    }
+
     public void PlayStepSound()
     {
         if (!isGrounded)
             return;
 
-        // Проверка поверхности под ногами
         if (TryGetGroundCollider(out Collider ground))
         {
-            // Если это Terrain
             if (ground is TerrainCollider)
             {
                 AudioClip clip = GetFootstepSound();
@@ -282,7 +315,6 @@ public class PlayerMovement : MonoBehaviour
             }
         }
 
-        // Если НЕ террейн — играем другой звук
         if (defaultStepSound != null)
             step.PlayOneShot(defaultStepSound, 1f);
     }
@@ -311,19 +343,15 @@ public class PlayerMovement : MonoBehaviour
 
         switch (tex)
         {
-            case 1: // Sand / Wood
+            case 1:
                 targetArray = woodSteps;
                 break;
-
-            case 2: // Grass
+            case 2:
                 targetArray = grassSteps;
                 break;
-
-            case 3: // Stone
+            case 3:
                 targetArray = stoneSteps;
                 break;
-
-            // 0 — пустой террейн: можно возвращать null или подставлять дефолтный звук
             case 0:
             default:
                 return null;
@@ -364,10 +392,15 @@ public class PlayerMovement : MonoBehaviour
         return best;
     }
 
-    // Методы для отслеживания бездействия и управления VFX
     void UpdateIdleTimer()
     {
-        // Проверяем движение и вращение
+        // Если рыбалка - не отслеживаем бездействие
+        if (isFishing)
+        {
+            ResetIdleTimer();
+            return;
+        }
+
         bool isMoving = moveInput != Vector2.zero ||
                        transform.position != lastPosition ||
                        lookInput != Vector2.zero;
@@ -388,7 +421,6 @@ public class PlayerMovement : MonoBehaviour
             }
         }
 
-        // Сохраняем текущие значения для следующего кадра
         lastPosition = transform.position;
         lastLookInput = lookInput;
     }
@@ -407,7 +439,6 @@ public class PlayerMovement : MonoBehaviour
     {
         if (idleVFX != null)
         {
-            // Устанавливаем позицию VFX если указана точка спавна
             if (vfxSpawnPoint != null)
             {
                 idleVFX.transform.position = vfxSpawnPoint.position;
@@ -419,8 +450,6 @@ public class PlayerMovement : MonoBehaviour
 
             idleVFX.Play();
             isIdleVFXActive = true;
-
-            Debug.Log("Idle VFX activated - player has been inactive for " + idleTimeThreshold + " seconds");
         }
     }
 
