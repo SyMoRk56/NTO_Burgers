@@ -34,7 +34,7 @@ public class TaskUI : MonoBehaviour
             return;
         }
 
-        reciever.text = LocalizationManager.Instance.Get("Reciever");
+        //reciever.text = LocalizationManager.Instance.Get("Reciever");
         adress.text = LocalizationManager.Instance.Get(task.adress);
 
         if (remainingCount > 0)
