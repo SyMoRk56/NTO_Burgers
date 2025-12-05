@@ -30,8 +30,8 @@ public class AdressListMenu : MonoBehaviour
         {
             Destroy(tasksParent.transform.GetChild(i).gameObject);
         }
-        var l = TaskManager.Instance.tasks.ToList();
-        l.Reverse();
+        var l = PlayerMailInventory.Instance.carriedMails.ToList();
+        
         foreach (var task in l)
         {
             var go = Instantiate(tabTaskUIPrefab, tasksParent.transform);

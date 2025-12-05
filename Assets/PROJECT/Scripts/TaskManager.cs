@@ -19,6 +19,7 @@ public class TaskManager : MonoBehaviour
             Destroy(Instance.gameObject);
             Instance = this;
         }
+        tasks = new();
         var m = Resources.LoadAll<MailCatalog>("");
         foreach(var n in m[0].mails)
         {

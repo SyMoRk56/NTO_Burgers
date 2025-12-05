@@ -5,7 +5,7 @@ public class PlayerMailInventory : MonoBehaviour
 {
     public static PlayerMailInventory Instance;
 
-    private List<Task> carriedMails = new List<Task>();
+    public List<Task> carriedMails = new List<Task>();
 
     private void Awake()
     {
