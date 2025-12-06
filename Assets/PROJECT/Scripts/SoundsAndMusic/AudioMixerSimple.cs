@@ -19,10 +19,10 @@ public class MusicMixer : MonoBehaviour
     public AudioMixerGroup group;
 
     private List<AudioSource> sources = new List<AudioSource>();
-
+    public bool playonstart = false;
     private void Start()
     {
-        
+        if(playonstart) Play();
     }
     public void Stop()
     {
