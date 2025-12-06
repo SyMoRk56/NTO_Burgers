@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 
 public class DialogueRunner : MonoBehaviour
 {
@@ -21,13 +22,13 @@ public class DialogueRunner : MonoBehaviour
     private bool isLetter;
     private bool isRunning;
     private bool isChoosing = false;
-
+    public AudioClip clip;
     public bool IsDialogueActive => isRunning;
 
     void Start()
     {
         dialogueUI = GetComponentInChildren<DialogueUI>(true);
-
+        dialogueUI.transform.GetChild(0).GetComponent<Button>().onClick.AddListener(()=>NextPhrase());
         if (audioSource == null)
         {
             audioSource = gameObject.AddComponent<AudioSource>();
@@ -79,7 +80,7 @@ public class DialogueRunner : MonoBehaviour
 
             dialogueUI.gameObject.SetActive(true);
             dialogueUI.nameText.text = LocalizationManager.Instance.Get(ownerName);
-
+            
             ShowCurrentPhrase();
             isRunning = true;
 
@@ -109,7 +110,7 @@ public class DialogueRunner : MonoBehaviour
             // Проигрываем звук фразы
             if (block.voiceOver != null && currentPhraseIndex < block.voiceOver.Length)
             {
-                AudioClip clip = block.voiceOver[currentPhraseIndex];
+                //AudioClip clip = block.voiceOver[currentPhraseIndex];
                 if (clip != null && audioSource != null)
                 {
                     audioSource.PlayOneShot(clip);

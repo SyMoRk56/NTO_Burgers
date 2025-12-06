@@ -8993,11 +8993,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f9a319094326b8a4c9d27596ecea8973, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MusicMixer
---- !u!82 &1111875054 stripped
-AudioSource:
-  m_CorrespondingSourceObject: {fileID: 2730042998777080045, guid: b722b55d0b0c58d40b9757d1b5e9c8f2, type: 3}
-  m_PrefabInstance: {fileID: 1111875052}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1122777918
 GameObject:
   m_ObjectHideFlags: 0
@@ -13694,6 +13689,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 21300000, guid: 76c189feb7aef914cbed28a41008f419, type: 3}
     - target: {fileID: 7762256097630750453, guid: 241a84a441f699145a90940f564bd83d, type: 3}
+      propertyPath: clip
+      value: 
+      objectReference: {fileID: 8300000, guid: 3e3b17d533bc73140a30c3a28defc1db, type: 3}
+    - target: {fileID: 7762256097630750453, guid: 241a84a441f699145a90940f564bd83d, type: 3}
       propertyPath: ownerName
       value: NPC_unplot_cat
       objectReference: {fileID: 0}
@@ -16992,13 +16991,17 @@ PrefabInstance:
       value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 171699747742588909, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
+      propertyPath: clip
+      value: 
+      objectReference: {fileID: 8300000, guid: 3e3b17d533bc73140a30c3a28defc1db, type: 3}
+    - target: {fileID: 171699747742588909, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
       propertyPath: ownerName
       value: NPC_koala
       objectReference: {fileID: 0}
     - target: {fileID: 171699747742588909, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
       propertyPath: audioSource
       value: 
-      objectReference: {fileID: 1972728485}
+      objectReference: {fileID: 1422409737}
     - target: {fileID: 171699747742588909, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
       propertyPath: letterDialogues.Array.size
       value: 17
@@ -17096,13 +17099,17 @@ PrefabInstance:
       value: NPC_dog
       objectReference: {fileID: 0}
     - target: {fileID: 1174392842874160519, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
+      propertyPath: clip
+      value: 
+      objectReference: {fileID: 8300000, guid: 3e3b17d533bc73140a30c3a28defc1db, type: 3}
+    - target: {fileID: 1174392842874160519, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
       propertyPath: ownerName
       value: NPC_unplot_bunny
       objectReference: {fileID: 0}
     - target: {fileID: 1174392842874160519, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
       propertyPath: audioSource
       value: 
-      objectReference: {fileID: 533818649}
+      objectReference: {fileID: 1422409737}
     - target: {fileID: 1174392842874160519, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
       propertyPath: defaultDialogues.Array.size
       value: 6
@@ -17284,13 +17291,17 @@ PrefabInstance:
       value: -166.53
       objectReference: {fileID: 0}
     - target: {fileID: 2487118307942275025, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
+      propertyPath: clip
+      value: 
+      objectReference: {fileID: 8300000, guid: d96f9ad382bbeba4a9f2967a98c43733, type: 3}
+    - target: {fileID: 2487118307942275025, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
       propertyPath: ownerName
       value: NPC_dog
       objectReference: {fileID: 0}
     - target: {fileID: 2487118307942275025, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
       propertyPath: audioSource
       value: 
-      objectReference: {fileID: 1111875054}
+      objectReference: {fileID: 1422409737}
     - target: {fileID: 2829701291188225762, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
       propertyPath: m_LocalPosition.y
       value: 0
@@ -17828,13 +17839,17 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7917126639617634309, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
+      propertyPath: clip
+      value: 
+      objectReference: {fileID: 8300000, guid: d96f9ad382bbeba4a9f2967a98c43733, type: 3}
+    - target: {fileID: 7917126639617634309, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
       propertyPath: ownerName
       value: NPC_unplot_koala
       objectReference: {fileID: 0}
     - target: {fileID: 7917126639617634309, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
       propertyPath: audioSource
       value: 
-      objectReference: {fileID: 1972728486}
+      objectReference: {fileID: 1422409737}
     - target: {fileID: 7917126639617634309, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
       propertyPath: letterDialogues.Array.size
       value: 1
@@ -17892,13 +17907,17 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 11400000, guid: 1ff8a4e2ef24b2a43aa85ef0087adee6, type: 2}
     - target: {fileID: 8109086669887069381, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
+      propertyPath: clip
+      value: 
+      objectReference: {fileID: 8300000, guid: 3e3b17d533bc73140a30c3a28defc1db, type: 3}
+    - target: {fileID: 8109086669887069381, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
       propertyPath: ownerName
       value: NPC_enot
       objectReference: {fileID: 0}
     - target: {fileID: 8109086669887069381, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
       propertyPath: audioSource
       value: 
-      objectReference: {fileID: 2141412990}
+      objectReference: {fileID: 1422409737}
     - target: {fileID: 8873984772955508063, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
       propertyPath: m_LocalRotation.w
       value: 0.7071068

@@ -46,6 +46,8 @@ public class DialogueUI : MonoBehaviour
     IEnumerator TypeText(string text)
     {
         phraseText.text = "";
+        print("TYPE TEXT" + text);
+        yield return new WaitForSeconds(typeSpeed);
         foreach (char c in text)
         {
             phraseText.text += c;
