@@ -48,7 +48,7 @@ public class TaskUI : MonoBehaviour
     void UpdateText()
     {
         adress.text = LocalizationManager.Instance.Get(adressT);
-        reciever.text = LocalizationManager.Instance.Get(!task.adress.Contains("NPC") ? "Reciever" : "Reciever_npc");
+        reciever.text = LocalizationManager.Instance.Get(!adressT.Contains("NPC") ? "Reciever" : "Reciever_npc");
 
     }
     public void HideTask()
