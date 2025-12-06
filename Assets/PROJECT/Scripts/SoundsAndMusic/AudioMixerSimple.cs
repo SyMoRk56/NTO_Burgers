@@ -61,6 +61,7 @@ public class MusicMixer : MonoBehaviour
             src.playOnAwake = false;
             src.volume = melodyGenerator.padVolume;
             src.pitch = p.pitch;
+            src.outputAudioMixerGroup = group;
 
             sources.Add(src);
 
