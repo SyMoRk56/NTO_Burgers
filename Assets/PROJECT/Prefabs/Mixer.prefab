@@ -59,7 +59,7 @@ MonoBehaviour:
   chordsVolume: 0
   drumsVolume: 0
   group: {fileID: 810310755162250902, guid: 14c75e4879c20a3419636ffbd9b0541d, type: 2}
-  playonstart: 0
+  playonstart: 1
 --- !u!114 &1630160625797749962
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -96,8 +96,8 @@ MonoBehaviour:
   pianoSample: {fileID: 8300000, guid: 9ffde21b0346bd247afe54c09fb11654, type: 3}
   bpm: 30
   bars: 1000
-  scaleType: 0
-  rootNote: 62
+  scaleType: 1
+  rootNote: 64
   progression:
     name: 
     degrees: 00000000040000000500000003000000
@@ -126,7 +126,7 @@ MonoBehaviour:
   bpm: 60
   bars: 1000
   restChance: 0.23
-  pitchRange: {x: 0.98, y: 1.02}
+  pitchRange: {x: 0.99, y: 1.01}
   scaleType: 1
   rootNote: 60
   progression:
