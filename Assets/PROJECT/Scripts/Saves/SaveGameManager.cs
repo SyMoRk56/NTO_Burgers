@@ -322,6 +322,10 @@ public class SaveGameManager : MonoBehaviour
         //try { data.settingsData = SettingsSaveSystem.Instance.GetData(); }
         //catch { data.settingsData = null; }
 
+        try { data.npcData = NPCSaveSystem.CollectNPCData(); }
+        catch { data.npcData = new List<NPCSaveData>(); }
+
+
         try { data.mailData = MailManager.Instance.GetSaveData(); }
         catch { data.mailData = null; }
 
@@ -346,6 +350,8 @@ public class SaveGameManager : MonoBehaviour
         if (data.mailData != null)
             MailManager.Instance.LoadSaveData(data.mailData);
 
+        if (data.npcData != null)
+            NPCSaveSystem.RestoreNPCData(data.npcData);
         // ДОБАВЛЕНО: загрузка данных инвентаря
         if (data.inventoryData != null)
             PlayerMailInventory.Instance.LoadSaveData(data.inventoryData);

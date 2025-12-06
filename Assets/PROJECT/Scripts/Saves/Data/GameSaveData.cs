@@ -11,6 +11,8 @@ public class GameSaveData
     public long timestamp;
     public float playtime;
 
+    public List<NPCSaveData> npcData = new List<NPCSaveData>();
+
     // ДОБАВЛЕНО: данные туториала
     public TutorialSaveData tutorialData;
 }

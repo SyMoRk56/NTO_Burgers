@@ -14,8 +14,11 @@ public class NPCBehaviour : MonoBehaviour
     [Header("Action Sequence")]
     [SerializeField] private NPCAction[] actions;
 
-    // 🔥 Флаг: активен ли диалог
     [HideInInspector] public bool dialogueActive = false;
+
+    // ДЛЯ СИСТЕМЫ СОХРАНЕНИЙ
+    public int CurrentActionIndex { get; private set; } = 0;
+    public string CurrentTargetName { get; private set; } = "";
 
     private void Start()
     {
@@ -33,7 +36,6 @@ public class NPCBehaviour : MonoBehaviour
             RotateTowardsMovementDirection();
     }
 
-    // 🔥 ОСТАНОВКА NPC
     public void Stop()
     {
         if (agent != null)
@@ -45,37 +47,31 @@ public class NPCBehaviour : MonoBehaviour
         if (animator != null)
         {
             animator.SetBool(moveAnimParameter, false);
-
             animator.SetTrigger("isIdle");
-
         }
     }
 
-    // 🔥 ПРОДОЛЖЕНИЕ
     public void Resume()
     {
         if (agent != null)
             agent.isStopped = false;
     }
 
-    // -------------------------------
+    // ============================================
     //   MAIN ROUTINE
-    // -------------------------------
+    // ============================================
     private IEnumerator ActionRoutine()
     {
         while (true)
         {
-            // Ждём завершения диалога
             while (dialogueActive)
                 yield return null;
 
-            for (int i = 0; i < actions.Length; i++)
+            for (CurrentActionIndex = 0; CurrentActionIndex < actions.Length; CurrentActionIndex++)
             {
-                // Ждём, если диалог внезапно активировался
-                while (dialogueActive)
-                    yield return null;
+                while (dialogueActive) yield return null;
 
-                NPCAction act = actions[i];
+                NPCAction act = actions[CurrentActionIndex];
 
                 switch (act.actionType)
                 {
@@ -91,12 +87,14 @@ public class NPCBehaviour : MonoBehaviour
         }
     }
 
-    // -------------------------------
+    // ============================================
     //   WALK ROUTINE
-    // -------------------------------
+    // ============================================
     private IEnumerator WalkToTarget(Transform target, Vector2 waitRange)
     {
         if (target == null) yield break;
+
+        CurrentTargetName = target.name;
 
         agent.isStopped = false;
         agent.SetDestination(target.position);
@@ -117,19 +115,20 @@ public class NPCBehaviour : MonoBehaviour
             yield return null;
         }
 
-        if (animator != null)
-            animator.SetBool(moveAnimParameter, false);
+        animator.SetBool(moveAnimParameter, false);
 
         float r = Random.Range(waitRange.x, waitRange.y);
         yield return new WaitForSeconds(r);
     }
 
-    // -------------------------------
+    // ============================================
     //   INTERACT ROUTINE
-    // -------------------------------
+    // ============================================
     private IEnumerator InteractWithObject(NPCAction act)
     {
         if (act.interactObject == null) yield break;
+
+        CurrentTargetName = act.interactObject.name;
 
         agent.isStopped = false;
         agent.SetDestination(act.interactObject.position);
@@ -160,9 +159,63 @@ public class NPCBehaviour : MonoBehaviour
         agent.isStopped = false;
     }
 
-    // -------------------------------
+    // ============================================
+    //   RESTORE FROM SAVE
+    // ============================================
+    public void RestoreStateFromSave(NPCSaveData d)
+    {
+        StopAllCoroutines();
+
+        CurrentActionIndex = d.currentActionIndex;
+        CurrentTargetName = d.currentTargetName;
+
+        // Ищем цель по имени
+        Transform target = null;
+
+        foreach (var a in actions)
+        {
+            if (a.walkTarget != null && a.walkTarget.name == d.currentTargetName)
+                target = a.walkTarget;
+
+            if (a.interactObject != null && a.interactObject.name == d.currentTargetName)
+                target = a.interactObject;
+        }
+
+        if (target != null)
+        {
+            agent.isStopped = false;
+            agent.SetDestination(target.position);
+        }
+
+        StartCoroutine(ActionRoutineFromIndex());
+    }
+
+    private IEnumerator ActionRoutineFromIndex()
+    {
+        while (true)
+        {
+            NPCAction act = actions[CurrentActionIndex];
+
+            switch (act.actionType)
+            {
+                case NPCActionType.Walk:
+                    yield return WalkToTarget(act.walkTarget, act.waitAfterWalk);
+                    break;
+
+                case NPCActionType.Interact:
+                    yield return InteractWithObject(act);
+                    break;
+            }
+
+            CurrentActionIndex++;
+            if (CurrentActionIndex >= actions.Length)
+                CurrentActionIndex = 0;
+        }
+    }
+
+    // ============================================
     //   ROTATION
-    // -------------------------------
+    // ============================================
     private void RotateTowardsMovementDirection()
     {
         if (agent.velocity.sqrMagnitude < 0.01f) return;
@@ -193,11 +246,9 @@ public class NPCAction
 {
     public NPCActionType actionType;
 
-    [Header("Walk Settings")]
     public Transform walkTarget;
     public Vector2 waitAfterWalk = new Vector2(1f, 3f);
 
-    [Header("Interaction Settings")]
     public Transform interactObject;
     public string interactionTrigger = "Interact";
     public float interactionDistance = 1.5f;
