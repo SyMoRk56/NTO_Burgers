@@ -14,6 +14,9 @@ public class EnterToHouse : MonoBehaviour
     public AudioSource audioSource;  // Источник звука для двери
     public AudioClip doorOpenSound;  // Звук открытия двери
 
+    private void Start()
+    {
+    }
     public void Interact()
     {
         var tran = false;
@@ -58,5 +61,9 @@ public class EnterToHouse : MonoBehaviour
         yield return new WaitForSeconds(2);
         isInTransition = false;
     }
+    public void DipFromBlack()
+    {
+        blackScreen.DOFade(0, 4);
 
+    }
 }

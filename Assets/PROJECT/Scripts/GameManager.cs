@@ -78,6 +78,8 @@ public class GameManager : MonoBehaviour
         autosaveRoutine = StartCoroutine(Autosave());
         FindFirstObjectByType<CheckForInHouse>().OnStartGame();
         Time.timeScale = 1;
+        FindFirstObjectByType<EnterToHouse>().DipFromBlack();
+
     }
 
     public GameObject GetPlayer()
