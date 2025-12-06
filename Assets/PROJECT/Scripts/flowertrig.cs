@@ -1,255 +1,199 @@
-using UnityEngine;
+п»їusing UnityEngine;
 using System.Collections;
 
 public class FlowerTriggerHandler : MonoBehaviour
 {
-    [Header("Настройки")]
+    [Header("РќР°СЃС‚СЂРѕР№РєРё")]
     public string targetDialogueName = "flowertrig";
     public GameObject flowerPrefab;
 
-    [Header("Скорости и задержки")]
+    [Header("РЎРєРѕСЂРѕСЃС‚Рё Рё Р·Р°РґРµСЂР¶РєРё")]
     public float prefabSpeed = 5f;
     public float spawnHeight = 1f;
     public float sneezeDelay = 1f;
 
-    [Header("Автопоиск")]
+    [Header("РђРІС‚РѕРїРѕРёСЃРє")]
     public bool autoFindPlayer = true;
     public bool autoFindVFX = true;
 
-    // Приватные переменные
+    // РџСЂРёРІР°С‚РЅС‹Рµ РїРµСЂРµРјРµРЅРЅС‹Рµ
     private bool sequenceTriggered = false;
     private GameObject currentFlower;
     private DialogueRunner dialogueRunner;
     private GameObject player;
     private ParticleSystem sneezeVFX;
     private PlayerMovement playerMovement;
+    private playerAnimations playerAnim;
 
     void Start()
     {
-        // Автоматически находим компоненты
+        // РќР°С…РѕРґРёРј РёРіСЂРѕРєР°
         if (autoFindPlayer)
         {
             player = GameObject.FindGameObjectWithTag("Player");
             if (player != null)
             {
                 playerMovement = player.GetComponent<PlayerMovement>();
+                playerAnim = player.GetComponent<playerAnimations>(); // в†ђ Р”РћР‘РђР’Р›Р•РќРћ
             }
         }
 
-        // Находим DialogueRunner
+        // РќР°С…РѕРґРёРј DialogueRunner
         dialogueRunner = GetComponent<DialogueRunner>();
-        // Находим VFX для чихания по тегу
+
+        // РќР°С…РѕРґРёРј VFX
         if (autoFindVFX)
         {
             GameObject taggedObj = GameObject.FindGameObjectWithTag("snezy");
 
             if (taggedObj != null)
-            {
                 sneezeVFX = taggedObj.GetComponent<ParticleSystem>();
-            }
             else
-            {
-                Debug.LogWarning("Объект с тегом 'snezy' не найден!");
-            }
+                Debug.LogWarning("РћР±СЉРµРєС‚ СЃ С‚РµРіРѕРј 'snezy' РЅРµ РЅР°Р№РґРµРЅ!");
         }
 
-        // Останавливаем VFX если он играет
         if (sneezeVFX != null && sneezeVFX.isPlaying)
-        {
             sneezeVFX.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
-        }
-
     }
 
     void Update()
     {
-        // Для тестирования: запускаем по нажатию T
         if (Input.GetKeyDown(KeyCode.T) && !sequenceTriggered)
         {
-            Debug.Log("Тест: запуск последовательности по нажатию T");
+            Debug.Log("РўРµСЃС‚: Р·Р°РїСѓСЃРє РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕСЃС‚Рё РїРѕ РЅР°Р¶Р°С‚РёСЋ T");
             StartCoroutine(FlowerSequence());
         }
 
-        // Мониторинг диалога
         CheckDialogueStatus();
     }
 
     void CheckDialogueStatus()
     {
         if (sequenceTriggered || dialogueRunner == null) return;
-        // Проверяем, активен ли диалог
+
         bool isDialogueActive = dialogueRunner.IsDialogueActive;
 
-        // Сохраняем состояние в статической переменной
         if (!dialogueWasActiveLastFrame && isDialogueActive)
         {
-            // Диалог только начался
             dialogueStartTime = Time.time;
         }
         else if (dialogueWasActiveLastFrame && !isDialogueActive)
         {
             print("ENDED");
-            // Диалог только что завершился
             float dialogueDuration = Time.time - dialogueStartTime;
 
-            // Проверяем, был ли это наш целевой диалог
-            // Поскольку мы не знаем имя, будем проверять по времени
-            // или просто запускать для любого завершенного диалога
-            // (В реальном проекте нужно добавить поле в DialogueRunner)
+            Debug.Log($"Р”РёР°Р»РѕРі Р·Р°РІРµСЂС€РёР»СЃСЏ. Р”Р»РёС‚РµР»СЊРЅРѕСЃС‚СЊ: {dialogueDuration:F1} СЃРµРє");
 
-            Debug.Log($"Диалог завершился. Длительность: {dialogueDuration:F1} сек");
-
-            // Запускаем последовательность для любого диалога (для теста)
-            // Или можно добавить проверку через рефлексию
             StartCoroutine(FlowerSequence());
         }
 
         dialogueWasActiveLastFrame = isDialogueActive;
     }
 
-    // Статические переменные для отслеживания диалога
     private static bool dialogueWasActiveLastFrame = false;
     private static float dialogueStartTime = 0f;
 
     IEnumerator FlowerSequence()
     {
         if (sequenceTriggered) yield break;
-
         sequenceTriggered = true;
-        Debug.Log("=== НАЧАЛО ПОСЛЕДОВАТЕЛЬНОСТИ ЦВЕТКА ===");
 
-        // 1. Блокируем управление игроком
+        Debug.Log("=== РќРђР§РђР›Рћ РџРћРЎР›Р•Р”РћР’РђРўР•Р›Р¬РќРћРЎРўР Р¦Р’Р•РўРљРђ ===");
+
+        // 1. Р‘Р»РѕРєРёСЂСѓРµРј СѓРїСЂР°РІР»РµРЅРёРµ
         if (playerMovement != null)
-        {
             playerMovement.enabled = false;
-            Debug.Log("Управление игроком заблокировано");
-        }
 
-        // 2. Создаем префаб цветка
+        // 2. РЎРїР°РІРЅ С†РІРµС‚РєР°
         Vector3 spawnPosition = transform.position + Vector3.up * spawnHeight;
 
         if (flowerPrefab != null)
-        {
             currentFlower = Instantiate(flowerPrefab, spawnPosition, Quaternion.identity);
-            Debug.Log($"Создан префаб цветка в позиции: {spawnPosition}");
-        }
         else
         {
-            // Создаем простой куб если префаба нет
             currentFlower = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             currentFlower.transform.position = spawnPosition;
             currentFlower.transform.localScale = Vector3.one * 0.3f;
             currentFlower.GetComponent<Renderer>().material.color = Color.yellow;
-            Debug.Log("Создан временный объект цветка (сфера)");
         }
 
-        // 3. Двигаем цветок к игроку
+        // 3. Р”РІРёРіР°РµРј Рє РёРіСЂРѕРєСѓ
         if (player != null && currentFlower != null)
         {
             Vector3 targetPosition = player.transform.position + Vector3.up * 1.5f;
+
             float distance = Vector3.Distance(spawnPosition, targetPosition);
             float travelTime = distance / prefabSpeed;
             float elapsedTime = 0f;
-
-            Debug.Log($"Движение цветка к игроку. Дистанция: {distance:F1}, время: {travelTime:F1} сек");
 
             while (elapsedTime < travelTime && currentFlower != null)
             {
                 elapsedTime += Time.deltaTime;
                 float t = elapsedTime / travelTime;
-
-                // Плавное движение
-                float smoothT = t * t * (3f - 2f * t); // Кубическая интерполяция
+                float smoothT = t * t * (3f - 2f * t);
 
                 currentFlower.transform.position = Vector3.Lerp(spawnPosition, targetPosition, smoothT);
-
-                // Вращение
                 currentFlower.transform.Rotate(Vector3.up, 180f * Time.deltaTime, Space.World);
 
                 yield return null;
             }
 
-            // Уничтожаем цветок
             if (currentFlower != null)
-            {
                 Destroy(currentFlower);
-                Debug.Log("Цветок достиг игрока и уничтожен");
-            }
         }
 
-        // 4. Ждем перед чиханием
-        Debug.Log($"Ожидание перед чиханием: {sneezeDelay} сек");
+        // 4. РќРµР±РѕР»СЊС€Р°СЏ Р·Р°РґРµСЂР¶РєР° РїРµСЂРµРґ С‡РёС…РѕРј
         yield return new WaitForSeconds(sneezeDelay);
 
-        // 5. Активируем VFX чихания
+        // 5. РўРЈРў Р’РљР›Р®Р§РђР•Рњ РђРќРРњРђР¦РР® Р§РРҐРђ
+        if (playerAnim != null)
+            playerAnim.PlaySneezy();   // в†ђ Р”РћР‘РђР’Р›Р•РќРћ
+
+        // 6. VFX Р§РёС…Р°РЅРёСЏ
         if (sneezeVFX != null)
         {
-            if (player != null)
-            {
-                // Позиционируем VFX перед игроком
-                Vector3 vfxPosition = player.transform.position +
-                                     player.transform.forward * 0.5f +
-                                     Vector3.up * 0.3f;
-                sneezeVFX.transform.position = vfxPosition;
+            Vector3 pos = player.transform.position +
+                          player.transform.forward * 0.5f +
+                          Vector3.up * 0.3f;
 
-                // Направляем вперед от игрока
-                sneezeVFX.transform.rotation = Quaternion.LookRotation(player.transform.forward);
-            }
-
+            sneezeVFX.transform.position = pos;
+            sneezeVFX.transform.rotation = Quaternion.LookRotation(player.transform.forward);
             sneezeVFX.Play();
-            Debug.Log("VFX чихания активирован");
 
-            // Ждем пока VFX проиграется
             yield return new WaitForSeconds(sneezeVFX.main.duration);
-
-            // Останавливаем VFX
             sneezeVFX.Stop();
         }
-        else
-        {
-            Debug.Log("VFX не найден. Пропускаем эффект чихания.");
-        }
 
-        // 6. Разблокируем управление
+        // 7. Р’РћР—Р’Р РђРў РђРќРРњРђР¦РР
+        if (playerAnim != null)
+            playerAnim.HeroIdleAnim(); // в†ђ Р”РћР‘РђР’Р›Р•РќРћ
+
+        // 8. Р Р°Р·Р±Р»РѕРєРёСЂРѕРІРєР° СѓРїСЂР°РІР»РµРЅРёСЏ
         if (playerMovement != null)
-        {
             playerMovement.enabled = true;
-            Debug.Log("Управление игроком восстановлено");
-        }
 
-        Debug.Log("=== ПОСЛЕДОВАТЕЛЬНОСТЬ ЦВЕТКА ЗАВЕРШЕНА ===");
+        Debug.Log("=== РџРћРЎР›Р•Р”РћР’РђРўР•Р›Р¬РќРћРЎРўР¬ Р¦Р’Р•РўРљРђ Р—РђР’Р•Р РЁР•РќРђ ===");
         sequenceTriggered = false;
     }
 
-    // Публичный метод для запуска из других скриптов
     public void TriggerSequence()
     {
         if (!sequenceTriggered)
-        {
             StartCoroutine(FlowerSequence());
-        }
     }
 
-    // Метод для тестирования в редакторе
-    [ContextMenu("Запустить последовательность")]
+    [ContextMenu("Р—Р°РїСѓСЃС‚РёС‚СЊ РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕСЃС‚СЊ")]
     void TriggerSequenceEditor()
     {
         if (Application.isPlaying)
-        {
             TriggerSequence();
-        }
         else
-        {
-            Debug.LogWarning("Метод работает только в режиме Play");
-        }
+            Debug.LogWarning("РњРµС‚РѕРґ СЂР°Р±РѕС‚Р°РµС‚ С‚РѕР»СЊРєРѕ РІ СЂРµР¶РёРјРµ Play");
     }
 
     void OnDestroy()
     {
-        // Очистка
         if (currentFlower != null)
-        {
             Destroy(currentFlower);
-        }
     }
 }

@@ -9,7 +9,8 @@ public enum States
     carry_walk,     // 4
     carry_jump,     // 5
     fishing_bros,   // 6
-    fishing_idle    // 7 
+    fishing_idle,   // 7
+    sneezy          // 8 ← ДОБАВИЛ НОВУЮ АНИМАЦИЮ
 }
 
 public class playerAnimations : MonoBehaviour
@@ -25,6 +26,13 @@ public class playerAnimations : MonoBehaviour
     {
         get { return (States)anim.GetInteger("hamsterState"); }
         set { anim.SetInteger("hamsterState", (int)value); }
+    }
+
+    // === НОВАЯ АНИМАЦИЯ ЧИХА ===
+    public void PlaySneezy()
+    {
+        State = States.sneezy;
+        Debug.Log("Анимация: sneezy (8)");
     }
 
     // === МЕТОДЫ ДЛЯ РЫБАЛКИ ===
