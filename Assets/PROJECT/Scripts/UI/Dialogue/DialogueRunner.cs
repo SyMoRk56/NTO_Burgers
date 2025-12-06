@@ -24,12 +24,11 @@ public class DialogueRunner : MonoBehaviour
     {
         if (!isRunning) return;
 
-        // Проверяем, показываются ли сейчас варианты выбора
         var block = isLetter ? letterDialogues[currentDialogueIndex] : defaultDialogues[currentDialogueIndex];
         bool isAtChoicePoint = currentPhraseIndex >= block.phrases.Length;
 
-        // Если показывается текст - Space/E/клик для продолжения
-        if (!isChoosing && !isAtChoicePoint && (Input.GetKeyDown(KeyCode.Space) ||
+        if (!isChoosing && !isAtChoicePoint &&
+           (Input.GetKeyDown(KeyCode.Space) ||
             Input.GetKeyDown(KeyCode.E) ||
             Input.GetMouseButtonDown(0)))
         {
@@ -39,29 +38,35 @@ public class DialogueRunner : MonoBehaviour
 
     public void StartDialogue(bool letter)
     {
-        // ВАЖНО: сначала закрываем предыдущий диалог, если он активен
         if (isRunning)
-        {
             ForceCloseDialogue();
-        }
 
         if (!isRunning)
         {
+            // 🔥 Останавливаем NPC
+            var npc = GetComponent<NPCBehaviour>();
+            if (npc != null)
+            {
+                npc.dialogueActive = true;
+                npc.Stop();
+            }
+
             isLetter = letter;
             currentDialogueIndex = 0;
             currentPhraseIndex = 0;
             isChoosing = false;
 
-            // Проверяем, есть ли диалог для этого типа
             var dialogues = letter ? letterDialogues : defaultDialogues;
             if (dialogues.Length == 0)
             {
                 Debug.LogError($"No dialogues found for type: letter={letter}");
                 return;
             }
+
             dialogueUI = GetComponentInChildren<DialogueUI>(true);
             dialogueUI.gameObject.SetActive(true);
             dialogueUI.nameText.text = LocalizationManager.Instance.Get(ownerName);
+
             ShowCurrentPhrase();
             isRunning = true;
 
@@ -81,7 +86,7 @@ public class DialogueRunner : MonoBehaviour
     void ShowCurrentPhrase()
     {
         isChoosing = false;
-        print(currentDialogueIndex);
+
         var block = isLetter ? letterDialogues[currentDialogueIndex] : defaultDialogues[currentDialogueIndex];
 
         if (currentPhraseIndex < block.phrases.Length)
@@ -121,6 +126,7 @@ public class DialogueRunner : MonoBehaviour
     public void Choose(int index)
     {
         isChoosing = false;
+
         var block = isLetter ? letterDialogues[currentDialogueIndex] : defaultDialogues[currentDialogueIndex];
 
         if (index < 0 || index >= block.choices.Length) return;
@@ -129,25 +135,37 @@ public class DialogueRunner : MonoBehaviour
 
         if (next < 0)
         {
-            dialogueUI.Hide();
-            isRunning = false;
-            isLetter = false;
+            EndDialogue();
             return;
         }
 
-        if (next >= (isLetter ? letterDialogues.Length : defaultDialogues.Length)) return;
+        if (next >= (isLetter ? letterDialogues.Length : defaultDialogues.Length))
+            return;
 
         currentDialogueIndex = next;
         currentPhraseIndex = 0;
         ShowCurrentPhrase();
     }
 
-    // ДОБАВЛЕНО: метод для принудительного закрытия диалога
+    public void EndDialogue()
+    {
+        dialogueUI.Hide();
+        isRunning = false;
+        isLetter = false;
+
+        // 🔥 Возобновляем NPC
+        var npc = GetComponent<NPCBehaviour>();
+        if (npc != null)
+        {
+            npc.dialogueActive = false;
+            npc.Resume();
+        }
+    }
+
     public void ForceCloseDialogue()
     {
         if (!isRunning) return;
 
-        Debug.Log("Force closing dialogue");
         isRunning = false;
         isLetter = false;
         isChoosing = false;
@@ -156,20 +174,16 @@ public class DialogueRunner : MonoBehaviour
 
         if (dialogueUI != null)
             dialogueUI.ForceHide();
+
+        // 🔥 Возобновляем NPC
+        var npc = GetComponent<NPCBehaviour>();
+        if (npc != null)
+        {
+            npc.dialogueActive = false;
+            npc.Resume();
+        }
     }
 
-    // ДОБАВЛЕНО: метод для сброса состояния
-    public void ResetDialogue()
-    {
-        isRunning = false;
-        isLetter = false;
-        isChoosing = false;
-        currentDialogueIndex = 0;
-        currentPhraseIndex = 0;
-
-        if (dialogueUI != null)
-            dialogueUI.ForceHide();
-    }
     private void Start()
     {
         dialogueUI = GetComponentInChildren<DialogueUI>(true);

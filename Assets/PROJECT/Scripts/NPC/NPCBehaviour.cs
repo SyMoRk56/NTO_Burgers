@@ -1,4 +1,4 @@
-using UnityEngine;
+п»їusing UnityEngine;
 using UnityEngine.AI;
 using System.Collections;
 
@@ -14,12 +14,14 @@ public class NPCBehaviour : MonoBehaviour
     [Header("Action Sequence")]
     [SerializeField] private NPCAction[] actions;
 
+    // рџ”Ґ Р¤Р»Р°Рі: Р°РєС‚РёРІРµРЅ Р»Рё РґРёР°Р»РѕРі
+    [HideInInspector] public bool dialogueActive = false;
+
     private void Start()
     {
         animator = GetComponentInChildren<Animator>();
         if (agent == null) agent = GetComponent<NavMeshAgent>();
 
-        // Отключаем встроенный поворот агента
         agent.updateRotation = false;
 
         StartCoroutine(ActionRoutine());
@@ -27,21 +29,57 @@ public class NPCBehaviour : MonoBehaviour
 
     private void Update()
     {
-        RotateTowardsMovementDirection();
+        if (!dialogueActive)
+            RotateTowardsMovementDirection();
     }
 
+    // рџ”Ґ РћРЎРўРђРќРћР’РљРђ NPC
+    public void Stop()
+    {
+        if (agent != null)
+        {
+            agent.isStopped = true;
+            agent.velocity = Vector3.zero;
+        }
+
+        if (animator != null)
+        {
+            animator.SetBool(moveAnimParameter, false);
+
+            animator.SetTrigger("isIdle");
+
+        }
+    }
+
+    // рџ”Ґ РџР РћР”РћР›Р–Р•РќРР•
+    public void Resume()
+    {
+        if (agent != null)
+            agent.isStopped = false;
+    }
+
+    // -------------------------------
+    //   MAIN ROUTINE
+    // -------------------------------
     private IEnumerator ActionRoutine()
     {
         while (true)
         {
+            // Р–РґС‘Рј Р·Р°РІРµСЂС€РµРЅРёСЏ РґРёР°Р»РѕРіР°
+            while (dialogueActive)
+                yield return null;
+
             for (int i = 0; i < actions.Length; i++)
             {
+                // Р–РґС‘Рј, РµСЃР»Рё РґРёР°Р»РѕРі РІРЅРµР·Р°РїРЅРѕ Р°РєС‚РёРІРёСЂРѕРІР°Р»СЃСЏ
+                while (dialogueActive)
+                    yield return null;
+
                 NPCAction act = actions[i];
 
                 switch (act.actionType)
                 {
                     case NPCActionType.Walk:
-                        print("Walk to target " + name + act.walkTarget.name);
                         yield return WalkToTarget(act.walkTarget, act.waitAfterWalk);
                         break;
 
@@ -53,46 +91,49 @@ public class NPCBehaviour : MonoBehaviour
         }
     }
 
-    // -------------------------------------------
+    // -------------------------------
     //   WALK ROUTINE
-    // -------------------------------------------
+    // -------------------------------
     private IEnumerator WalkToTarget(Transform target, Vector2 waitRange)
     {
         if (target == null) yield break;
 
         agent.isStopped = false;
         agent.SetDestination(target.position);
-        animator = GetComponentInChildren<Animator>();
-        if(animator != null)
-        animator.SetBool(moveAnimParameter, true);
 
-        print("Move " + name);
+        if (animator != null)
+            animator.SetBool(moveAnimParameter, true);
 
         while (agent.pathPending ||
-       agent.remainingDistance > agent.stoppingDistance ||
-       agent.velocity.sqrMagnitude > 0.01f)
+               agent.remainingDistance > agent.stoppingDistance ||
+               agent.velocity.sqrMagnitude > 0.01f)
         {
+            if (dialogueActive)
+            {
+                Stop();
+                yield break;
+            }
+
             yield return null;
         }
 
-        if(animator != null)
-        animator.SetBool(moveAnimParameter, false);
-        print("EndMoving");
+        if (animator != null)
+            animator.SetBool(moveAnimParameter, false);
 
         float r = Random.Range(waitRange.x, waitRange.y);
-        print(r);
         yield return new WaitForSeconds(r);
     }
 
-    // -------------------------------------------
-    //   INTERACTION ROUTINE
-    // -------------------------------------------
+    // -------------------------------
+    //   INTERACT ROUTINE
+    // -------------------------------
     private IEnumerator InteractWithObject(NPCAction act)
     {
         if (act.interactObject == null) yield break;
 
         agent.isStopped = false;
         agent.SetDestination(act.interactObject.position);
+
         animator.SetBool(moveAnimParameter, true);
 
         while (Vector3.Distance(
@@ -100,6 +141,12 @@ public class NPCBehaviour : MonoBehaviour
             new Vector3(act.interactObject.position.x, 0, act.interactObject.position.z)
         ) > act.interactionDistance)
         {
+            if (dialogueActive)
+            {
+                Stop();
+                yield break;
+            }
+
             yield return null;
         }
 
@@ -113,9 +160,9 @@ public class NPCBehaviour : MonoBehaviour
         agent.isStopped = false;
     }
 
-    // -------------------------------------------
-    //   ROTATION TO MOVEMENT DIRECTION
-    // -------------------------------------------
+    // -------------------------------
+    //   ROTATION
+    // -------------------------------
     private void RotateTowardsMovementDirection()
     {
         if (agent.velocity.sqrMagnitude < 0.01f) return;
@@ -130,7 +177,7 @@ public class NPCBehaviour : MonoBehaviour
         transform.rotation = Quaternion.Slerp(
             transform.rotation,
             targetRot,
-            Time.deltaTime * 8f   // скорость поворота, можешь менять
+            Time.deltaTime * 8f
         );
     }
 }
