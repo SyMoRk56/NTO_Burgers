@@ -59,6 +59,7 @@ MonoBehaviour:
   chordsVolume: 0
   drumsVolume: 0
   group: {fileID: 810310755162250902, guid: 14c75e4879c20a3419636ffbd9b0541d, type: 2}
+  playonstart: 0
 --- !u!114 &1630160625797749962
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -94,7 +95,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ChordGenerator
   pianoSample: {fileID: 8300000, guid: 9ffde21b0346bd247afe54c09fb11654, type: 3}
   bpm: 30
-  bars: 50
+  bars: 1000
   scaleType: 0
   rootNote: 62
   progression:
@@ -123,7 +124,7 @@ MonoBehaviour:
   generatePads: 1
   melodyPattern: 2
   bpm: 60
-  bars: 50
+  bars: 1000
   restChance: 0.23
   pitchRange: {x: 0.98, y: 1.02}
   scaleType: 1

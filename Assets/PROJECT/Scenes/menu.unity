@@ -5317,6 +5317,34 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1057108259595614633, guid: 56b4a273e9c56c947822e6c2e18d27fa, type: 3}
+      propertyPath: bars
+      value: 1000
+      objectReference: {fileID: 0}
+    - target: {fileID: 1057108259595614633, guid: 56b4a273e9c56c947822e6c2e18d27fa, type: 3}
+      propertyPath: rootNote
+      value: 64
+      objectReference: {fileID: 0}
+    - target: {fileID: 1057108259595614633, guid: 56b4a273e9c56c947822e6c2e18d27fa, type: 3}
+      propertyPath: scaleType
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1392312634420860122, guid: 56b4a273e9c56c947822e6c2e18d27fa, type: 3}
+      propertyPath: bars
+      value: 1000
+      objectReference: {fileID: 0}
+    - target: {fileID: 1392312634420860122, guid: 56b4a273e9c56c947822e6c2e18d27fa, type: 3}
+      propertyPath: scaleType
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1392312634420860122, guid: 56b4a273e9c56c947822e6c2e18d27fa, type: 3}
+      propertyPath: pitchRange.x
+      value: 0.99
+      objectReference: {fileID: 0}
+    - target: {fileID: 1392312634420860122, guid: 56b4a273e9c56c947822e6c2e18d27fa, type: 3}
+      propertyPath: pitchRange.y
+      value: 1.01
+      objectReference: {fileID: 0}
     - target: {fileID: 8044634405192252106, guid: 56b4a273e9c56c947822e6c2e18d27fa, type: 3}
       propertyPath: playonstart
       value: 1
