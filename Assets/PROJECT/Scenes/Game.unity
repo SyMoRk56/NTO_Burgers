@@ -17694,6 +17694,10 @@ PrefabInstance:
       propertyPath: actions.Array.data[12].waitAfterWalk.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7130686543935835437, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
+      propertyPath: actions.Array.data[12].interactionTrigger
+      value: isIdle
+      objectReference: {fileID: 0}
     - target: {fileID: 7557237838531673391, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
       propertyPath: agent
       value: 
