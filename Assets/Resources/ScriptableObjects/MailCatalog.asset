@@ -13,6 +13,9 @@ MonoBehaviour:
   m_Name: MailCatalog
   m_EditorClassIdentifier: 
   mails:
+  - id: NPC_koala
+    reciever: NPC_koala
+    adress: NPC_koala
   - id: Post_M3
     reciever: Post_M3
     adress: Post_M3
@@ -22,6 +25,9 @@ MonoBehaviour:
   - id: Post_V4
     reciever: Post_V4
     adress: Post_V4
+  - id: NPC_enot
+    reciever: NPC_enot
+    adress: NPC_enot
   - id: Post_V9
     reciever: Post_V9
     adress: Post_V9
@@ -37,6 +43,9 @@ MonoBehaviour:
   - id: Post_K5
     reciever: Post_K5
     adress: Post_K5
+  - id: NPC_dog
+    reciever: NPC_dog
+    adress: NPC_dog
   - id: Post_B1
     reciever: Post_B1
     adress: Post_B1

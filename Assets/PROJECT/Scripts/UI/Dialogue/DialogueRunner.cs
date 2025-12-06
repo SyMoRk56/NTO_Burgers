@@ -61,6 +61,7 @@ public class DialogueRunner : MonoBehaviour
             }
             dialogueUI = GetComponentInChildren<DialogueUI>(true);
             dialogueUI.gameObject.SetActive(true);
+            dialogueUI.nameText.text = LocalizationManager.Instance.Get(ownerName);
             ShowCurrentPhrase();
             isRunning = true;
 

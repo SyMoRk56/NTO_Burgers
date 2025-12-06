@@ -5050,6 +5050,22 @@ NavMeshAgent:
   m_BaseOffset: 1
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
+--- !u!114 &738422893
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 738422885}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67040f88a13bf5749b7c7be6485d4095, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mailboxAddress: NPC_koala
+  dialogueRunner: {fileID: 1972728481}
+  triggerDialogueAfterDelivery: 1
+  dialogueDelay: 0.3
 --- !u!1 &740521148
 GameObject:
   m_ObjectHideFlags: 0
@@ -13140,6 +13156,10 @@ PrefabInstance:
       propertyPath: m_Sprite
       value: 
       objectReference: {fileID: 21300000, guid: 76c189feb7aef914cbed28a41008f419, type: 3}
+    - target: {fileID: 7762256097630750453, guid: 241a84a441f699145a90940f564bd83d, type: 3}
+      propertyPath: ownerName
+      value: NPC_unplot_cat
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
     - {fileID: 298604549209399621, guid: 241a84a441f699145a90940f564bd83d, type: 3}
@@ -16358,6 +16378,10 @@ PrefabInstance:
       propertyPath: actions.Array.data[3].waitAfterWalk.y
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 171699747742588909, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
+      propertyPath: ownerName
+      value: NPC_koala
+      objectReference: {fileID: 0}
     - target: {fileID: 651141360037235983, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
       propertyPath: m_LocalRotation.w
       value: 0.7071068
@@ -16377,6 +16401,14 @@ PrefabInstance:
     - target: {fileID: 651141360037235983, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
       value: 90
+      objectReference: {fileID: 0}
+    - target: {fileID: 664232461598089129, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
+      propertyPath: mailboxAddress
+      value: NPC_dog
+      objectReference: {fileID: 0}
+    - target: {fileID: 1174392842874160519, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
+      propertyPath: ownerName
+      value: NPC_unplot_bunny
       objectReference: {fileID: 0}
     - target: {fileID: 1276142842229420979, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
       propertyPath: m_LocalScale.x
@@ -16506,6 +16538,10 @@ PrefabInstance:
       propertyPath: m_LocalPosition.z
       value: -166.53
       objectReference: {fileID: 0}
+    - target: {fileID: 2487118307942275025, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
+      propertyPath: ownerName
+      value: NPC_dog
+      objectReference: {fileID: 0}
     - target: {fileID: 2829701291188225762, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
       propertyPath: m_LocalPosition.y
       value: 0
@@ -16513,6 +16549,10 @@ PrefabInstance:
     - target: {fileID: 2998410408264442809, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
       propertyPath: m_LocalPosition.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3051859621359618039, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
+      propertyPath: mailboxAddress
+      value: NPC_enot
       objectReference: {fileID: 0}
     - target: {fileID: 3146509944075363049, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
       propertyPath: m_LocalPosition.y
@@ -17038,6 +17078,14 @@ PrefabInstance:
       propertyPath: m_LocalPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7917126639617634309, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
+      propertyPath: ownerName
+      value: NPC_unplot_koala
+      objectReference: {fileID: 0}
+    - target: {fileID: 8109086669887069381, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
+      propertyPath: ownerName
+      value: NPC_enot
+      objectReference: {fileID: 0}
     - target: {fileID: 8873984772955508063, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
       propertyPath: m_LocalRotation.w
       value: 0.7071068
@@ -17054,7 +17102,8 @@ PrefabInstance:
       propertyPath: m_LocalPosition.y
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 9183098421408881106, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
     m_RemovedGameObjects:
     - {fileID: 7058022804625174870, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
     m_AddedGameObjects:
@@ -17086,6 +17135,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8759513271123885076, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
       insertIndex: -1
       addedObject: {fileID: 738422892}
+    - targetCorrespondingSourceObject: {fileID: 8759513271123885076, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 738422893}
     - targetCorrespondingSourceObject: {fileID: 4582036754662117997, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
       insertIndex: -1
       addedObject: {fileID: 232310339}
@@ -17095,6 +17147,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 113591210141136382, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
   m_PrefabInstance: {fileID: 1972728479}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1972728481 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 171699747742588909, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
+  m_PrefabInstance: {fileID: 1972728479}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 738422885}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8092978f730f5b443bc4f0910b43808c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DialogueRunner
 --- !u!1 &2017089461
 GameObject:
   m_ObjectHideFlags: 0

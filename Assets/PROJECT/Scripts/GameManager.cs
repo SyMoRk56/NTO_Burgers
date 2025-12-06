@@ -95,7 +95,7 @@ public class GameManager : MonoBehaviour
     {
         while (isGameGoing)
         {
-            yield return new WaitForSeconds(180f);
+            yield return new WaitForSeconds(30f);
             SaveGameManager.Instance.SaveAuto(true);
         }
     }
