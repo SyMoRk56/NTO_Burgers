@@ -2,23 +2,37 @@
 
 public class DialogueRunner : MonoBehaviour
 {
+    [Header("Настройки диалога")]
     public string ownerName;
     public DialogueScriptableObject[] defaultDialogues;
     public DialogueScriptableObject[] letterDialogues;
     public bool random;
 
+    [Header("UI и эмоции")]
     public DialogueUI dialogueUI;
+    public Face face;
+
+    [Header("Аудио")]
+    public AudioSource audioSource; // Источник для звуков фраз
 
     int currentDialogueIndex;
     int currentPhraseIndex;
 
-    public Face face;
+    private bool isLetter;
+    private bool isRunning;
+    private bool isChoosing = false;
 
     public bool IsDialogueActive => isRunning;
 
-    bool isLetter;
-    private bool isRunning;
-    private bool isChoosing = false;
+    void Start()
+    {
+        dialogueUI = GetComponentInChildren<DialogueUI>(true);
+
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+        }
+    }
 
     void Update()
     {
@@ -43,7 +57,7 @@ public class DialogueRunner : MonoBehaviour
 
         if (!isRunning)
         {
-            // 🔥 Останавливаем NPC
+            // Останавливаем NPC
             var npc = GetComponent<NPCBehaviour>();
             if (npc != null)
             {
@@ -63,7 +77,6 @@ public class DialogueRunner : MonoBehaviour
                 return;
             }
 
-            dialogueUI = GetComponentInChildren<DialogueUI>(true);
             dialogueUI.gameObject.SetActive(true);
             dialogueUI.nameText.text = LocalizationManager.Instance.Get(ownerName);
 
@@ -93,11 +106,21 @@ public class DialogueRunner : MonoBehaviour
         {
             dialogueUI.ShowPhrase(ownerName, block.phrases[currentPhraseIndex]);
 
+            // Проигрываем звук фразы
+            if (block.voiceOver != null && currentPhraseIndex < block.voiceOver.Length)
+            {
+                AudioClip clip = block.voiceOver[currentPhraseIndex];
+                if (clip != null && audioSource != null)
+                {
+                    audioSource.PlayOneShot(clip);
+                }
+            }
+
             if (face != null)
             {
-                if (block.emotions.Count != 0 || currentDialogueIndex < block.emotions.Count)
+                if (block.emotions.Count != 0 && currentPhraseIndex < block.emotions.Count)
                 {
-                    face.SetFace(block.emotions[currentDialogueIndex]);
+                    face.SetFace(block.emotions[currentPhraseIndex]);
                 }
             }
         }
@@ -153,7 +176,6 @@ public class DialogueRunner : MonoBehaviour
         isRunning = false;
         isLetter = false;
 
-        // 🔥 Возобновляем NPC
         var npc = GetComponent<NPCBehaviour>();
         if (npc != null)
         {
@@ -175,17 +197,11 @@ public class DialogueRunner : MonoBehaviour
         if (dialogueUI != null)
             dialogueUI.ForceHide();
 
-        // 🔥 Возобновляем NPC
         var npc = GetComponent<NPCBehaviour>();
         if (npc != null)
         {
             npc.dialogueActive = false;
             npc.Resume();
         }
-    }
-
-    private void Start()
-    {
-        dialogueUI = GetComponentInChildren<DialogueUI>(true);
     }
 }

@@ -14,8 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DialogueScriptableObject
   phrases:
   - dia_1_dog_phr_1_1_2
+  voiceOver:
+  - {fileID: 8300000, guid: d96f9ad382bbeba4a9f2967a98c43733, type: 3}
   choices:
   - text: dia_1_ans_1_2_1
     nextDialogueIndex: 11
   - text: dia_1_ans_1_2_2
     nextDialogueIndex: 12
+  emotions: 

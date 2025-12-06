@@ -2203,6 +2203,10 @@ MonoBehaviour:
     - {x: 155, y: 0.2, z: 43}
   interactionIndicator: {fileID: 0}
   dropZoneRadius: 5
+  audioSource: {fileID: 1111875054}
+  pickUpSound: {fileID: 8300000, guid: 0d23100742ca15d4d8fea915973d8168, type: 3}
+  dropSound: {fileID: 8300000, guid: 0d23100742ca15d4d8fea915973d8168, type: 3}
+  launchSound: {fileID: 8300000, guid: 0d23100742ca15d4d8fea915973d8168, type: 3}
 --- !u!1 &424235605
 GameObject:
   m_ObjectHideFlags: 0
@@ -8598,6 +8602,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f9a319094326b8a4c9d27596ecea8973, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MusicMixer
+--- !u!82 &1111875054 stripped
+AudioSource:
+  m_CorrespondingSourceObject: {fileID: 2730042998777080045, guid: b722b55d0b0c58d40b9757d1b5e9c8f2, type: 3}
+  m_PrefabInstance: {fileID: 1111875052}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1122777918
 GameObject:
   m_ObjectHideFlags: 0
@@ -16715,6 +16724,10 @@ PrefabInstance:
       propertyPath: ownerName
       value: NPC_dog
       objectReference: {fileID: 0}
+    - target: {fileID: 2487118307942275025, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
+      propertyPath: audioSource
+      value: 
+      objectReference: {fileID: 1111875054}
     - target: {fileID: 2829701291188225762, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
       propertyPath: m_LocalPosition.y
       value: 0
@@ -19394,6 +19407,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 3398313798313697072, guid: cb724408e66a96f45b929be4a81a86c3, type: 3}
     - target: {fileID: 5600498972183243501, guid: 7901bb945d734d9459168c46d9569070, type: 3}
+      propertyPath: audioSource
+      value: 
+      objectReference: {fileID: 1111875054}
+    - target: {fileID: 5600498972183243501, guid: 7901bb945d734d9459168c46d9569070, type: 3}
       propertyPath: blackScreen
       value: 
       objectReference: {fileID: 129759700}
@@ -19401,6 +19418,10 @@ PrefabInstance:
       propertyPath: firstPerson
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 5600498972183243501, guid: 7901bb945d734d9459168c46d9569070, type: 3}
+      propertyPath: doorOpenSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 1f8cd82f48115e042916688e067be34a, type: 3}
     - target: {fileID: 5835482861942957296, guid: 7901bb945d734d9459168c46d9569070, type: 3}
       propertyPath: trigger
       value: 
@@ -19546,9 +19567,17 @@ PrefabInstance:
       value: 6258.428
       objectReference: {fileID: 0}
     - target: {fileID: 8984775089466572716, guid: 7901bb945d734d9459168c46d9569070, type: 3}
+      propertyPath: audioSource
+      value: 
+      objectReference: {fileID: 1111875054}
+    - target: {fileID: 8984775089466572716, guid: 7901bb945d734d9459168c46d9569070, type: 3}
       propertyPath: blackScreen
       value: 
       objectReference: {fileID: 129759700}
+    - target: {fileID: 8984775089466572716, guid: 7901bb945d734d9459168c46d9569070, type: 3}
+      propertyPath: doorOpenSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 1f8cd82f48115e042916688e067be34a, type: 3}
     m_RemovedComponents:
     - {fileID: 5835482861942957296, guid: 7901bb945d734d9459168c46d9569070, type: 3}
     m_RemovedGameObjects:

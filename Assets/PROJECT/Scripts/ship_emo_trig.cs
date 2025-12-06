@@ -32,6 +32,13 @@ public class ObjectMovement : MonoBehaviour
 
     [Header("Настройки зоны")]
     public float dropZoneRadius = 5f; // Радиус для проверки зоны
+    
+    [Header("Звуковые эффекты")]
+    public AudioSource audioSource;     // Источник звука
+    public AudioClip pickUpSound;       // Звук поднятия
+    public AudioClip dropSound;         // Звук сброса
+    public AudioClip launchSound;       // Звук запуска объекта
+
 
     // Состояния
     private enum State { Idle, Held, Moving }
@@ -161,6 +168,8 @@ public class ObjectMovement : MonoBehaviour
         currentState = State.Held;
         interactionCollider.enabled = false;
 
+        PlaySound(pickUpSound);
+
         // Делаем объект дочерним к модели игрока
         transform.SetParent(playerModel);
         transform.localPosition = heldPosition;
@@ -188,6 +197,10 @@ public class ObjectMovement : MonoBehaviour
     void Drop()
     {
         currentState = State.Idle;
+        
+        
+        PlaySound(dropSound);
+
 
         // Открепляем от модели игрока и возвращаем в оригинального родителя
         transform.SetParent(originalParent);
@@ -234,6 +247,7 @@ public class ObjectMovement : MonoBehaviour
 
         // Открепляем от модели игрока
         transform.SetParent(originalParent);
+        PlaySound(launchSound);
         transform.localScale = originalScale;
 
         // ПРЯМОЙ СТАРТ - телепортируем к первой точке маршрута и сразу начинаем движение
@@ -405,6 +419,21 @@ public class ObjectMovement : MonoBehaviour
             }
         }
     }
+
+    private void PlaySound(AudioClip clip)
+    {
+        if (clip == null) return;
+
+        if (audioSource == null)
+        {
+            // Если источник не назначен, создаем на лету
+            audioSource = gameObject.AddComponent<AudioSource>();
+        }
+
+        audioSource.clip = clip;
+        audioSource.Play();
+    }
+
 
     public bool IsHeld() => currentState == State.Held;
     public bool IsMoving() => currentState == State.Moving;

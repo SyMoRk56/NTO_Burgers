@@ -1,4 +1,4 @@
-using DG.Tweening;
+﻿using DG.Tweening;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,6 +10,10 @@ public class EnterToHouse : MonoBehaviour
     Coroutine t;
     public bool isInTransition;
     public bool firstPerson;
+    [Header("Звуковые эффекты")]
+    public AudioSource audioSource;  // Источник звука для двери
+    public AudioClip doorOpenSound;  // Звук открытия двери
+
     public void Interact()
     {
         var tran = false;
@@ -22,10 +26,27 @@ public class EnterToHouse : MonoBehaviour
         t = StartCoroutine(TeleportCoroutine());
     }
 
+    private void PlayDoorSound()
+    {
+        if (doorOpenSound == null) return;
+
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+        }
+
+        audioSource.clip = doorOpenSound;
+        audioSource.Play();
+    }
+
+
 
     IEnumerator TeleportCoroutine()
     {
         isInTransition = true;
+
+        PlayDoorSound(); // 🔊 здесь звук двери
+
         GameManager.Instance.GetPlayer().GetComponent<PlayerManager>().CanMove = false;
         blackScreen.DOFade(1, 1);
         yield return new WaitForSeconds(1);
@@ -37,4 +58,5 @@ public class EnterToHouse : MonoBehaviour
         yield return new WaitForSeconds(2);
         isInTransition = false;
     }
+
 }
