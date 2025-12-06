@@ -10,13 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 08cee0cc3bf3f5e46bc2c69cc308b86e, type: 3}
-  m_Name: dog_1 13
+  m_Name: just_dio_2 1
   m_EditorClassIdentifier: Assembly-CSharp::DialogueScriptableObject
   phrases:
-  - dia_1_dog_phr_1_2_2_1
-  voiceOver:
-  - {fileID: 8300000, guid: d96f9ad382bbeba4a9f2967a98c43733, type: 3}
+  - dia_weather_hamster_phr_1
+  - dia_weather_squirrel_phr_2_plans
+  voiceOver: []
   choices:
-  - text: ...
-    nextDialogueIndex: -1
+  - text: dia_weather_ans_walk
+    nextDialogueIndex: 2
+  - text: dia_weather_ans_business
+    nextDialogueIndex: 3
   emotions: 

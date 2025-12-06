@@ -10,13 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 08cee0cc3bf3f5e46bc2c69cc308b86e, type: 3}
-  m_Name: dog_1 13
+  m_Name: just_dio_5 4
   m_EditorClassIdentifier: Assembly-CSharp::DialogueScriptableObject
   phrases:
-  - dia_1_dog_phr_1_2_2_1
-  voiceOver:
-  - {fileID: 8300000, guid: d96f9ad382bbeba4a9f2967a98c43733, type: 3}
+  - dia_embankment_hamster_phr_1_meditation
+  - dia_embankment_squirrel_phr_2_wise
+  voiceOver: []
   choices:
-  - text: ...
-    nextDialogueIndex: -1
+  - text: dia_embankment_ans_plan
+    nextDialogueIndex: 5
+  - text: dia_embankment_ans_slow
+    nextDialogueIndex: 6
   emotions: 
