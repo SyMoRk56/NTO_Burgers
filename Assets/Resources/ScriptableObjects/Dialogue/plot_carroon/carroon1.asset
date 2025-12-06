@@ -16,6 +16,8 @@ MonoBehaviour:
   - dia_3_hamster_phr_1
   - dia_3_raccoon_phr_1
   - dia_3_raccoon_phr_2
+  voiceOver:
+  - {fileID: 8300000, guid: cf81cb0c726a89a4c8380d74a7592990, type: 3}
   choices:
   - text: dia_3_ans_1
     nextDialogueIndex: 1
@@ -23,3 +25,4 @@ MonoBehaviour:
     nextDialogueIndex: 4
   - text: dia_3_ans_3
     nextDialogueIndex: 7
+  emotions: 

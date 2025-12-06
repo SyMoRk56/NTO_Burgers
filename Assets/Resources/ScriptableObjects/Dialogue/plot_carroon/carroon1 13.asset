@@ -14,6 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DialogueScriptableObject
   phrases:
   - dia_3_raccoon_phr_1_1_2_2
+  voiceOver:
+  - {fileID: 8300000, guid: cf81cb0c726a89a4c8380d74a7592990, type: 3}
   choices:
   - text: ...
     nextDialogueIndex: -1
+  emotions: 

@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DialogueScriptableObject
   phrases:
   - dia_peace_squirrel_phr_1
-  voiceOver: []
+  voiceOver:
+  - {fileID: 8300000, guid: 3e3b17d533bc73140a30c3a28defc1db, type: 3}
   choices:
   - text: dia_peace_ans_rested
     nextDialogueIndex: 1

@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DialogueScriptableObject
   phrases:
   - dia_2_koala_phr_1_1_2
-  voiceOver: []
+  voiceOver:
+  - {fileID: 8300000, guid: 3e3b17d533bc73140a30c3a28defc1db, type: 3}
   choices:
   - text: ...
     nextDialogueIndex: -1
