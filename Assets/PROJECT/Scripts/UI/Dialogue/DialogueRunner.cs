@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using System.Collections; // Добавляем для IEnumerator
 
 public class DialogueRunner : MonoBehaviour
 {
@@ -9,29 +10,44 @@ public class DialogueRunner : MonoBehaviour
     public DialogueScriptableObject[] letterDialogues;
     public bool random;
 
+    // Публичные свойства для доступа из других скриптов
+    public int CurrentDialogueIndex => currentDialogueIndex;
+    public bool CurrentIsLetter => isLetter;
+
     [Header("UI и эмоции")]
     public DialogueUI dialogueUI;
     public Face face;
 
     [Header("Аудио")]
-    public AudioSource audioSource; // Источник для звуков фраз
+    public AudioSource audioSource;
 
+    // Приватные поля
     int currentDialogueIndex;
     int currentPhraseIndex;
-
     private bool isLetter;
     private bool isRunning;
     private bool isChoosing = false;
     public AudioClip clip;
     public bool IsDialogueActive => isRunning;
 
+    // Для запуска дерева после фразы про яблоню
+    private treecastscene treeScene;
+    private bool wasApplePhraseSpoken = false;
+
     void Start()
     {
         dialogueUI = GetComponentInChildren<DialogueUI>(true);
-        dialogueUI.transform.GetChild(0).GetComponent<Button>().onClick.AddListener(()=>NextPhrase());
+        dialogueUI.transform.GetChild(0).GetComponent<Button>().onClick.AddListener(() => NextPhrase());
         if (audioSource == null)
         {
             audioSource = gameObject.AddComponent<AudioSource>();
+        }
+
+        // Находим treecastscene на этом же объекте
+        treeScene = GetComponent<treecastscene>();
+        if (treeScene == null)
+        {
+            treeScene = GetComponentInChildren<treecastscene>();
         }
     }
 
@@ -70,6 +86,7 @@ public class DialogueRunner : MonoBehaviour
             currentDialogueIndex = 0;
             currentPhraseIndex = 0;
             isChoosing = false;
+            wasApplePhraseSpoken = false; // Сбрасываем флаг
 
             var dialogues = letter ? letterDialogues : defaultDialogues;
             if (dialogues.Length == 0)
@@ -80,7 +97,7 @@ public class DialogueRunner : MonoBehaviour
 
             dialogueUI.gameObject.SetActive(true);
             dialogueUI.nameText.text = LocalizationManager.Instance.Get(ownerName);
-            
+
             ShowCurrentPhrase();
             isRunning = true;
 
@@ -105,14 +122,14 @@ public class DialogueRunner : MonoBehaviour
 
         if (currentPhraseIndex < block.phrases.Length)
         {
-            dialogueUI.ShowPhrase(ownerName, block.phrases[currentPhraseIndex]);
+            string phrase = block.phrases[currentPhraseIndex];
+            dialogueUI.ShowPhrase(ownerName, phrase);
 
-                //AudioClip clip = block.voiceOver[currentPhraseIndex];
-                if (clip != null && audioSource != null)
-                {
-                    audioSource.PlayOneShot(clip);
-                }
-            
+            //AudioClip clip = block.voiceOver[currentPhraseIndex];
+            if (clip != null && audioSource != null)
+            {
+                audioSource.PlayOneShot(clip);
+            }
 
             if (face != null)
             {
@@ -121,11 +138,44 @@ public class DialogueRunner : MonoBehaviour
                     face.SetFace(block.emotions[currentPhraseIndex]);
                 }
             }
+
+            // Проверяем фразу для запуска дерева
+            CheckForTreeSequence(phrase);
         }
         else
         {
             isChoosing = true;
             dialogueUI.ShowChoices(block.choices);
+        }
+    }
+
+    // Метод для проверки триггерных фраз
+    void CheckForTreeSequence(string phrase)
+    {
+        // Если фраза содержит упоминание яблони
+        if (phrase.Contains("Яблоня") || phrase.Contains("яблоня"))
+        {
+            Debug.Log($"DialogueRunner: Найдена фраза про яблоню: '{phrase}'");
+            wasApplePhraseSpoken = true;
+
+            // Если есть treecastscene, запускаем последовательность
+            if (treeScene != null)
+            {
+                // Запускаем через небольшую задержку, чтобы фраза успела отобразиться
+                StartCoroutine(DelayedTreeSequence());
+            }
+        }
+    }
+
+    IEnumerator DelayedTreeSequence()
+    {
+        // Ждем 2 секунды, чтобы фраза полностью отобразилась
+        yield return new WaitForSeconds(2f);
+
+        if (treeScene != null && wasApplePhraseSpoken)
+        {
+            Debug.Log("DialogueRunner: Запускаем кинопоследовательность с деревом...");
+            treeScene.TriggerCameraSequence();
         }
     }
 
@@ -173,6 +223,7 @@ public class DialogueRunner : MonoBehaviour
         dialogueUI.Hide();
         isRunning = false;
         isLetter = false;
+        wasApplePhraseSpoken = false; // Сбрасываем флаг
 
         var npc = GetComponent<NPCBehaviour>();
         if (npc != null)
@@ -191,6 +242,7 @@ public class DialogueRunner : MonoBehaviour
         isChoosing = false;
         currentDialogueIndex = 0;
         currentPhraseIndex = 0;
+        wasApplePhraseSpoken = false;
 
         if (dialogueUI != null)
             dialogueUI.ForceHide();
