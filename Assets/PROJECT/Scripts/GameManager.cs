@@ -29,7 +29,10 @@ public class GameManager : MonoBehaviour
 
         SceneManager.sceneLoaded += OnSceneLoaded;
     }
-
+    private void Start()
+    {
+        SettingsSaveManager.Instance.LoadSettings();
+    }
     private void OnDestroy()
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;

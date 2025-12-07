@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using UnityEngine.Audio;
 
 public class MusicManager : MonoBehaviour
 {
@@ -14,6 +15,7 @@ public class MusicManager : MonoBehaviour
     // текущие активные
     private AudioClip currentClip;
     private MusicMixer currentMixer;
+    public AudioMixerGroup group;
 
     private void Awake()
     {
@@ -21,6 +23,7 @@ public class MusicManager : MonoBehaviour
         audioSource = gameObject.AddComponent<AudioSource>();
         audioSource.loop = true;
         audioSource.volume = .1f;
+        audioSource.outputAudioMixerGroup = group;
 
         if (defaultMixer != null) PlayMusic(defaultMixer);
         else if (defaultClip != null) PlayMusic(defaultClip);
