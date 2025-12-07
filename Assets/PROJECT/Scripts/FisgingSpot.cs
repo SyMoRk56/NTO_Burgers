@@ -4,11 +4,14 @@ using System.Collections;
 
 public class FishingSpot : MonoBehaviour
 {
+    public bool isFishingEnding = false;
+
     [Header("References")]
     [SerializeField] private Transform fishingRod;
     [SerializeField] private GameObject fishPrefab;
     [SerializeField] private Transform fishSpawnPoint;
-    [SerializeField] private Text cooldownText; // UI текст для отображения кулдауна
+    [SerializeField] private Text cooldownText;
+    [SerializeField] private Transform fishTargetPoint; // НОВОЕ: Конкретная точка прилета рыбы
 
     [Header("Настройки удочки")]
     [SerializeField] private Vector3 rodStartRotation = new Vector3(0f, 0f, 20f);
@@ -22,12 +25,12 @@ public class FishingSpot : MonoBehaviour
     [Header("Настройки рыбы")]
     [SerializeField] private float fishFlyDuration = 2f;
     [SerializeField] private float fishSpawnDelay = 0.5f;
-    [SerializeField] private float minFishSize = 0.2f; // Минимальный размер рыбы
-    [SerializeField] private float maxFishSize = 3f;   // Максимальный размер рыбы
-    [SerializeField] private float maxGrowthTime = 10f; // Время для достижения максимального размера
+    [SerializeField] private float minFishSize = 0.2f;
+    [SerializeField] private float maxFishSize = 3f;
+    [SerializeField] private float maxGrowthTime = 10f;
 
     [Header("Настройки кулдауна")]
-    [SerializeField] private float cooldownDuration = 30f; // Кулдаун в секундах
+    [SerializeField] private float cooldownDuration = 30f;
     [SerializeField] private Color activeColor = Color.white;
     [SerializeField] private Color cooldownColor = Color.red;
 
@@ -39,9 +42,9 @@ public class FishingSpot : MonoBehaviour
     private GameObject currentPlayer;
 
     // Таймеры
-    private float fishingStartTime; // Время начала рыбалки (заброса)
-    private float cooldownEndTime; // Время окончания кулдауна
-    private float fishGrowthTime; // Время роста рыбы
+    private float fishingStartTime;
+    private float cooldownEndTime;
+    private float fishGrowthTime;
 
     // Компоненты игрока
     private playerAnimations playerAnim;
@@ -71,6 +74,12 @@ public class FishingSpot : MonoBehaviour
         if (cooldownText != null)
         {
             cooldownText.gameObject.SetActive(false);
+        }
+
+        // Если точка прилета не задана, создаем её
+        if (fishTargetPoint == null)
+        {
+            CreateDefaultTargetPoint();
         }
     }
 
@@ -254,14 +263,13 @@ public class FishingSpot : MonoBehaviour
             Debug.Log($"Размер рыбы: {fishSize:F2}x");
 
             StartCoroutine(FlyFish(fish, fishSize));
-            Destroy(fish, 5f);
+            Destroy(fish, 30f); // Увеличено время жизни рыбы до 30 секунд
         }
     }
 
     private float CalculateFishSize(float growthTime)
     {
         // Рассчитываем размер от minFishSize до maxFishSize в зависимости от времени
-        // Линейная интерполяция: размер = min + (growthTime/maxGrowthTime) * (max-min)
         float normalizedTime = Mathf.Clamp01(growthTime / maxGrowthTime);
         float size = minFishSize + normalizedTime * (maxFishSize - minFishSize);
 
@@ -275,10 +283,23 @@ public class FishingSpot : MonoBehaviour
         float time = 0f;
         Vector3 startPos = fish.transform.position;
 
-        // Цель - немного перед игроком
-        Vector3 targetPos = currentPlayer.transform.position +
-                           (playerModel != null ? playerModel.forward : currentPlayer.transform.forward) * 1f +
-                           Vector3.up * 1f;
+        // Цель - конкретная точка fishTargetPoint
+        Vector3 targetPos;
+
+        if (fishTargetPoint != null)
+        {
+            // Используем конкретную точку
+            targetPos = fishTargetPoint.position;
+            Debug.Log($"Рыба летит в конкретную точку: {targetPos}");
+        }
+        else
+        {
+            // Если точка не задана, летим перед игроком (старый вариант)
+            targetPos = currentPlayer.transform.position +
+                       (playerModel != null ? playerModel.forward : currentPlayer.transform.forward) * 1f +
+                       Vector3.up * 1f;
+            Debug.Log($"Рыба летит перед игроком: {targetPos}");
+        }
 
         while (time < fishFlyDuration)
         {
@@ -307,8 +328,20 @@ public class FishingSpot : MonoBehaviour
         if (fish != null)
         {
             fish.transform.position = targetPos;
+            Debug.Log($"Рыба достигла цели!");
         }
     }
+
+    private void CreateDefaultTargetPoint()
+    {
+        // Создаем точку прилета по умолчанию
+        GameObject targetPoint = new GameObject("FishTargetPoint");
+        targetPoint.transform.SetParent(transform);
+        targetPoint.transform.localPosition = new Vector3(0, 0.5f, 1.5f); // Немного впереди и выше
+        fishTargetPoint = targetPoint.transform;
+        Debug.Log($"Создана точка прилета рыбы по умолчанию: {fishTargetPoint.position}");
+    }
+
     private void EndFishing()
     {
         // Получаем PlayerMovement и снимаем флаг рыбалки
@@ -316,6 +349,7 @@ public class FishingSpot : MonoBehaviour
         if (playerMovement != null)
         {
             playerMovement.EndFishing();
+            isFishingEnding = true;
         }
 
         // 1. Разрешаем движение
@@ -340,7 +374,19 @@ public class FishingSpot : MonoBehaviour
         // 5. Запускаем кулдаун
         StartCooldown();
 
+        // 6. Сбрасываем флаг isFishingEnding через 30 секунд
+        StartCoroutine(ResetFishingEndingAfterDelay(30f));
+
         Debug.Log("Рыбалка завершена! Кулдаун 30 секунд.");
+    }
+
+    private IEnumerator ResetFishingEndingAfterDelay(float delay)
+    {
+        Debug.Log($"Ждем {delay} секунд перед сбросом isFishingEnding...");
+        yield return new WaitForSeconds(delay);
+
+        isFishingEnding = false;
+        Debug.Log("Флаг isFishingEnding сброшен в false");
     }
 
     private void StartCooldown()
@@ -511,5 +557,40 @@ public class FishingSpot : MonoBehaviour
             Gizmos.DrawSphere(fishSpawnPoint.position, 0.1f);
             Gizmos.DrawWireSphere(fishSpawnPoint.position, 0.3f);
         }
+
+        if (fishTargetPoint != null)
+        {
+            Gizmos.color = Color.green;
+            Gizmos.DrawSphere(fishTargetPoint.position, 0.15f);
+            Gizmos.DrawWireSphere(fishTargetPoint.position, 0.4f);
+            Gizmos.DrawLine(transform.position, fishTargetPoint.position);
+        }
+    }
+
+    // Методы для управления точкой прилета из других скриптов
+    public void SetFishTargetPoint(Transform newTargetPoint)
+    {
+        fishTargetPoint = newTargetPoint;
+        Debug.Log($"Точка прилета рыбы установлена: {newTargetPoint?.name}");
+    }
+
+    public void SetFishTargetPoint(Vector3 position)
+    {
+        if (fishTargetPoint == null)
+        {
+            GameObject target = new GameObject("FishTargetPoint");
+            fishTargetPoint = target.transform;
+        }
+        fishTargetPoint.position = position;
+        Debug.Log($"Точка прилета рыбы установлена в позицию: {position}");
+    }
+
+    public Vector3 GetFishTargetPosition()
+    {
+        if (fishTargetPoint != null)
+        {
+            return fishTargetPoint.position;
+        }
+        return transform.position + Vector3.up * 2f;
     }
 }

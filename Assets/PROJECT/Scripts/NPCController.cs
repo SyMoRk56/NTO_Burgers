@@ -1,200 +1,536 @@
 using UnityEngine;
+using UnityEngine.AI;
 using System.Collections;
+using System.Collections.Generic;
 
 public class NPCController : MonoBehaviour
 {
+    [Header("Настройки рыбалки")]
+    [SerializeField] private MonoBehaviour componentToDisable;
+    [SerializeField] private string bridgeTag = "bridge";
+    [SerializeField] private string fishTag = "fish";
+
     [Header("Настройки движения")]
-    public float moveSpeed = 3f;
-    public float stopDistance = 2f;
-    public float rotationSpeed = 5f;
+    [SerializeField] private float stoppingDistance = 1.0f;
+    [SerializeField] private float updateTargetInterval = 1.0f;
+    [SerializeField] private float attachFishDistance = 2.0f;
+    [SerializeField] private float collisionCheckRadius = 2.0f;
 
-    [Header("Визуальные эффекты")]
-    public ParticleSystem appearEffect;
-    public ParticleSystem disappearEffect;
+    [Header("Настройки рыбы")]
+    [SerializeField] private Vector3 fishCarryOffset = new Vector3(0f, 1.5f, 1.5f);
+    [SerializeField] private Vector3 fishRotationOffset = new Vector3(0f, 90f, 0f);
+    [SerializeField] private float fishFollowSpeed = 5f;
 
-    // Состояния
-    private enum NPCState
+    [Header("Настройки анимации")]
+    [SerializeField] private Animator npcAnimator;
+    [SerializeField] private string carringWalkParam = "carringwalk"; // Название параметра в аниматоре
+
+    public bool isGoingForFish = false;
+
+    private FishingSpot fishingManager;
+    private NavMeshAgent navMeshAgent;
+    private GameObject targetFish;
+    private bool isMovingToFish = false;
+    private Coroutine movementCoroutine;
+    private bool hasFishAttached = false;
+    private GameObject attachedFish;
+    private bool isCarryingFish = false;
+
+    private void Start()
     {
-        Appearing,      // Появление
-        Approaching,    // Подход к игроку
-        Waiting,        // Ожидание у игрока
-        Leaving,        // Уход
-        Disappearing    // Исчезновение
-    }
+        Debug.Log($"NPCController.Start() вызван для {gameObject.name}");
 
-    private NPCState currentState = NPCState.Appearing;
-    private Transform player;
-    private bool hasReachedPlayer = false;
-    private Vector3 leaveDirection;
+        fishingManager = FindObjectOfType<FishingSpot>();
 
-    void Start()
-    {
-        Debug.Log($"NPC {name}: Появился");
-
-        // Находим игрока
-        player = GameObject.FindGameObjectWithTag("Player")?.transform;
-
-        if (player == null)
+        if (fishingManager == null)
         {
-            Debug.LogError($"NPC {name}: Игрок не найден!");
-        }
-
-        // Запускаем эффект появления
-        if (appearEffect != null)
-        {
-            appearEffect.Play();
-        }
-
-        // Через 1 секунду начинаем движение к игроку
-        Invoke("StartApproach", 1f);
-    }
-
-    void Update()
-    {
-        switch (currentState)
-        {
-            case NPCState.Approaching:
-                ApproachPlayer();
-                break;
-
-            case NPCState.Leaving:
-                Leave();
-                break;
-
-            case NPCState.Disappearing:
-                // Ничего не делаем, ждем уничтожения
-                break;
-        }
-    }
-
-    void StartApproach()
-    {
-        if (player != null)
-        {
-            currentState = NPCState.Approaching;
-            Debug.Log($"NPC {name}: Начинает подход к игроку");
-        }
-    }
-
-    // Метод для вызова из FishingSpot
-    public void StartApproach(Transform playerTransform)
-    {
-        if (playerTransform == null) return;
-
-        player = playerTransform;
-        currentState = NPCState.Approaching;
-        hasReachedPlayer = false;
-
-        Debug.Log($"NPC {name}: Получил команду подойти к игроку");
-    }
-
-    void ApproachPlayer()
-    {
-        if (player == null) return;
-
-        // Двигаемся к игроку
-        Vector3 direction = (player.position - transform.position).normalized;
-        transform.position += direction * moveSpeed * Time.deltaTime;
-
-        // Плавно поворачиваемся к игроку
-        if (direction != Vector3.zero)
-        {
-            Quaternion targetRotation = Quaternion.LookRotation(new Vector3(direction.x, 0, direction.z));
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
-        }
-
-        // Проверяем расстояние до игрока
-        float distance = Vector3.Distance(transform.position, player.position);
-
-        if (distance <= stopDistance)
-        {
-            hasReachedPlayer = true;
-            currentState = NPCState.Waiting;
-            Debug.Log($"NPC {name}: Достиг игрока, начинает ожидание");
-
-            // Начинаем отсчет времени ожидания
-            Invoke("StartLeaving", 5f);
-        }
-    }
-
-    void StartLeaving()
-    {
-        currentState = NPCState.Leaving;
-
-        // Выбираем случайное направление для ухода
-        float randomAngle = Random.Range(0f, 360f);
-        leaveDirection = new Vector3(Mathf.Sin(randomAngle * Mathf.Deg2Rad), 0, Mathf.Cos(randomAngle * Mathf.Deg2Rad));
-
-        Debug.Log($"NPC {name}: Начинает уход");
-    }
-
-    void Leave()
-    {
-        // Двигаемся в выбранном направлении
-        transform.position += leaveDirection * moveSpeed * Time.deltaTime;
-
-        // Поворачиваемся в направлении движения
-        if (leaveDirection != Vector3.zero)
-        {
-            Quaternion targetRotation = Quaternion.LookRotation(new Vector3(leaveDirection.x, 0, leaveDirection.z));
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
-        }
-
-        // Через 3 секунды исчезаем
-        Invoke("Disappear", 3f);
-        currentState = NPCState.Disappearing;
-    }
-
-    void Disappear()
-    {
-        Debug.Log($"NPC {name}: Исчезает");
-
-        // Запускаем эффект исчезновения
-        if (disappearEffect != null)
-        {
-            disappearEffect.Play();
-            // Ждем пока эффект проиграется
-            Invoke("DestroyNPC", disappearEffect.main.duration);
+            Debug.LogWarning("FishingManager не найден в сцене!");
         }
         else
         {
-            DestroyNPC();
+            Debug.Log($"FishingManager найден: {fishingManager.gameObject.name}");
         }
-    }
 
-    void DestroyNPC()
-    {
-        Destroy(gameObject);
-    }
-
-    // Публичный метод для ухода (можно вызвать из FishingSpot)
-    public void GoAway()
-    {
-        if (currentState == NPCState.Waiting)
+        navMeshAgent = GetComponent<NavMeshAgent>();
+        if (navMeshAgent == null)
         {
-            StartLeaving();
+            navMeshAgent = gameObject.AddComponent<NavMeshAgent>();
+            Debug.Log("NavMeshAgent добавлен к NPC");
+        }
+
+        navMeshAgent.stoppingDistance = stoppingDistance;
+        navMeshAgent.autoBraking = true;
+
+        if (componentToDisable == null)
+        {
+            Debug.LogWarning("Не назначен компонент для отключения!");
+        }
+
+        if (npcAnimator == null)
+        {
+            npcAnimator = GetComponent<Animator>();
+            if (npcAnimator == null)
+            {
+                Debug.LogWarning("Animator не найден на NPC!");
+            }
+            else
+            {
+                // Проверяем, есть ли параметр carringwalk в аниматоре
+                bool hasParam = false;
+                foreach (AnimatorControllerParameter param in npcAnimator.parameters)
+                {
+                    if (param.name == carringWalkParam && param.type == AnimatorControllerParameterType.Int)
+                    {
+                        hasParam = true;
+                        break;
+                    }
+                }
+
+                if (!hasParam)
+                {
+                    Debug.LogWarning($"Параметр '{carringWalkParam}' типа Int не найден в аниматоре!");
+                }
+                else
+                {
+                    Debug.Log($"Параметр '{carringWalkParam}' найден в аниматоре");
+                }
+            }
+        }
+
+        Debug.Log($"NPCController инициализирован. Bridge tag: '{bridgeTag}', Fish tag: '{fishTag}'");
+    }
+
+    private void Update()
+    {
+        // Если NPC несет рыбу, обновляем позицию рыбы
+        if (isCarryingFish && attachedFish != null)
+        {
+            UpdateFishPosition();
+        }
+
+        // Обновляем анимацию в зависимости от состояния
+        UpdateAnimation();
+
+        // Постоянная проверка нахождения на мосту при isFishingEnding == true
+        if (fishingManager != null && fishingManager.isFishingEnding)
+        {
+            CheckForBridgeContinuously();
+        }
+
+        // Отладочная информация каждые 2 секунды
+        if (Time.frameCount % 120 == 0)
+        {
+            Debug.Log($"NPC состояние: isGoingForFish={isGoingForFish}, isMovingToFish={isMovingToFish}, isCarryingFish={isCarryingFish}");
+            if (fishingManager != null)
+            {
+                Debug.Log($"FishingManager.isFishingEnding = {fishingManager.isFishingEnding}");
+            }
         }
     }
 
-    public bool HasReachedPlayer()
+    // Обновление позиции рыбы при переносе
+    private void UpdateFishPosition()
     {
-        return hasReachedPlayer;
+        if (attachedFish == null) return;
+
+        // Вычисляем целевую позицию рыбы
+        Vector3 targetPosition = transform.position +
+                                transform.forward * fishCarryOffset.z +
+                                transform.up * fishCarryOffset.y +
+                                transform.right * fishCarryOffset.x;
+
+        // Плавное движение рыбы к целевой позиции
+        attachedFish.transform.position = Vector3.Lerp(
+            attachedFish.transform.position,
+            targetPosition,
+            Time.deltaTime * fishFollowSpeed
+        );
+
+        // Поворачиваем рыбу
+        Quaternion targetRotation = transform.rotation * Quaternion.Euler(fishRotationOffset);
+        attachedFish.transform.rotation = Quaternion.Slerp(
+            attachedFish.transform.rotation,
+            targetRotation,
+            Time.deltaTime * fishFollowSpeed
+        );
     }
 
-    void OnDrawGizmos()
+    // Обновление анимации
+    private void UpdateAnimation()
     {
-        // Показываем направление к игроку (если есть)
-        if (player != null && currentState == NPCState.Approaching)
+        if (npcAnimator == null) return;
+
+        // Определяем значение параметра carringwalk
+        int carringWalkValue = 0;
+
+        if (isCarryingFish)
         {
-            Gizmos.color = Color.green;
-            Gizmos.DrawLine(transform.position, player.position);
+            // Если несет рыбу - устанавливаем 4
+            carringWalkValue = 4;
+            Debug.Log($"Устанавливаем carringwalk = 4 (несет рыбу)");
+        }
+        else if (isMovingToFish)
+        {
+            // Если идет за рыбой - можно установить 1 (просто идет)
+            carringWalkValue = 1;
+        }
+        // 0 - idle по умолчанию
+
+        npcAnimator.SetInteger(carringWalkParam, carringWalkValue);
+
+        // Также можно контролировать скорость анимации в зависимости от скорости движения
+        if (navMeshAgent != null)
+        {
+            float speed = navMeshAgent.velocity.magnitude;
+            npcAnimator.SetFloat("Speed", speed);
+        }
+    }
+
+    // Постоянная проверка нахождения на мосту
+    private void CheckForBridgeContinuously()
+    {
+        if (isMovingToFish || isCarryingFish) return;
+
+        Collider[] colliders = Physics.OverlapSphere(transform.position, collisionCheckRadius);
+
+        bool foundBridge = false;
+
+        foreach (Collider collider in colliders)
+        {
+            if (collider.gameObject != gameObject && collider.gameObject.tag == bridgeTag)
+            {
+                foundBridge = true;
+                Debug.Log($"Найден мост: {collider.gameObject.name} на дистанции: {Vector3.Distance(transform.position, collider.transform.position):F2}");
+
+                // Отключаем компонент
+                if (componentToDisable != null && componentToDisable.enabled)
+                {
+                    componentToDisable.enabled = false;
+                    Debug.Log($"Компонент {componentToDisable.GetType().Name} отключен");
+                }
+
+                // Начинаем движение к рыбе
+                if (!isMovingToFish)
+                {
+                    Debug.Log("Условие выполнено: isFishingEnding == true и NPC на мосту");
+                    StartMovingToFish();
+                }
+                break;
+            }
         }
 
-        // Показываем направление ухода
-        if (currentState == NPCState.Leaving)
+        if (!foundBridge && colliders.Length > 0)
         {
-            Gizmos.color = Color.red;
-            Gizmos.DrawLine(transform.position, transform.position + leaveDirection * 5f);
+            Debug.Log($"Мост не найден. Проверенные объекты ({colliders.Length}):");
+            foreach (Collider collider in colliders)
+            {
+                if (collider.gameObject != gameObject)
+                {
+                    Debug.Log($"  - {collider.gameObject.name} (тег: {collider.gameObject.tag})");
+                }
+            }
         }
+    }
+
+    private void StartMovingToFish()
+    {
+        Debug.Log($"Поиск объектов с тегом '{fishTag}'...");
+        GameObject[] fishObjects = GameObject.FindGameObjectsWithTag(fishTag);
+
+        Debug.Log($"Найдено объектов с тегом '{fishTag}': {fishObjects.Length}");
+
+        if (fishObjects.Length > 0)
+        {
+            // Сначала ищем активные (не уничтожаемые) рыбы
+            List<GameObject> activeFish = new List<GameObject>();
+            foreach (GameObject fish in fishObjects)
+            {
+                if (fish != null && fish.activeInHierarchy)
+                {
+                    activeFish.Add(fish);
+                }
+            }
+
+            if (activeFish.Count > 0)
+            {
+                targetFish = activeFish[0];
+                float closestDistance = Vector3.Distance(transform.position, targetFish.transform.position);
+
+                // Выбираем ближайшую активную рыбу
+                foreach (GameObject fish in activeFish)
+                {
+                    float distance = Vector3.Distance(transform.position, fish.transform.position);
+                    if (distance < closestDistance)
+                    {
+                        closestDistance = distance;
+                        targetFish = fish;
+                    }
+                }
+
+                Debug.Log($"Выбрана рыба: {targetFish.name}, расстояние: {closestDistance:F2}");
+
+                isMovingToFish = true;
+                isGoingForFish = true;
+
+                if (movementCoroutine != null)
+                {
+                    StopCoroutine(movementCoroutine);
+                }
+
+                movementCoroutine = StartCoroutine(MoveToFishCoroutine());
+            }
+            else
+            {
+                Debug.LogWarning("Не найдено активных рыб! Все рыбы могут быть помечены для уничтожения.");
+            }
+        }
+        else
+        {
+            Debug.LogWarning($"Объектов с тегом '{fishTag}' не найдено! Создайте рыбу с тегом 'fish'.");
+        }
+    }
+
+    private IEnumerator MoveToFishCoroutine()
+    {
+        Debug.Log($"Начало движения к рыбе: {targetFish?.name}");
+
+        while (isMovingToFish && targetFish != null)
+        {
+            if (navMeshAgent.isActiveAndEnabled && targetFish.activeInHierarchy)
+            {
+                navMeshAgent.SetDestination(targetFish.transform.position);
+
+                float distanceToFish = Vector3.Distance(transform.position, targetFish.transform.position);
+
+                if (distanceToFish <= attachFishDistance && !isCarryingFish)
+                {
+                    Debug.Log($"Достаточно близко! Поднимаем рыбу...");
+                    PickupFish(targetFish);
+                }
+
+                if (navMeshAgent.remainingDistance <= navMeshAgent.stoppingDistance &&
+                    !navMeshAgent.pathPending)
+                {
+                    Debug.Log("Достигнута конечная точка");
+                    StopMovingToFish();
+                    OnReachedFish();
+                    yield break;
+                }
+            }
+            else if (targetFish == null || !targetFish.activeInHierarchy)
+            {
+                Debug.LogWarning("Целевая рыба уничтожена или не активна!");
+                StopMovingToFish();
+                yield break;
+            }
+
+            yield return new WaitForSeconds(updateTargetInterval);
+        }
+
+        Debug.Log("Движение завершено");
+    }
+
+    private void PickupFish(GameObject fish)
+    {
+        if (fish == null || isCarryingFish) return;
+
+        Debug.Log($"NPC поднимает рыбу: {fish.name}");
+
+        // Сохраняем ссылку на рыбу
+        attachedFish = fish;
+        hasFishAttached = true;
+        isCarryingFish = true;
+
+        // Отключаем физику
+        Rigidbody rb = attachedFish.GetComponent<Rigidbody>();
+        if (rb != null)
+        {
+            rb.isKinematic = true;
+            rb.useGravity = false;
+        }
+
+        // Отключаем коллайдер
+        Collider col = attachedFish.GetComponent<Collider>();
+        if (col != null)
+        {
+            col.enabled = false;
+        }
+
+        // Включаем отключенный компонент обратно
+        if (componentToDisable != null && !componentToDisable.enabled)
+        {
+            componentToDisable.enabled = true;
+            Debug.Log($"Компонент {componentToDisable.GetType().Name} включен обратно");
+        }
+
+        // Останавливаем движение
+        StopMovingToFish();
+
+        // Устанавливаем параметр аниматора
+        if (npcAnimator != null)
+        {
+            npcAnimator.SetInteger(carringWalkParam, 4);
+            Debug.Log($"Установлен параметр {carringWalkParam} = 4");
+        }
+
+        Debug.Log("Рыба успешно поднята! NPC теперь несет рыбу.");
+
+        // Запускаем корутину для ношения рыбы
+        StartCoroutine(CarryFishForDuration(10f));
+    }
+
+    private IEnumerator CarryFishForDuration(float duration)
+    {
+        Debug.Log($"NPC будет нести рыбу {duration} секунд");
+        yield return new WaitForSeconds(duration);
+
+        // Бросаем рыбу
+        DropFish();
+    }
+
+    private void DropFish()
+    {
+        if (!isCarryingFish || attachedFish == null) return;
+
+        Debug.Log($"NPC бросает рыбу: {attachedFish.name}");
+
+        // Включаем физику обратно
+        Rigidbody rb = attachedFish.GetComponent<Rigidbody>();
+        if (rb != null)
+        {
+            rb.isKinematic = false;
+            rb.useGravity = true;
+            // Добавляем небольшой толчок вперед
+            rb.AddForce(transform.forward * 2f + Vector3.up * 1f, ForceMode.Impulse);
+        }
+
+        // Включаем коллайдер
+        Collider col = attachedFish.GetComponent<Collider>();
+        if (col != null)
+        {
+            col.enabled = true;
+        }
+
+        // Возвращаем параметр аниматора в 0 (idle)
+        if (npcAnimator != null)
+        {
+            npcAnimator.SetInteger(carringWalkParam, 0);
+            Debug.Log($"Установлен параметр {carringWalkParam} = 0");
+        }
+
+        // Сбрасываем флаги
+        isCarryingFish = false;
+        hasFishAttached = false;
+        attachedFish = null;
+
+        Debug.Log("Рыба брошена!");
+    }
+
+    private void StopMovingToFish()
+    {
+        isMovingToFish = false;
+        isGoingForFish = false;
+
+        if (movementCoroutine != null)
+        {
+            StopCoroutine(movementCoroutine);
+            movementCoroutine = null;
+        }
+
+        if (navMeshAgent != null && navMeshAgent.isActiveAndEnabled)
+        {
+            navMeshAgent.ResetPath();
+        }
+
+        Debug.Log("Движение остановлено");
+    }
+
+    private void OnReachedFish()
+    {
+        Debug.Log("NPC достиг позиции рыбы");
+
+        if (targetFish != null && !isCarryingFish)
+        {
+            PickupFish(targetFish);
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (movementCoroutine != null)
+        {
+            StopCoroutine(movementCoroutine);
+        }
+
+        // Бросаем рыбу при уничтожении
+        if (isCarryingFish)
+        {
+            DropFish();
+        }
+    }
+
+    // Метод для ручной проверки состояния
+    [ContextMenu("Проверить состояние NPC")]
+    public void CheckNPCStatus()
+    {
+        Debug.Log($"=== ПРОВЕРКА СОСТОЯНИЯ NPC ===");
+        Debug.Log($"Имя: {gameObject.name}");
+        Debug.Log($"Позиция: {transform.position}");
+        Debug.Log($"isGoingForFish: {isGoingForFish}");
+        Debug.Log($"isMovingToFish: {isMovingToFish}");
+        Debug.Log($"isCarryingFish: {isCarryingFish}");
+        Debug.Log($"Компонент отключен: {componentToDisable != null && !componentToDisable.enabled}");
+
+        if (fishingManager != null)
+        {
+            Debug.Log($"FishingManager.isFishingEnding: {fishingManager.isFishingEnding}");
+        }
+
+        // Проверим наличие мостов рядом
+        Collider[] colliders = Physics.OverlapSphere(transform.position, 5f);
+        int bridgeCount = 0;
+        foreach (Collider collider in colliders)
+        {
+            if (collider.gameObject.tag == bridgeTag)
+            {
+                bridgeCount++;
+                Debug.Log($"Мост найден: {collider.gameObject.name} на расстоянии {Vector3.Distance(transform.position, collider.transform.position):F2}");
+            }
+        }
+        Debug.Log($"Мостов в радиусе 5м: {bridgeCount}");
+
+        // Проверим наличие рыб
+        GameObject[] fishObjects = GameObject.FindGameObjectsWithTag(fishTag);
+        Debug.Log($"Рыб в сцене: {fishObjects.Length}");
+        foreach (GameObject fish in fishObjects)
+        {
+            Debug.Log($"  - {fish.name} (активна: {fish.activeInHierarchy})");
+        }
+
+        // Проверим состояние аниматора
+        if (npcAnimator != null)
+        {
+            Debug.Log($"Параметр {carringWalkParam}: {npcAnimator.GetInteger(carringWalkParam)}");
+        }
+
+        Debug.Log($"=== КОНЕЦ ПРОВЕРКИ ===");
+    }
+
+    // Метод для принудительного поднятия рыбы
+    [ContextMenu("Поднять рыбу принудительно")]
+    public void ForcePickupFish()
+    {
+        GameObject[] fishObjects = GameObject.FindGameObjectsWithTag(fishTag);
+        if (fishObjects.Length > 0 && !isCarryingFish)
+        {
+            PickupFish(fishObjects[0]);
+        }
+    }
+
+    // Метод для принудительного броска рыбы
+    [ContextMenu("Бросить рыбу")]
+    public void ForceDropFish()
+    {
+        DropFish();
     }
 }

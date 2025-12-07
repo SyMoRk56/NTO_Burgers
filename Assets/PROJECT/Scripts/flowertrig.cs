@@ -12,6 +12,11 @@ public class FlowerTriggerHandler : MonoBehaviour
     public float spawnHeight = 1f;
     public float sneezeDelay = 1f;
 
+    [Header("Звуки")]
+    public AudioClip sneezeSound; // Звук чихания
+    public float sneezeVolume = 1f;
+    [SerializeField] private AudioSource audioSource; // Аудиоисточник (если не назначен - создадим)
+
     [Header("Автопоиск")]
     public bool autoFindPlayer = true;
     public bool autoFindVFX = true;
@@ -34,7 +39,7 @@ public class FlowerTriggerHandler : MonoBehaviour
             if (player != null)
             {
                 playerMovement = player.GetComponent<PlayerMovement>();
-                playerAnim = player.GetComponent<playerAnimations>(); // ← ДОБАВЛЕНО
+                playerAnim = player.GetComponent<playerAnimations>();
             }
         }
 
@@ -45,7 +50,6 @@ public class FlowerTriggerHandler : MonoBehaviour
         if (autoFindVFX)
         {
             GameObject taggedObj = GameObject.FindGameObjectWithTag("snezy");
-
             if (taggedObj != null)
                 sneezeVFX = taggedObj.GetComponent<ParticleSystem>();
             else
@@ -54,6 +58,20 @@ public class FlowerTriggerHandler : MonoBehaviour
 
         if (sneezeVFX != null && sneezeVFX.isPlaying)
             sneezeVFX.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+
+        // Проверяем аудиоисточник
+        if (audioSource == null)
+        {
+            audioSource = GetComponent<AudioSource>();
+            if (audioSource == null)
+            {
+                // Создаем новый AudioSource, если нет
+                audioSource = gameObject.AddComponent<AudioSource>();
+                audioSource.playOnAwake = false;
+                audioSource.spatialBlend = 1f; // 3D звук
+                audioSource.maxDistance = 20f;
+            }
+        }
     }
 
     void Update()
@@ -81,9 +99,7 @@ public class FlowerTriggerHandler : MonoBehaviour
         {
             print("ENDED");
             float dialogueDuration = Time.time - dialogueStartTime;
-
             Debug.Log($"Диалог завершился. Длительность: {dialogueDuration:F1} сек");
-
             StartCoroutine(FlowerSequence());
         }
 
@@ -145,11 +161,14 @@ public class FlowerTriggerHandler : MonoBehaviour
         // 4. Небольшая задержка перед чихом
         yield return new WaitForSeconds(sneezeDelay);
 
-        // 5. ТУТ ВКЛЮЧАЕМ АНИМАЦИЮ ЧИХА
+        // 5. ВКЛЮЧАЕМ АНИМАЦИЮ ЧИХА
         if (playerAnim != null)
-            playerAnim.PlaySneezy();   // ← ДОБАВЛЕНО
+            playerAnim.PlaySneezy();
 
-        // 6. VFX Чихания
+        // 6. ПРОИГРЫВАЕМ ЗВУК ЧИХАНИЯ
+        PlaySneezeSound();
+
+        // 7. VFX Чихания
         if (sneezeVFX != null)
         {
             Vector3 pos = player.transform.position +
@@ -163,17 +182,40 @@ public class FlowerTriggerHandler : MonoBehaviour
             yield return new WaitForSeconds(sneezeVFX.main.duration);
             sneezeVFX.Stop();
         }
+        else
+        {
+            // Если нет VFX, ждем 1 секунду для анимации чиха
+            yield return new WaitForSeconds(1f);
+        }
 
-        // 7. ВОЗВРАТ АНИМАЦИИ
+        // 8. ВОЗВРАТ АНИМАЦИИ
         if (playerAnim != null)
-            playerAnim.HeroIdleAnim(); // ← ДОБАВЛЕНО
+            playerAnim.HeroIdleAnim();
 
-        // 8. Разблокировка управления
+        // 9. Разблокировка управления
         if (playerMovement != null)
             playerMovement.enabled = true;
 
         Debug.Log("=== ПОСЛЕДОВАТЕЛЬНОСТЬ ЦВЕТКА ЗАВЕРШЕНА ===");
         sequenceTriggered = false;
+    }
+
+    private void PlaySneezeSound()
+    {
+        if (sneezeSound != null && audioSource != null)
+        {
+            // Можно добавить небольшую случайность в pitch для разнообразия
+            audioSource.pitch = Random.Range(0.9f, 1.1f);
+            audioSource.PlayOneShot(sneezeSound, sneezeVolume);
+            Debug.Log("Звук чихания проигран");
+        }
+        else
+        {
+            if (sneezeSound == null)
+                Debug.LogWarning("Не назначен звук чихания!");
+            if (audioSource == null)
+                Debug.LogWarning("Не найден AudioSource!");
+        }
     }
 
     public void TriggerSequence()
