@@ -3374,6 +3374,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 936709233368181333, guid: 0910cd8d95f59a742a5e020e2f8b9ddb, type: 3}
+      propertyPath: terrain
+      value: 
+      objectReference: {fileID: 3219539444260320773}
+    - target: {fileID: 936709233368181333, guid: 0910cd8d95f59a742a5e020e2f8b9ddb, type: 3}
       propertyPath: defaultStepSound
       value: 
       objectReference: {fileID: 8300000, guid: b62eca4217454e94fb49c0340c48b7c4, type: 3}
@@ -16777,6 +16781,11 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 10, y: 2.2204463e-16, z: 10.000001}
   m_Center: {x: -0.000000059604645, y: 0, z: 0}
+--- !u!218 &3219539444260320773 stripped
+Terrain:
+  m_CorrespondingSourceObject: {fileID: 2458412574479616117, guid: 46abca1ffaff73543887f9f521eab7f8, type: 3}
+  m_PrefabInstance: {fileID: 3219539444260320770}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &8548631049506497561
 PrefabInstance:
   m_ObjectHideFlags: 0

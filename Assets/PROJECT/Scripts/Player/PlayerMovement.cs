@@ -57,7 +57,7 @@ public class PlayerMovement : MonoBehaviour
     public float stepInterval = 0.45f;
     private float stepTimer = 0f;
 
-    private Terrain terrain;
+    public Terrain terrain;
     private TerrainData terrainData;
     public AudioClip defaultStepSound;
 
@@ -69,9 +69,7 @@ public class PlayerMovement : MonoBehaviour
 
     void Start()
     {
-        terrain = Terrain.activeTerrain;
-        if (terrain != null)
-            terrainData = terrain.terrainData;
+        terrainData = terrain.terrainData;
 
         rb = GetComponent<Rigidbody>();
         col = GetComponent<CapsuleCollider>();
