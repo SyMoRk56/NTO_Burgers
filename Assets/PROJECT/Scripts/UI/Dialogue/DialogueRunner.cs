@@ -37,7 +37,7 @@ public class DialogueRunner : MonoBehaviour
     void Start()
     {
         dialogueUI = GetComponentInChildren<DialogueUI>(true);
-        dialogueUI.transform.GetChild(0).GetComponent<Button>().onClick.AddListener(() => NextPhrase());
+        dialogueUI.transform.GetChild(0).GetComponent<Button>().onClick.AddListener(()=>NextPhrase());
         if (audioSource == null)
         {
             audioSource = gameObject.AddComponent<AudioSource>();
@@ -97,7 +97,7 @@ public class DialogueRunner : MonoBehaviour
 
             dialogueUI.gameObject.SetActive(true);
             dialogueUI.nameText.text = LocalizationManager.Instance.Get(ownerName);
-
+            
             ShowCurrentPhrase();
             isRunning = true;
 
@@ -152,8 +152,11 @@ public class DialogueRunner : MonoBehaviour
     // Метод для проверки триггерных фраз
     void CheckForTreeSequence(string phrase)
     {
+        phrase = LocalizationManager.Instance.Get(phrase);
+        print("Check for phrase " + phrase);
+
         // Если фраза содержит упоминание яблони
-        if (phrase.Contains("Яблоня") || phrase.Contains("яблоня"))
+        if (phrase.Contains("Яблоня") || phrase.Contains("яблоня") || phrase.Contains("Apple tree"))
         {
             Debug.Log($"DialogueRunner: Найдена фраза про яблоню: '{phrase}'");
             wasApplePhraseSpoken = true;
@@ -171,7 +174,7 @@ public class DialogueRunner : MonoBehaviour
     {
         // Ждем 2 секунды, чтобы фраза полностью отобразилась
         yield return new WaitForSeconds(2f);
-
+        
         if (treeScene != null && wasApplePhraseSpoken)
         {
             Debug.Log("DialogueRunner: Запускаем кинопоследовательность с деревом...");
