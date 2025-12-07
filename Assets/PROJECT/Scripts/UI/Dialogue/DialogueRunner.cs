@@ -152,8 +152,10 @@ public class DialogueRunner : MonoBehaviour
     // Метод для проверки триггерных фраз
     void CheckForTreeSequence(string phrase)
     {
+        phrase = LocalizationManager.Instance.Get(phrase);
+        print("Check for phrase " + phrase);
         // Если фраза содержит упоминание яблони
-        if (phrase.Contains("Яблоня") || phrase.Contains("яблоня"))
+        if (phrase.Contains("Яблоня") || phrase.Contains("яблоня") || phrase.Contains("Apple tree"))
         {
             Debug.Log($"DialogueRunner: Найдена фраза про яблоню: '{phrase}'");
             wasApplePhraseSpoken = true;
