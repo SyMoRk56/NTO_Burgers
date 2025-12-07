@@ -107,15 +107,12 @@ public class DialogueRunner : MonoBehaviour
         {
             dialogueUI.ShowPhrase(ownerName, block.phrases[currentPhraseIndex]);
 
-            // Проигрываем звук фразы
-            if (block.voiceOver != null && currentPhraseIndex < block.voiceOver.Length)
-            {
                 //AudioClip clip = block.voiceOver[currentPhraseIndex];
                 if (clip != null && audioSource != null)
                 {
                     audioSource.PlayOneShot(clip);
                 }
-            }
+            
 
             if (face != null)
             {
