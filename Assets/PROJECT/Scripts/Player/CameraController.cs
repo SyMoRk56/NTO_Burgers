@@ -11,6 +11,10 @@ public class CameraController : MonoBehaviour
     {
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+#if !UNITY_EDITOR
+sensX *=2;
+sensY *=2;
+#endif
     }
 
     private void Update()

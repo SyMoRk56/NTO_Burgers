@@ -27,7 +27,7 @@ public class MailBox : MonoBehaviour
             var mail = PlayerMailInventory.Instance.GetMailForAddress(mailboxAddress);
             Debug.Log($"✓ Найдено подходящее письмо: {mail.recieverName}");
             DeliverMail(mail);
-
+            FindFirstObjectByType<LetterPanel>().ShowPanel();
             // Запускаем диалог после доставки С ЗАДЕРЖКОЙ
             if (triggerDialogueAfterDelivery && dialogueRunner != null)
             {
