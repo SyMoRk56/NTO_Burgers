@@ -11,6 +11,37 @@ public class AutoSaveSlot
     public string slotName;
 }
 
+[System.Serializable]
+public class DictionaryData
+{
+    public List<string> keys = new List<string>();
+    public List<bool> values = new List<bool>();
+
+    public DictionaryData() { }
+
+    public DictionaryData(Dictionary<string, bool> dict)
+    {
+        foreach (var kvp in dict)
+        {
+            keys.Add(kvp.Key);
+            values.Add(kvp.Value);
+        }
+    }
+
+    public Dictionary<string, bool> ToDictionary()
+    {
+        Dictionary<string, bool> dict = new Dictionary<string, bool>();
+        for (int i = 0; i < keys.Count; i++)
+        {
+            if (i < values.Count)
+            {
+                dict[keys[i]] = values[i];
+            }
+        }
+        return dict;
+    }
+}
+
 public class SaveGameManager : MonoBehaviour
 {
     public static SaveGameManager Instance;
@@ -73,7 +104,14 @@ public class SaveGameManager : MonoBehaviour
         currentSceneName = scene.name;
         Debug.Log($"Scene loaded: {currentSceneName}");
 
-        // При загрузке сцены Game сбрасываем флаг первого сохранения
+        // При загрузке меню очищаем ObjectStateManager
+        if (currentSceneName == "Menu" && ObjectStateManager.Instance != null)
+        {
+            ObjectStateManager.Instance.Clear();
+            Debug.Log("ObjectStateManager очищен (загрузка меню)");
+        }
+
+        // При загрузке Game сцены проверяем, нужно ли очищать
         if (currentSceneName == "Game")
         {
             isFirstSaveInGame = true;
@@ -316,22 +354,54 @@ public class SaveGameManager : MonoBehaviour
     {
         GameSaveData data = new GameSaveData();
 
-        try { data.playerData = PlayerSaveSystem.Instance.GetData(); }
-        catch { data.playerData = null; }
+        try
+        {
+            data.playerData = PlayerSaveSystem.Instance.GetData();
+        }
+        catch
+        {
+            data.playerData = null;
+        }
 
-        //try { data.settingsData = SettingsSaveSystem.Instance.GetData(); }
-        //catch { data.settingsData = null; }
+        try
+        {
+            data.mailData = MailManager.Instance.GetSaveData();
+        }
+        catch
+        {
+            data.mailData = null;
+        }
 
-        try { data.npcData = NPCSaveSystem.CollectNPCData(); }
-        catch { data.npcData = new List<NPCSaveData>(); }
+        try
+        {
+            data.npcData = NPCSaveSystem.CollectNPCData();
+        }
+        catch
+        {
+            data.npcData = new List<NPCSaveData>();
+        }
 
+        try
+        {
+            data.inventoryData = PlayerMailInventory.Instance.GetSaveData();
+        }
+        catch
+        {
+            data.inventoryData = null;
+        }
 
-        try { data.mailData = MailManager.Instance.GetSaveData(); }
-        catch { data.mailData = null; }
-
-        // ДОБАВЛЕНО: сохранение данных инвентаря
-        try { data.inventoryData = PlayerMailInventory.Instance.GetSaveData(); }
-        catch { data.inventoryData = null; }
+        // Сохраняем состояния объектов (скамейка, дерево)
+        try
+        {
+            if (ObjectStateManager.Instance != null)
+            {
+                data.objectStates = new DictionaryData(ObjectStateManager.Instance.GetAllStates());
+            }
+        }
+        catch
+        {
+            data.objectStates = new DictionaryData();
+        }
 
         data.saveDate = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
         data.timestamp = System.DateTimeOffset.Now.ToUnixTimeSeconds();
@@ -345,23 +415,61 @@ public class SaveGameManager : MonoBehaviour
         Debug.Log("Loading from JSON");
         GameSaveData data = JsonUtility.FromJson<GameSaveData>(json);
 
+        // Сначала загружаем данные игрока
         PlayerSaveSystem.Instance.LoadData(data.playerData);
 
-        if (data.mailData != null)
-            MailManager.Instance.LoadSaveData(data.mailData);
+        // ЗАГРУЖАЕМ СОСТОЯНИЯ ОБЪЕКТОВ ДО ВСЕГО ОСТАЛЬНОГО
+        if (ObjectStateManager.Instance != null && data.objectStates != null)
+        {
+            Debug.Log("Загружаем состояния объектов из сохранения...");
+            ObjectStateManager.Instance.LoadStates(data.objectStates.ToDictionary());
+            ObjectStateManager.Instance.DebugStates();
+        }
 
-        if (data.npcData != null)
-            NPCSaveSystem.RestoreNPCData(data.npcData);
-        // ДОБАВЛЕНО: загрузка данных инвентаря
-        if (data.inventoryData != null)
-            PlayerMailInventory.Instance.LoadSaveData(data.inventoryData);
+        // ВАЖНО: Проверяем наличие сумки у игрока
+        if (data.playerData != null && !data.playerData.hasBag)
+        {
+            Debug.LogWarning("У игрока нет сумки - очищаем все задания и письма!");
+
+            // Очищаем ВСЕ письма
+            if (MailManager.Instance != null && MailManager.Instance.catalog != null)
+            {
+                foreach (var mail in MailManager.Instance.catalog.mails)
+                {
+                    MailManager.Instance.SetDelivered(mail.id, false);
+                }
+                Debug.Log("Все письма сброшены (hasBag = false)");
+            }
+
+            // Очищаем инвентарь писем
+            if (PlayerMailInventory.Instance != null)
+            {
+                PlayerMailInventory.Instance.ClearInventory();
+                Debug.Log("Инвентарь писем очищен (hasBag = false)");
+            }
+        }
+        else
+        {
+            // Если у игрока есть сумка - загружаем задания нормально
+            Debug.Log("У игрока есть сумка - загружаем задания");
+
+            if (data.mailData != null)
+                MailManager.Instance.LoadSaveData(data.mailData);
+
+            if (data.npcData != null)
+                NPCSaveSystem.RestoreNPCData(data.npcData);
+
+            if (data.inventoryData != null)
+                PlayerMailInventory.Instance.LoadSaveData(data.inventoryData);
+        }
 
         Debug.Log("Save loaded successfully");
 
+        // Перемещаем игрока на сохраненную позицию
         var floatArray = PlayerSaveSystem.Instance.GetData().position;
         GameObject player = GameManager.Instance.GetPlayer();
 
-        if (player != null)
+        if (player != null && floatArray != null && floatArray.Length == 3)
         {
             player.GetComponent<Rigidbody>()
                   .MovePosition(new Vector3(floatArray[0], floatArray[1], floatArray[2]));

@@ -20,10 +20,12 @@ public class PlayerMailInventory : MonoBehaviour
             Instance = this;
         }
     }
+
     public bool LastMail(string id)
     {
         return carriedMails[0].id == id;
     }
+
     public void AddMailToInventory(Task task)
     {
         if (!ContainsTask(task.id))
@@ -101,7 +103,7 @@ public class PlayerMailInventory : MonoBehaviour
         }
     }
 
-    // Нормализация адреса для сравнения (убираем пробелы, приводим к нижнему регистру)
+    // Нормализация адреса для сравнения
     private string NormalizeAddress(string address)
     {
         if (string.IsNullOrEmpty(address))
@@ -110,13 +112,11 @@ public class PlayerMailInventory : MonoBehaviour
         return address.Trim().ToLower().Replace(" ", "").Replace(".", "").Replace(",", "");
     }
 
-    // Исправленный метод - возвращает default(Task) вместо null
     public Task GetNextMailForDelivery()
     {
         return carriedMails.Count > 0 ? carriedMails[0] : default(Task);
     }
 
-    // Альтернативное решение - сделать метод возвращающим bool
     public bool TryGetNextMailForDelivery(out Task nextMail)
     {
         if (carriedMails.Count > 0)
@@ -131,7 +131,6 @@ public class PlayerMailInventory : MonoBehaviour
         }
     }
 
-    // Удаляет первое письмо из очереди (после доставки)
     public void RemoveFirstMail()
     {
         if (carriedMails.Count > 0)
@@ -141,7 +140,7 @@ public class PlayerMailInventory : MonoBehaviour
         }
     }
 
-    // НОВЫЕ МЕТОДЫ ДЛЯ СОХРАНЕНИЯ/ЗАГРУЗКИ
+    // Методы для сохранения/загрузки
     public InventorySaveData GetSaveData()
     {
         var saveData = new InventorySaveData();
@@ -156,6 +155,19 @@ public class PlayerMailInventory : MonoBehaviour
             carriedMails = new List<Task>(saveData.carriedMails);
             UpdateTaskUI();
             Debug.Log($"Загружено {carriedMails.Count} писем в инвентарь");
+        }
+    }
+
+    // ДОБАВЛЕНО: Метод для очистки инвентаря
+    public void ClearInventory()
+    {
+        carriedMails.Clear();
+        Debug.Log("Инвентарь писем очищен");
+
+        // Обновляем UI
+        if (TaskUI.Instance != null)
+        {
+            TaskUI.Instance.HideTask();
         }
     }
 
