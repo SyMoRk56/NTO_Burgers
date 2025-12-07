@@ -63,6 +63,7 @@ public class EnterToHouse : MonoBehaviour
     }
     public void DipFromBlack()
     {
+        print("Dip from black");
         blackScreen.DOFade(0, 4);
 
     }

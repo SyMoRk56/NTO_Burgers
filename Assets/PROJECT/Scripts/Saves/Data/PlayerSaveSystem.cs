@@ -8,6 +8,7 @@ public class PlayerSaveSystem : MonoBehaviour
 
     IEnumerator Start()
     {
+        if (Instance != this && Instance != null) Destroy(Instance.transform.parent.gameObject);
         Instance = this;
         while (GameManager.Instance.GetPlayer() == null) yield return null;
         player = GameManager.Instance.GetPlayer()?.transform;

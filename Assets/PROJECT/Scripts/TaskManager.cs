@@ -9,6 +9,8 @@ public class TaskManager : MonoBehaviour
 
     private void Awake()
     {
+        if (Instance == this)
+            Destroy(gameObject);
         if (Instance == null)
         {
             Instance = this;

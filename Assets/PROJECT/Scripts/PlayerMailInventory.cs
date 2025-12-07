@@ -16,7 +16,8 @@ public class PlayerMailInventory : MonoBehaviour
         }
         else
         {
-            Destroy(gameObject);
+            Destroy(Instance.gameObject);
+            Instance = this;
         }
     }
     public bool LastMail(string id)
