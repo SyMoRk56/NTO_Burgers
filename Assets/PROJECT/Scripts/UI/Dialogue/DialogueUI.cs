@@ -47,7 +47,7 @@ public class DialogueUI : MonoBehaviour
     {
         phraseText.text = "";
         print("TYPE TEXT" + text);
-        yield return new WaitForSeconds(typeSpeed);
+        yield return new WaitForSeconds(typeSpeed * 2);
         foreach (char c in text)
         {
             phraseText.text += c;
