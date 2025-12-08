@@ -439,7 +439,7 @@ public class FishingSpot : MonoBehaviour
         else
         {
             int secondsLeft = Mathf.CeilToInt(timeLeft);
-            cooldownText.text = $"До следующей рыбалки: {secondsLeft} сек.";
+            cooldownText.text = $"{secondsLeft}";
             cooldownText.color = cooldownColor;
         }
     }
