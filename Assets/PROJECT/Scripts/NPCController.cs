@@ -23,7 +23,12 @@ public class NPCController : MonoBehaviour
 
     [Header("Настройки анимации")]
     [SerializeField] private Animator npcAnimator;
-    [SerializeField] private string carringWalkParam = "carringwalk"; // Название параметра в аниматоре
+    [SerializeField] private string carringWalkParam = "carringwalk";
+
+    [Header("VFX эффекты - ПРОСТОЙ ВАРИАНТ")]
+    [SerializeField] private bool enableVFX = true;
+    [SerializeField] private string vfxTag = "PickupVFX"; // Тег для поиска VFX
+    [SerializeField] private float vfxDuration = 3f;
 
     public bool isGoingForFish = false;
 
@@ -35,8 +40,9 @@ public class NPCController : MonoBehaviour
     private bool hasFishAttached = false;
     private GameObject attachedFish;
     private bool isCarryingFish = false;
+    private List<GameObject> foundVFX = new List<GameObject>(); // Найденные VFX
 
-    private void Start()
+    void Start()
     {
         Debug.Log($"NPCController.Start() вызван для {gameObject.name}");
 
@@ -46,16 +52,11 @@ public class NPCController : MonoBehaviour
         {
             Debug.LogWarning("FishingManager не найден в сцене!");
         }
-        else
-        {
-            Debug.Log($"FishingManager найден: {fishingManager.gameObject.name}");
-        }
 
         navMeshAgent = GetComponent<NavMeshAgent>();
         if (navMeshAgent == null)
         {
             navMeshAgent = gameObject.AddComponent<NavMeshAgent>();
-            Debug.Log("NavMeshAgent добавлен к NPC");
         }
 
         navMeshAgent.stoppingDistance = stoppingDistance;
@@ -69,84 +70,88 @@ public class NPCController : MonoBehaviour
         if (npcAnimator == null)
         {
             npcAnimator = GetComponent<Animator>();
-            if (npcAnimator == null)
-            {
-                Debug.LogWarning("Animator не найден на NPC!");
-            }
-            else
-            {
-                // Проверяем, есть ли параметр carringwalk в аниматоре
-                bool hasParam = false;
-                foreach (AnimatorControllerParameter param in npcAnimator.parameters)
-                {
-                    if (param.name == carringWalkParam && param.type == AnimatorControllerParameterType.Int)
-                    {
-                        hasParam = true;
-                        break;
-                    }
-                }
+        }
 
-                if (!hasParam)
+        // Ищем VFX объекты сразу при старте
+        FindVFXObjects();
+
+        Debug.Log($"NPCController инициализирован. VFX включен: {enableVFX}, тег: '{vfxTag}'");
+    }
+
+    // Метод для поиска VFX объектов
+    void FindVFXObjects()
+    {
+        if (!enableVFX) return;
+
+        GameObject[] vfxArray = GameObject.FindGameObjectsWithTag(vfxTag);
+        foundVFX.Clear();
+
+        foreach (GameObject vfx in vfxArray)
+        {
+            if (vfx != null)
+            {
+                foundVFX.Add(vfx);
+                Debug.Log($"Найден VFX объект: {vfx.name}");
+
+                // Сначала выключаем все VFX
+                vfx.SetActive(false);
+
+                // Проверяем, есть ли ParticleSystem
+                ParticleSystem ps = vfx.GetComponent<ParticleSystem>();
+                if (ps == null) ps = vfx.GetComponentInChildren<ParticleSystem>();
+
+                if (ps != null)
                 {
-                    Debug.LogWarning($"Параметр '{carringWalkParam}' типа Int не найден в аниматоре!");
+                    Debug.Log($"  ParticleSystem найден: {ps.name}");
                 }
                 else
                 {
-                    Debug.Log($"Параметр '{carringWalkParam}' найден в аниматоре");
+                    Debug.LogWarning($"  ParticleSystem не найден на {vfx.name}!");
                 }
             }
         }
 
-        Debug.Log($"NPCController инициализирован. Bridge tag: '{bridgeTag}', Fish tag: '{fishTag}'");
+        if (foundVFX.Count == 0)
+        {
+            Debug.LogError($"НЕ НАЙДЕНО объектов с тегом '{vfxTag}' в сцене!");
+            Debug.LogError("Создайте объекты с ParticleSystem и назначьте им тег '" + vfxTag + "'");
+        }
+        else
+        {
+            Debug.Log($"Всего найдено VFX объектов: {foundVFX.Count}");
+        }
     }
 
-    private void Update()
+    void Update()
     {
-        // Если NPC несет рыбу, обновляем позицию рыбы
         if (isCarryingFish && attachedFish != null)
         {
             UpdateFishPosition();
         }
 
-        // Обновляем анимацию в зависимости от состояния
         UpdateAnimation();
 
-        // Постоянная проверка нахождения на мосту при isFishingEnding == true
         if (fishingManager != null && fishingManager.isFishingEnding)
         {
             CheckForBridgeContinuously();
         }
-
-        // Отладочная информация каждые 2 секунды
-        if (Time.frameCount % 120 == 0)
-        {
-            Debug.Log($"NPC состояние: isGoingForFish={isGoingForFish}, isMovingToFish={isMovingToFish}, isCarryingFish={isCarryingFish}");
-            if (fishingManager != null)
-            {
-                Debug.Log($"FishingManager.isFishingEnding = {fishingManager.isFishingEnding}");
-            }
-        }
     }
 
-    // Обновление позиции рыбы при переносе
-    private void UpdateFishPosition()
+    void UpdateFishPosition()
     {
         if (attachedFish == null) return;
 
-        // Вычисляем целевую позицию рыбы
         Vector3 targetPosition = transform.position +
                                 transform.forward * fishCarryOffset.z +
                                 transform.up * fishCarryOffset.y +
                                 transform.right * fishCarryOffset.x;
 
-        // Плавное движение рыбы к целевой позиции
         attachedFish.transform.position = Vector3.Lerp(
             attachedFish.transform.position,
             targetPosition,
             Time.deltaTime * fishFollowSpeed
         );
 
-        // Поворачиваем рыбу
         Quaternion targetRotation = transform.rotation * Quaternion.Euler(fishRotationOffset);
         attachedFish.transform.rotation = Quaternion.Slerp(
             attachedFish.transform.rotation,
@@ -155,30 +160,23 @@ public class NPCController : MonoBehaviour
         );
     }
 
-    // Обновление анимации
-    private void UpdateAnimation()
+    void UpdateAnimation()
     {
         if (npcAnimator == null) return;
 
-        // Определяем значение параметра carringwalk
         int carringWalkValue = 0;
 
         if (isCarryingFish)
         {
-            // Если несет рыбу - устанавливаем 4
             carringWalkValue = 4;
-            Debug.Log($"Устанавливаем carringwalk = 4 (несет рыбу)");
         }
         else if (isMovingToFish)
         {
-            // Если идет за рыбой - можно установить 1 (просто идет)
             carringWalkValue = 1;
         }
-        // 0 - idle по умолчанию
 
         npcAnimator.SetInteger(carringWalkParam, carringWalkValue);
 
-        // Также можно контролировать скорость анимации в зависимости от скорости движения
         if (navMeshAgent != null)
         {
             float speed = navMeshAgent.velocity.magnitude;
@@ -186,62 +184,36 @@ public class NPCController : MonoBehaviour
         }
     }
 
-    // Постоянная проверка нахождения на мосту
-    private void CheckForBridgeContinuously()
+    void CheckForBridgeContinuously()
     {
         if (isMovingToFish || isCarryingFish) return;
 
         Collider[] colliders = Physics.OverlapSphere(transform.position, collisionCheckRadius);
 
-        bool foundBridge = false;
-
         foreach (Collider collider in colliders)
         {
             if (collider.gameObject != gameObject && collider.gameObject.tag == bridgeTag)
             {
-                foundBridge = true;
-                Debug.Log($"Найден мост: {collider.gameObject.name} на дистанции: {Vector3.Distance(transform.position, collider.transform.position):F2}");
-
-                // Отключаем компонент
                 if (componentToDisable != null && componentToDisable.enabled)
                 {
                     componentToDisable.enabled = false;
-                    Debug.Log($"Компонент {componentToDisable.GetType().Name} отключен");
                 }
 
-                // Начинаем движение к рыбе
                 if (!isMovingToFish)
                 {
-                    Debug.Log("Условие выполнено: isFishingEnding == true и NPC на мосту");
                     StartMovingToFish();
                 }
                 break;
             }
         }
-
-        if (!foundBridge && colliders.Length > 0)
-        {
-            Debug.Log($"Мост не найден. Проверенные объекты ({colliders.Length}):");
-            foreach (Collider collider in colliders)
-            {
-                if (collider.gameObject != gameObject)
-                {
-                    Debug.Log($"  - {collider.gameObject.name} (тег: {collider.gameObject.tag})");
-                }
-            }
-        }
     }
 
-    private void StartMovingToFish()
+    void StartMovingToFish()
     {
-        Debug.Log($"Поиск объектов с тегом '{fishTag}'...");
         GameObject[] fishObjects = GameObject.FindGameObjectsWithTag(fishTag);
-
-        Debug.Log($"Найдено объектов с тегом '{fishTag}': {fishObjects.Length}");
 
         if (fishObjects.Length > 0)
         {
-            // Сначала ищем активные (не уничтожаемые) рыбы
             List<GameObject> activeFish = new List<GameObject>();
             foreach (GameObject fish in fishObjects)
             {
@@ -256,7 +228,6 @@ public class NPCController : MonoBehaviour
                 targetFish = activeFish[0];
                 float closestDistance = Vector3.Distance(transform.position, targetFish.transform.position);
 
-                // Выбираем ближайшую активную рыбу
                 foreach (GameObject fish in activeFish)
                 {
                     float distance = Vector3.Distance(transform.position, fish.transform.position);
@@ -266,8 +237,6 @@ public class NPCController : MonoBehaviour
                         targetFish = fish;
                     }
                 }
-
-                Debug.Log($"Выбрана рыба: {targetFish.name}, расстояние: {closestDistance:F2}");
 
                 isMovingToFish = true;
                 isGoingForFish = true;
@@ -279,21 +248,11 @@ public class NPCController : MonoBehaviour
 
                 movementCoroutine = StartCoroutine(MoveToFishCoroutine());
             }
-            else
-            {
-                Debug.LogWarning("Не найдено активных рыб! Все рыбы могут быть помечены для уничтожения.");
-            }
-        }
-        else
-        {
-            Debug.LogWarning($"Объектов с тегом '{fishTag}' не найдено! Создайте рыбу с тегом 'fish'.");
         }
     }
 
-    private IEnumerator MoveToFishCoroutine()
+    IEnumerator MoveToFishCoroutine()
     {
-        Debug.Log($"Начало движения к рыбе: {targetFish?.name}");
-
         while (isMovingToFish && targetFish != null)
         {
             if (navMeshAgent.isActiveAndEnabled && targetFish.activeInHierarchy)
@@ -304,14 +263,12 @@ public class NPCController : MonoBehaviour
 
                 if (distanceToFish <= attachFishDistance && !isCarryingFish)
                 {
-                    Debug.Log($"Достаточно близко! Поднимаем рыбу...");
                     PickupFish(targetFish);
                 }
 
                 if (navMeshAgent.remainingDistance <= navMeshAgent.stoppingDistance &&
                     !navMeshAgent.pathPending)
                 {
-                    Debug.Log("Достигнута конечная точка");
                     StopMovingToFish();
                     OnReachedFish();
                     yield break;
@@ -319,29 +276,28 @@ public class NPCController : MonoBehaviour
             }
             else if (targetFish == null || !targetFish.activeInHierarchy)
             {
-                Debug.LogWarning("Целевая рыба уничтожена или не активна!");
                 StopMovingToFish();
                 yield break;
             }
 
             yield return new WaitForSeconds(updateTargetInterval);
         }
-
-        Debug.Log("Движение завершено");
     }
 
-    private void PickupFish(GameObject fish)
+    void PickupFish(GameObject fish)
     {
         if (fish == null || isCarryingFish) return;
 
-        Debug.Log($"NPC поднимает рыбу: {fish.name}");
+        Debug.Log($"=== ПОДБОР РЫБЫ НАЧАТ ===");
+        Debug.Log($"Рыба: {fish.name}");
+        Debug.Log($"VFX включен: {enableVFX}");
+        Debug.Log($"Количество найденных VFX объектов: {foundVFX.Count}");
+        Debug.Log($"=========================");
 
-        // Сохраняем ссылку на рыбу
         attachedFish = fish;
         hasFishAttached = true;
         isCarryingFish = true;
 
-        // Отключаем физику
         Rigidbody rb = attachedFish.GetComponent<Rigidbody>();
         if (rb != null)
         {
@@ -349,84 +305,149 @@ public class NPCController : MonoBehaviour
             rb.useGravity = false;
         }
 
-        // Отключаем коллайдер
         Collider col = attachedFish.GetComponent<Collider>();
         if (col != null)
         {
             col.enabled = false;
         }
 
-        // Включаем отключенный компонент обратно
         if (componentToDisable != null && !componentToDisable.enabled)
         {
             componentToDisable.enabled = true;
-            Debug.Log($"Компонент {componentToDisable.GetType().Name} включен обратно");
         }
 
-        // Останавливаем движение
         StopMovingToFish();
 
-        // Устанавливаем параметр аниматора
         if (npcAnimator != null)
         {
             npcAnimator.SetInteger(carringWalkParam, 4);
-            Debug.Log($"Установлен параметр {carringWalkParam} = 4");
         }
 
-        Debug.Log("Рыба успешно поднята! NPC теперь несет рыбу.");
+        Debug.Log("Рыба поднята! Запускаем VFX...");
 
-        // Запускаем корутину для ношения рыбы
+        // ВКЛЮЧАЕМ VFX
+        if (enableVFX)
+        {
+            StartCoroutine(ActivateVFX());
+        }
+        else
+        {
+            Debug.LogWarning("VFX отключен в настройках!");
+        }
+
         StartCoroutine(CarryFishForDuration(10f));
     }
 
-    private IEnumerator CarryFishForDuration(float duration)
+    // Корутина для активации VFX
+    IEnumerator ActivateVFX()
     {
-        Debug.Log($"NPC будет нести рыбу {duration} секунд");
-        yield return new WaitForSeconds(duration);
+        Debug.Log($"=== АКТИВАЦИЯ VFX ===");
 
-        // Бросаем рыбу
+        if (foundVFX.Count == 0)
+        {
+            Debug.LogError("Нет VFX объектов для активации! Ищем заново...");
+            FindVFXObjects();
+        }
+
+        if (foundVFX.Count == 0)
+        {
+            Debug.LogError($"ВСЁ РАВНО НЕТ ОБЪЕКТОВ С ТЕГОМ '{vfxTag}'!");
+            yield break;
+        }
+
+        Debug.Log($"Включаем {foundVFX.Count} VFX объектов:");
+
+        // Включаем все VFX
+        foreach (GameObject vfx in foundVFX)
+        {
+            if (vfx != null)
+            {
+                Debug.Log($"  Включаем: {vfx.name}");
+                vfx.SetActive(true);
+
+                // Запускаем ParticleSystem
+                ParticleSystem ps = vfx.GetComponent<ParticleSystem>();
+                if (ps == null) ps = vfx.GetComponentInChildren<ParticleSystem>();
+
+                if (ps != null)
+                {
+                    ps.Play();
+                    Debug.Log($"    ParticleSystem запущен: {ps.name}, частиц: {ps.particleCount}");
+                }
+                else
+                {
+                    Debug.LogWarning($"    ParticleSystem не найден!");
+                }
+            }
+        }
+
+        Debug.Log($"VFX будут активны {vfxDuration} секунд");
+
+        // Ждем указанное время
+        yield return new WaitForSeconds(vfxDuration);
+
+        Debug.Log("Отключаем VFX...");
+
+        // Выключаем все VFX
+        foreach (GameObject vfx in foundVFX)
+        {
+            if (vfx != null)
+            {
+                vfx.SetActive(false);
+            }
+        }
+
+        Debug.Log("=== VFX ОТКЛЮЧЕНЫ ===");
+    }
+
+    IEnumerator CarryFishForDuration(float duration)
+    {
+        yield return new WaitForSeconds(duration);
         DropFish();
     }
 
-    private void DropFish()
+    void DropFish()
     {
         if (!isCarryingFish || attachedFish == null) return;
 
-        Debug.Log($"NPC бросает рыбу: {attachedFish.name}");
-
-        // Включаем физику обратно
         Rigidbody rb = attachedFish.GetComponent<Rigidbody>();
         if (rb != null)
         {
             rb.isKinematic = false;
             rb.useGravity = true;
-            // Добавляем небольшой толчок вперед
             rb.AddForce(transform.forward * 2f + Vector3.up * 1f, ForceMode.Impulse);
         }
 
-        // Включаем коллайдер
         Collider col = attachedFish.GetComponent<Collider>();
         if (col != null)
         {
             col.enabled = true;
         }
 
-        // Возвращаем параметр аниматора в 0 (idle)
         if (npcAnimator != null)
         {
             npcAnimator.SetInteger(carringWalkParam, 0);
-            Debug.Log($"Установлен параметр {carringWalkParam} = 0");
         }
 
-        // Сбрасываем флаги
+        // Выключаем VFX при броске
+        if (enableVFX)
+        {
+            Debug.Log("Выключаем VFX при броске рыбы");
+            foreach (GameObject vfx in foundVFX)
+            {
+                if (vfx != null && vfx.activeSelf)
+                {
+                    vfx.SetActive(false);
+                }
+            }
+        }
+
         isCarryingFish = false;
         hasFishAttached = false;
         attachedFish = null;
-
-        Debug.Log("Рыба брошена!");
     }
 
-    private void StopMovingToFish()
+    void StopMovingToFish()
     {
         isMovingToFish = false;
         isGoingForFish = false;
@@ -441,96 +462,98 @@ public class NPCController : MonoBehaviour
         {
             navMeshAgent.ResetPath();
         }
-
-        Debug.Log("Движение остановлено");
     }
 
-    private void OnReachedFish()
+    void OnReachedFish()
     {
-        Debug.Log("NPC достиг позиции рыбы");
-
         if (targetFish != null && !isCarryingFish)
         {
             PickupFish(targetFish);
         }
     }
 
-    private void OnDestroy()
+    void OnDestroy()
     {
         if (movementCoroutine != null)
         {
             StopCoroutine(movementCoroutine);
         }
 
-        // Бросаем рыбу при уничтожении
         if (isCarryingFish)
         {
             DropFish();
         }
     }
 
-    // Метод для ручной проверки состояния
-    [ContextMenu("Проверить состояние NPC")]
-    public void CheckNPCStatus()
+    // Методы для отладки
+    [ContextMenu("Проверить VFX настройки")]
+    public void DebugVFXSettings()
     {
-        Debug.Log($"=== ПРОВЕРКА СОСТОЯНИЯ NPC ===");
-        Debug.Log($"Имя: {gameObject.name}");
-        Debug.Log($"Позиция: {transform.position}");
-        Debug.Log($"isGoingForFish: {isGoingForFish}");
-        Debug.Log($"isMovingToFish: {isMovingToFish}");
-        Debug.Log($"isCarryingFish: {isCarryingFish}");
-        Debug.Log($"Компонент отключен: {componentToDisable != null && !componentToDisable.enabled}");
+        Debug.Log($"=== VFX НАСТРОЙКИ ===");
+        Debug.Log($"Enable VFX: {enableVFX}");
+        Debug.Log($"VFX Tag: '{vfxTag}'");
+        Debug.Log($"VFX Duration: {vfxDuration}");
+        Debug.Log($"Найдено VFX объектов: {foundVFX.Count}");
 
-        if (fishingManager != null)
+        foreach (GameObject vfx in foundVFX)
         {
-            Debug.Log($"FishingManager.isFishingEnding: {fishingManager.isFishingEnding}");
-        }
-
-        // Проверим наличие мостов рядом
-        Collider[] colliders = Physics.OverlapSphere(transform.position, 5f);
-        int bridgeCount = 0;
-        foreach (Collider collider in colliders)
-        {
-            if (collider.gameObject.tag == bridgeTag)
+            if (vfx != null)
             {
-                bridgeCount++;
-                Debug.Log($"Мост найден: {collider.gameObject.name} на расстоянии {Vector3.Distance(transform.position, collider.transform.position):F2}");
+                Debug.Log($"  - {vfx.name} (активен: {vfx.activeSelf})");
             }
         }
-        Debug.Log($"Мостов в радиусе 5м: {bridgeCount}");
 
-        // Проверим наличие рыб
-        GameObject[] fishObjects = GameObject.FindGameObjectsWithTag(fishTag);
-        Debug.Log($"Рыб в сцене: {fishObjects.Length}");
-        foreach (GameObject fish in fishObjects)
+        // Перепроверяем в сцене
+        GameObject[] allVFX = GameObject.FindGameObjectsWithTag(vfxTag);
+        Debug.Log($"Объектов с тегом '{vfxTag}' в сцене: {allVFX.Length}");
+
+        foreach (GameObject vfx in allVFX)
         {
-            Debug.Log($"  - {fish.name} (активна: {fish.activeInHierarchy})");
+            Debug.Log($"  - {vfx.name}");
         }
 
-        // Проверим состояние аниматора
-        if (npcAnimator != null)
-        {
-            Debug.Log($"Параметр {carringWalkParam}: {npcAnimator.GetInteger(carringWalkParam)}");
-        }
-
-        Debug.Log($"=== КОНЕЦ ПРОВЕРКИ ===");
+        Debug.Log($"=====================");
     }
 
-    // Метод для принудительного поднятия рыбы
-    [ContextMenu("Поднять рыбу принудительно")]
-    public void ForcePickupFish()
+    [ContextMenu("Тест: Включить VFX на 5 сек")]
+    public void TestVFX()
     {
-        GameObject[] fishObjects = GameObject.FindGameObjectsWithTag(fishTag);
-        if (fishObjects.Length > 0 && !isCarryingFish)
+        if (enableVFX)
         {
-            PickupFish(fishObjects[0]);
+            StartCoroutine(TestVFXCoroutine());
+        }
+        else
+        {
+            Debug.LogWarning("VFX отключен!");
         }
     }
 
-    // Метод для принудительного броска рыбы
-    [ContextMenu("Бросить рыбу")]
-    public void ForceDropFish()
+    IEnumerator TestVFXCoroutine()
     {
-        DropFish();
+        Debug.Log("=== ТЕСТ VFX ===");
+
+        // Включаем
+        foreach (GameObject vfx in foundVFX)
+        {
+            if (vfx != null)
+            {
+                vfx.SetActive(true);
+                Debug.Log($"Включен: {vfx.name}");
+            }
+        }
+
+        yield return new WaitForSeconds(5f);
+
+        // Выключаем
+        foreach (GameObject vfx in foundVFX)
+        {
+            if (vfx != null)
+            {
+                vfx.SetActive(false);
+                Debug.Log($"Выключен: {vfx.name}");
+            }
+        }
+
+        Debug.Log("=== ТЕСТ ЗАВЕРШЕН ===");
     }
 }
