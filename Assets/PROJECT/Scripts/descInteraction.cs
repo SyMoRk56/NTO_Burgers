@@ -154,9 +154,10 @@ public class DeskInteraction : MonoBehaviour
         if (switcher != null)
             switcher.enabled = false;
 
-        CameraManagement cameraManagement = FindObjectOfType<CameraManagement>();
-        if (cameraManagement != null)
-            cameraManagement.enabled = false;
+        // Удаляем или закомментируем эти строки:
+        // CameraManagement cameraManagement = FindObjectOfType<CameraManagement>();
+        // if (cameraManagement != null)
+        //     cameraManagement.enabled = false;
 
         CameraController cameraController = FindObjectOfType<CameraController>();
         if (cameraController != null)
@@ -172,9 +173,10 @@ public class DeskInteraction : MonoBehaviour
         if (switcher != null)
             switcher.enabled = true;
 
-        CameraManagement cameraManagement = FindObjectOfType<CameraManagement>();
-        if (cameraManagement != null)
-            cameraManagement.enabled = true;
+        // Удаляем или закомментируем эти строки:
+        // CameraManagement cameraManagement = FindObjectOfType<CameraManagement>();
+        // if (cameraManagement != null)
+        //     cameraManagement.enabled = true;
 
         CameraController cameraController = FindObjectOfType<CameraController>();
         if (cameraController != null)
@@ -187,15 +189,18 @@ public class DeskInteraction : MonoBehaviour
     private void ShowAvailableMails()
     {
         ClearAllLetters();
-
+        print("SHOW AVIA");
         if (TaskManager.Instance != null && TaskManager.Instance.tasks.Count > 0)
         {
+            print(1);
             var availableTasks = new List<Task>(TaskManager.Instance.tasks);
 
             foreach (var task in availableTasks)
             {
+                print(task.adress);
                 if (!PlayerMailInventory.Instance.ContainsTask(task.id))
                 {
+                    print("1123;");
                     CreateMailUI(task);
                 }
             }

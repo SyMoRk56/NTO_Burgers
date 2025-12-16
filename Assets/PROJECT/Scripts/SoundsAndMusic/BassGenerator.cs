@@ -63,6 +63,8 @@ public class BassGenerator : MonoBehaviour
 
     private void AddNote(List<BassNote> list, float beat, int midi)
     {
+        return;
+        if (list == null) return;
         float pitch = Mathf.Pow(2f, (midi - 60) / 12f);
 
         list.Add(new BassNote(bassSample.sample, pitch, beat));

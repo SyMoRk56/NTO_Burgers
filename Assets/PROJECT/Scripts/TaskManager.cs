@@ -9,6 +9,8 @@ public class TaskManager : MonoBehaviour
 
     private void Awake()
     {
+        if (Instance == this)
+            Destroy(gameObject);
         if (Instance == null)
         {
             Instance = this;
@@ -16,7 +18,14 @@ public class TaskManager : MonoBehaviour
         }
         else
         {
-            Destroy(gameObject);
+            Destroy(Instance.gameObject);
+            Instance = this;
+        }
+        tasks = new();
+        var m = Resources.LoadAll<MailCatalog>("");
+        foreach(var n in m[0].mails)
+        {
+            tasks.Add(new Task(n.reciever, n.adress, n.id));
         }
     }
 

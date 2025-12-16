@@ -15,6 +15,8 @@ MonoBehaviour:
   phrases:
   - dia_1_hamster_phr_1
   - dia_1_dog_phr_1
+  voiceOver:
+  - {fileID: 8300000, guid: 3e3b17d533bc73140a30c3a28defc1db, type: 3}
   choices:
   - text: dia_1_ans_1
     nextDialogueIndex: 1
@@ -22,3 +24,4 @@ MonoBehaviour:
     nextDialogueIndex: 4
   - text: dia_1_ans_3
     nextDialogueIndex: 7
+  emotions: 

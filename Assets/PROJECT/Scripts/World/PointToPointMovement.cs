@@ -43,7 +43,6 @@ public class PointToPointMovement : MonoBehaviour
     Vector3 velocity = Vector3.zero;  // helper for smoothing rotation (unused by SmoothDampQuaternion)
     float currentVelYaw = 0f;
     public float moveDelay;
-
     void Awake()
     {
         rb = GetComponent<Rigidbody>();
@@ -71,7 +70,6 @@ public class PointToPointMovement : MonoBehaviour
     void FixedUpdate()
     {
         if (samples == null || samples.Count == 0) return;
-
         float dt = Time.fixedDeltaTime;
         // advance traveled distance
         float moveDist = speed * dt * (forward ? 1f : -1f);

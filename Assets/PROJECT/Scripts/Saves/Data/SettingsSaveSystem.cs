@@ -8,7 +8,7 @@ public class SettingsSaveSystem : MonoBehaviour
     public static SettingsSaveSystem Instance;
 
     void Awake() => Instance = this;
-    public string lang;
+    public string lang = "RU";
     public float masterVolume = 1;
     public float musicVolume = 1;
     public float dialoguesVolume = 1;
@@ -29,8 +29,9 @@ public class SettingsSaveSystem : MonoBehaviour
         masterVolume = data.masterVolume;
         musicVolume = data.musicVolume;
         dialoguesVolume = data.dialoguesVolume;
-        mixer.SetFloat("MasterVolume", Mathf.Log10(masterVolume)*20);
-        mixer.SetFloat("DialoguesVolume", Mathf.Log10(dialoguesVolume)*20);
-        mixer.SetFloat("MusicVolume", Mathf.Log10(musicVolume)*20);
+        mixer.SetFloat("MasterVolume", Mathf.Log10(masterVolume+ .001f)*20);
+        mixer.SetFloat("DialoguesVolume", Mathf.Log10(dialoguesVolume+.001f)*20);
+        mixer.SetFloat("MusicVolume", Mathf.Log10(musicVolume+.001f)*20);
+       
     }
 }

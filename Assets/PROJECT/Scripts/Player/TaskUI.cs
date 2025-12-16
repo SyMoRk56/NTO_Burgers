@@ -12,12 +12,15 @@ public class TaskUI : MonoBehaviour
     public TMP_Text adress;
     public TMP_Text countText;
 
+    public string adressT;
     private void Awake()
     {
         Instance = this;
 
         if (taskCanvas != null)
             taskCanvas.SetActive(false);
+
+        LocalizationManager.Instance.OnLanguageChanged += () => UpdateText();
     }
 
     public void SetTask(Task task, int remainingCount)
@@ -34,15 +37,20 @@ public class TaskUI : MonoBehaviour
             return;
         }
 
-        reciever.text = LocalizationManager.Instance.Get(task.recieverName);
+        reciever.text = LocalizationManager.Instance.Get(!task.adress.Contains("NPC") ? "Reciever" : "Reciever_npc");
         adress.text = LocalizationManager.Instance.Get(task.adress);
-
+        adressT = task.adress;
         if (remainingCount > 0)
             countText.text = remainingCount.ToString();
         else
             countText.text = "";
     }
+    void UpdateText()
+    {
+        adress.text = LocalizationManager.Instance.Get(adressT);
+        reciever.text = LocalizationManager.Instance.Get(!adressT.Contains("NPC") ? "Reciever" : "Reciever_npc");
 
+    }
     public void HideTask()
     {
         if (taskCanvas != null)

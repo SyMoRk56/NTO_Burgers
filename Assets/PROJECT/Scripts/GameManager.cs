@@ -29,7 +29,10 @@ public class GameManager : MonoBehaviour
 
         SceneManager.sceneLoaded += OnSceneLoaded;
     }
-
+    private void Start()
+    {
+        SettingsSaveManager.Instance.LoadSettings();
+    }
     private void OnDestroy()
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;
@@ -43,12 +46,19 @@ public class GameManager : MonoBehaviour
 
     IEnumerator DelayedGameStart()
     {
+        print("GAME MANGER 1");
         yield return null;
         while (GetPlayer() == null)
             yield return null;
+        print("GAME MANGER 1");
+
         while (PlayerSaveSystem.Instance == null)
             yield return null;
+        print("GAME MANGER 1");
+
         while (PlayerSaveSystem.Instance.GetData().position[1] == 0) yield return null;
+        print("GAME MANGER 1");
+
         yield return new WaitForEndOfFrame();
 
         // Теперь мы точно можем загружать сейв
@@ -57,6 +67,9 @@ public class GameManager : MonoBehaviour
 
     public void OnStartGame()
     {
+        print("ON start game");
+        FindFirstObjectByType<EnterToHouse>().DipFromBlack();
+
         isGameGoing = true;
         player = GetPlayer();
 
@@ -78,6 +91,7 @@ public class GameManager : MonoBehaviour
         autosaveRoutine = StartCoroutine(Autosave());
         FindFirstObjectByType<CheckForInHouse>().OnStartGame();
         Time.timeScale = 1;
+
     }
 
     public GameObject GetPlayer()
@@ -95,7 +109,7 @@ public class GameManager : MonoBehaviour
     {
         while (isGameGoing)
         {
-            yield return new WaitForSeconds(180f);
+            yield return new WaitForSeconds(30f);
             SaveGameManager.Instance.SaveAuto(true);
         }
     }

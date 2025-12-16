@@ -1,4 +1,4 @@
-using DG.Tweening;
+п»їusing DG.Tweening;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
@@ -7,50 +7,64 @@ public class EnterToHouse : MonoBehaviour
 {
     public Transform teleportTo;
     public Image blackScreen;
+    Coroutine t;
+    public bool isInTransition;
+    public bool firstPerson;
+    [Header("Р—РІСѓРєРѕРІС‹Рµ СЌС„С„РµРєС‚С‹")]
+    public AudioSource audioSource;  // РСЃС‚РѕС‡РЅРёРє Р·РІСѓРєР° РґР»СЏ РґРІРµСЂРё
+    public AudioClip doorOpenSound;  // Р—РІСѓРє РѕС‚РєСЂС‹С‚РёСЏ РґРІРµСЂРё
 
+    private void Start()
+    {
+    }
     public void Interact()
     {
-        StartCoroutine(TeleportCoroutine());
+        var tran = false;
+        foreach(var e in FindObjectsByType<EnterToHouse>(FindObjectsSortMode.None))
+        {
+            tran |= e.isInTransition;
+
+        }
+        if(!tran)
+        t = StartCoroutine(TeleportCoroutine());
     }
 
-    // Новый метод для телепортации с письмом
-    public void InteractWithLetter(Letter letter)
+    private void PlayDoorSound()
     {
-        StartCoroutine(TeleportWithLetterCoroutine(letter));
+        if (doorOpenSound == null) return;
+
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+        }
+
+        audioSource.clip = doorOpenSound;
+        audioSource.Play();
     }
+
+
 
     IEnumerator TeleportCoroutine()
     {
+        isInTransition = true;
+
+        PlayDoorSound(); // рџ”Љ Р·РґРµСЃСЊ Р·РІСѓРє РґРІРµСЂРё
+
         GameManager.Instance.GetPlayer().GetComponent<PlayerManager>().CanMove = false;
         blackScreen.DOFade(1, 1);
         yield return new WaitForSeconds(1);
         GameManager.Instance.GetPlayer().transform.position = teleportTo.position;
-        CameraSwitcher.Instance.Switch();
+        CameraSwitcher.Instance.SetCameraMode(firstPerson);
         yield return new WaitForSeconds(2);
         blackScreen.DOFade(0, 1);
         GameManager.Instance.GetPlayer().GetComponent<PlayerManager>().CanMove = true;
-    }
-
-    IEnumerator TeleportWithLetterCoroutine(Letter letter)
-    {
-        GameObject player = GameManager.Instance.GetPlayer();
-        PlayerManager playerManager = player.GetComponent<PlayerManager>();
-
-        playerManager.CanMove = false;
-        blackScreen.DOFade(1, 1);
-        yield return new WaitForSeconds(1);
-
-        // Телепортируем игрока
-        player.transform.position = teleportTo.position;
-
-        // Телепортируем письмо вместе с игроком
-        if (letter != null)
-        {
-            letter.transform.position = teleportTo.position + teleportTo.forward;
-        }
-
         yield return new WaitForSeconds(2);
-        blackScreen.DOFade(0, 1);
-        playerManager.CanMove = true;
+        isInTransition = false;
+    }
+    public void DipFromBlack()
+    {
+        print("Dip from black");
+        blackScreen.DOFade(0, 4);
+
     }
 }

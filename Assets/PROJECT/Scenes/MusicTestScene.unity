@@ -377,280 +377,67 @@ MonoBehaviour:
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
   m_SoftShadowQuality: 0
---- !u!1 &1813970477
-GameObject:
+--- !u!1001 &1347810515055336502
+PrefabInstance:
   m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1813970483}
-  - component: {fileID: 1813970482}
-  - component: {fileID: 1813970481}
-  - component: {fileID: 1813970480}
-  - component: {fileID: 1813970479}
-  - component: {fileID: 1813970478}
-  - component: {fileID: 1813970485}
-  - component: {fileID: 1813970484}
-  m_Layer: 0
-  m_Name: Mixer
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1813970478
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1813970477}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3d283e74df25bf548bdf82d07d3a8ab4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::RhythmGenerator
-  kick: {fileID: 11400000, guid: 8654f951109727e4fb21c18eaaa01f80, type: 2}
-  snare: {fileID: 11400000, guid: 2aaa829c32fcfe8468b212b076c9b7fb, type: 2}
-  hat: {fileID: 11400000, guid: 96cac746dc187dc40a2a21f11488c405, type: 2}
-  extraDrums: []
-  pattern: 1
-  bars: 50
-  bpm: 120
---- !u!114 &1813970479
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1813970477}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2e2fdd19306172446a8241b7049df37d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MusicGenerator
-  instruments:
-  - {fileID: 11400000, guid: 7058dcc36bea28c47bf749deb89b654d, type: 2}
-  padInstruments:
-  - {fileID: 11400000, guid: 7058dcc36bea28c47bf749deb89b654d, type: 2}
-  padVolume: 0.05
-  padLength: 4
-  generatePads: 1
-  melodyPattern: 2
-  bpm: 60
-  bars: 50
-  restChance: 0.23
-  pitchRange: {x: 0.98, y: 1.02}
-  scaleType: 1
-  rootNote: 60
-  progression:
-    name: 
-    degrees: 000000000200000004000000020000000400000006000000010000000300000005000000030000000500000006000000
---- !u!114 &1813970480
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1813970477}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 314c6911c25055d4f8bf30d54e84f821, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ChordGenerator
-  pianoSample: {fileID: 8300000, guid: 9ffde21b0346bd247afe54c09fb11654, type: 3}
-  bpm: 30
-  bars: 50
-  scaleType: 0
-  rootNote: 62
-  progression:
-    name: 
-    degrees: 00000000040000000500000003000000
-  pitchMultiplyRange: {x: 1, y: 1}
-  chordType: 1
---- !u!114 &1813970481
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1813970477}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0613aad42ff656c43943b28405d40ec1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BassGenerator
-  bassSample: {fileID: 11400000, guid: 8e212cd030b0fff488f660e894eb4598, type: 2}
-  bassPattern: 2
-  bars: 50
-  bpm: 120
-  scaleType: 0
-  rootNote: 48
-  progression:
-    name: 
-    degrees: 00000000040000000500000003000000
---- !u!114 &1813970482
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1813970477}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f9a319094326b8a4c9d27596ecea8973, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MusicMixer
-  melodyGenerator: {fileID: 1813970479}
-  bassGenerator: {fileID: 1813970481}
-  rhythmGenerator: {fileID: 1813970478}
-  chordGenerator: {fileID: 1813970480}
-  melodyVolume: 0.091
-  bassVolume: 0
-  chordsVolume: 0
-  drumsVolume: 0
-  group: {fileID: 0}
---- !u!4 &1813970483
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1813970477}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -6.4294, y: 3.31141, z: -3.39423}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!164 &1813970484
-AudioReverbFilter:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1813970477}
-  m_Enabled: 1
-  m_DryLevel: 0
-  m_Room: 0
-  m_RoomHF: 0
-  m_DecayTime: 1
-  m_DecayHFRatio: 0.5
-  m_ReflectionsLevel: -10000
-  m_ReverbLevel: 0
-  m_ReverbDelay: 0.04
-  m_Diffusion: 100
-  m_Density: 100
-  m_HFReference: 5000
-  m_RoomLF: 0
-  m_LFReference: 250
-  m_ReflectionsDelay: 0
-  m_ReverbPreset: 27
---- !u!82 &1813970485
-AudioSource:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1813970477}
-  m_Enabled: 1
-  serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 0}
-  m_Resource: {fileID: 0}
-  m_PlayOnAwake: 1
-  m_Volume: 1
-  m_Pitch: 1
-  Loop: 0
-  Mute: 0
-  Spatialize: 0
-  SpatializePostEffects: 0
-  Priority: 128
-  DopplerLevel: 1
-  MinDistance: 1
-  MaxDistance: 500
-  Pan2D: 0
-  rolloffMode: 0
-  BypassEffects: 0
-  BypassListenerEffects: 0
-  BypassReverbZones: 0
-  rolloffCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 1395598099912620037, guid: b1be0f59e42ef8042936307f1221456a, type: 3}
+      propertyPath: m_Name
+      value: Mixer
+      objectReference: {fileID: 0}
+    - target: {fileID: 6021750971730780594, guid: b1be0f59e42ef8042936307f1221456a, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -6.4294
+      objectReference: {fileID: 0}
+    - target: {fileID: 6021750971730780594, guid: b1be0f59e42ef8042936307f1221456a, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 3.31141
+      objectReference: {fileID: 0}
+    - target: {fileID: 6021750971730780594, guid: b1be0f59e42ef8042936307f1221456a, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -3.39423
+      objectReference: {fileID: 0}
+    - target: {fileID: 6021750971730780594, guid: b1be0f59e42ef8042936307f1221456a, type: 3}
+      propertyPath: m_LocalRotation.w
       value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6021750971730780594, guid: b1be0f59e42ef8042936307f1221456a, type: 3}
+      propertyPath: m_LocalRotation.x
       value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  panLevelCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6021750971730780594, guid: b1be0f59e42ef8042936307f1221456a, type: 3}
+      propertyPath: m_LocalRotation.y
       value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  spreadCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6021750971730780594, guid: b1be0f59e42ef8042936307f1221456a, type: 3}
+      propertyPath: m_LocalRotation.z
       value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  reverbZoneMixCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 6021750971730780594, guid: b1be0f59e42ef8042936307f1221456a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6021750971730780594, guid: b1be0f59e42ef8042936307f1221456a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6021750971730780594, guid: b1be0f59e42ef8042936307f1221456a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: b1be0f59e42ef8042936307f1221456a, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 308427785}
   - {fileID: 1294066916}
-  - {fileID: 1813970483}
+  - {fileID: 1347810515055336502}

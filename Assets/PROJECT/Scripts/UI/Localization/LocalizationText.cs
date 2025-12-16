@@ -15,6 +15,7 @@ public class LocalizedText : MonoBehaviour
     private void OnEnable()
     {
         LocalizationManager.Instance.OnLanguageChanged += UpdateText;
+        UpdateText();
     }
 
     private void OnDisable()

@@ -1,5 +1,5 @@
-﻿using System.Collections;
-using UnityEngine;
+﻿using UnityEngine;
+using System.Collections;
 
 public class PlayerSaveSystem : MonoBehaviour
 {
@@ -8,6 +8,7 @@ public class PlayerSaveSystem : MonoBehaviour
 
     IEnumerator Start()
     {
+        if (Instance != this && Instance != null) Destroy(Instance.transform.parent.gameObject);
         Instance = this;
         while (GameManager.Instance.GetPlayer() == null) yield return null;
         player = GameManager.Instance.GetPlayer()?.transform;
@@ -33,7 +34,7 @@ public class PlayerSaveSystem : MonoBehaviour
                 player.position.y,
                 player.position.z,
             },
-            hasBag = HasBag() // ДОБАВЛЕНО: сохраняем состояние сумки
+            hasBag = HasBag() // Сохраняем состояние сумки
         };
     }
 
@@ -57,10 +58,15 @@ public class PlayerSaveSystem : MonoBehaviour
             player.GetComponent<PlayerMovement>().enabled = true;
         }
 
-        // ДОБАВЛЕНО: восстанавливаем состояние сумки
+        // Восстанавливаем состояние сумки
         if (data.hasBag && !HasBag())
         {
             CreateBagForPlayer();
+            Destroy(FindFirstObjectByType<BagPickup>().gameObject);
+            foreach (var g in FindObjectsByType<EnterToHouse>(FindObjectsSortMode.None))
+            {
+                g.enabled = true;
+            }
         }
 
     }
@@ -78,17 +84,16 @@ public class PlayerSaveSystem : MonoBehaviour
         yield break;
     }
 
-    // ДОБАВЛЕНО: проверка наличия сумки
+    // Проверка наличия сумки
     private bool HasBag()
     {
         if (player == null) return false;
         return FindChildWithTag(player.transform, "Bag") != null;
     }
 
-    // ДОБАВЛЕНО: создание сумки при загрузке
+    // Создание сумки при загрузке
     private void CreateBagForPlayer()
     {
-        // Находим BagPickup в сцене чтобы получить настройки
         BagPickup bagPickup = FindObjectOfType<BagPickup>();
         if (bagPickup != null && bagPickup.bagPrefab != null)
         {

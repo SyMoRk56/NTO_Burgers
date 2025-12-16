@@ -11,6 +11,7 @@ public class MainMenu : MonoBehaviour
     public GameObject autosaveButton;
     void Start()
     {
+        Time.timeScale = 1;
         if (!SaveGameManager.Instance.CheckAutoSave())
         {
 

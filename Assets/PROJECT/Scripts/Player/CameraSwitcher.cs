@@ -24,7 +24,7 @@ public class CameraSwitcher : MonoBehaviour
         SetCameraMode(isFirstPerson);
     }
 
-    void SetCameraMode(bool firstPerson)
+    public void SetCameraMode(bool firstPerson)
     {
         renderer.enabled = !firstPerson;
         if (firstPerson)

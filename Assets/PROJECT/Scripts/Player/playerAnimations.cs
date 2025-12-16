@@ -1,33 +1,72 @@
-using UnityEngine;
+﻿using UnityEngine;
+
+public enum States
+{
+    idle,           // 0
+    walk,           // 1  
+    jump,           // 2
+    carry_idle,     // 3
+    carry_walk,     // 4
+    carry_jump,     // 5
+    fishing_bros,   // 6
+    fishing_idle,   // 7
+    sneezy          // 8 ← ДОБАВИЛ НОВУЮ АНИМАЦИЮ
+}
 
 public class playerAnimations : MonoBehaviour
-{    
+{
     public Animator anim;
+
     private void Awake()
     {
         anim = GetComponentInChildren<Animator>();
     }
-    
-    
+
     private States State
     {
         get { return (States)anim.GetInteger("hamsterState"); }
         set { anim.SetInteger("hamsterState", (int)value); }
     }
 
-    public void HeroIdleAnim()
+    // === НОВАЯ АНИМАЦИЯ ЧИХА ===
+    public void PlaySneezy()
     {
-        State = States.idle;
+        State = States.sneezy;
+        Debug.Log("Анимация: sneezy (8)");
     }
 
-    public void HeroWalkAnim() { State = States.walk; }
+    // === МЕТОДЫ ДЛЯ РЫБАЛКИ ===
+    public void StartFishing()
+    {
+        State = States.fishing_bros;
+        Debug.Log("Анимация: fishing_bros (6)");
+    }
 
-    public void HeroJumpAnim() { State = States.jump; }
-}
+    public void FishingIdle()
+    {
+        State = States.fishing_idle;
+        Debug.Log("Анимация: fishing_idle (7)");
+    }
 
-public enum States
-{
-    idle,
-    walk,
-    jump
+    public void EndFishing()
+    {
+        State = States.idle;
+        Debug.Log("Анимация: idle (0)");
+    }
+
+    // === СТАРЫЕ МЕТОДЫ ===
+    public void HeroIdleAnim(bool isCarrying = false)
+    {
+        State = isCarrying ? States.carry_idle : States.idle;
+    }
+
+    public void HeroWalkAnim(bool isCarrying = false)
+    {
+        State = isCarrying ? States.carry_walk : States.walk;
+    }
+
+    public void HeroJumpAnim(bool isCarrying = false)
+    {
+        State = isCarrying ? States.carry_jump : States.jump;
+    }
 }

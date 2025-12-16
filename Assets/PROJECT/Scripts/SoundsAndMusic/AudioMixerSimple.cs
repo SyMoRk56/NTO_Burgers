@@ -19,10 +19,16 @@ public class MusicMixer : MonoBehaviour
     public AudioMixerGroup group;
 
     private List<AudioSource> sources = new List<AudioSource>();
-
+    public bool playonstart = false;
     private void Start()
     {
-        Play();
+        if(playonstart) Play();
+    }
+    public void Stop()
+    {
+        print("STOP");
+        StopAllCoroutines();
+        StopAll();
     }
     public void Play()
     {
@@ -55,6 +61,7 @@ public class MusicMixer : MonoBehaviour
             src.playOnAwake = false;
             src.volume = melodyGenerator.padVolume;
             src.pitch = p.pitch;
+            src.outputAudioMixerGroup = group;
 
             sources.Add(src);
 
@@ -91,6 +98,7 @@ public class MusicMixer : MonoBehaviour
 
             // Создаём источник
             GameObject go = new GameObject("MelodyNote");
+            go.transform.parent = transform;
             AudioSource src = go.AddComponent<AudioSource>();
             //AudioReverbFilter f = go.AddComponent<AudioReverbFilter>();
             //f.reverbPreset = AudioReverbPreset.StoneCorridor;
@@ -112,6 +120,7 @@ public class MusicMixer : MonoBehaviour
 
     private IEnumerator PlayBass(List<BassNote> notes)
     {
+        yield break;
         foreach (var n in notes)
         {
             GameObject go = new GameObject("BassNote");
@@ -135,6 +144,7 @@ public class MusicMixer : MonoBehaviour
 
     private IEnumerator PlayChords(List<ChordNote> notes)
     {
+        yield break;
         foreach (var n in notes)
         {
             GameObject go = new GameObject("ChordNote");
@@ -158,6 +168,7 @@ public class MusicMixer : MonoBehaviour
 
     private IEnumerator PlayDrums(List<DrumHit> hits)
     {
+        yield break;
         foreach (var h in hits)
         {
             GameObject go = new GameObject("DrumHit");
