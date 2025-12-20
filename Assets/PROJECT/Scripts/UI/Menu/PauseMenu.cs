@@ -48,8 +48,8 @@ public class PauseMenu : MonoBehaviour
     // ����� ��� ��������, ��������� �� ����� � UI �����
     private bool IsInTableUI()
     {
-        DeskInteraction[] desks = FindObjectsOfType<DeskInteraction>();
-        foreach (DeskInteraction desk in desks)
+        DeskUI[] desks = FindObjectsOfType<DeskUI>();
+        foreach (DeskUI desk in desks)
         {
             if (desk.isInTable)
             {

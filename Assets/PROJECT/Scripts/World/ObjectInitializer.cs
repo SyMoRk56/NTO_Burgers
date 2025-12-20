@@ -16,15 +16,15 @@ public class ObjectInitializer : MonoBehaviour
         Debug.Log("Инициализация объектов из сохранения...");
 
         // Инициализируем скамейки
-        skamia[] allBenches = FindObjectsOfType<skamia>();
-        foreach (skamia bench in allBenches)
+        Bench[] allBenches = FindObjectsOfType<Bench>();
+        foreach (Bench bench in allBenches)
         {
             bench.ForceUpdateFromSave();
         }
 
         // Инициализируем деревья
-        treecastscene[] allTrees = FindObjectsOfType<treecastscene>();
-        foreach (treecastscene tree in allTrees)
+        TreeCutscene[] allTrees = FindObjectsOfType<TreeCutscene>();
+        foreach (TreeCutscene tree in allTrees)
         {
             tree.ForceUpdateFromSave();
         }

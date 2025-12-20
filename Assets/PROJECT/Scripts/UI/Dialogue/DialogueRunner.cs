@@ -31,8 +31,8 @@ public class DialogueRunner : MonoBehaviour
     public bool IsDialogueActive => isRunning;
 
     // Ссылки на сцены
-    private treecastscene treeScene;
-    private skamia benchScene;
+    private TreeCutscene treeScene;
+    private Bench benchScene;
     private FlowerTriggerHandler flowerHandler;
 
     // Для запуска дерева после фразы про яблоню
@@ -41,10 +41,10 @@ public class DialogueRunner : MonoBehaviour
     void Start()
     {
         // Инициализация benchScene
-        benchScene = GetComponent<skamia>();
+        benchScene = GetComponent<Bench>();
         if (benchScene == null)
         {
-            benchScene = GetComponentInChildren<skamia>();
+            benchScene = GetComponentInChildren<Bench>();
         }
 
         // Инициализация flowerHandler
@@ -62,14 +62,14 @@ public class DialogueRunner : MonoBehaviour
         }
 
         // Находим treecastscene на этом же объекте
-        treeScene = GetComponent<treecastscene>();
+        treeScene = GetComponent<TreeCutscene>();
         if (treeScene != null)
         {
             Debug.Log("Найден treecastscene");
         }
         else
         {
-            treeScene = GetComponentInChildren<treecastscene>();
+            treeScene = GetComponentInChildren<TreeCutscene>();
             if (treeScene != null)
             {
                 Debug.Log("Найден treecastscene в дочерних объектах");

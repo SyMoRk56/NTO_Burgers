@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections;
 
-public class skamia : MonoBehaviour
+public class Bench : MonoBehaviour
 {
     [Header("Настройки камеры")]
     public Camera mainCamera;

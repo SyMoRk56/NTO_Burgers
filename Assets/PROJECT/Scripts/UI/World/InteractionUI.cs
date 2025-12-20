@@ -5,7 +5,7 @@ public class InteractionUI : MonoBehaviour
 {
     public GameObject popup;
     public SphereCollider trigger;
-    public DeskInteraction deskInteraction; // Опционально, только для объектов с UI
+    public DeskUI deskInteraction; // Опционально, только для объектов с UI
 
     private Image popupImage;
     private bool playerInRange = false;

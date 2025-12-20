@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections;
 
-public class treecastscene : MonoBehaviour
+public class TreeCutscene : MonoBehaviour
 {
     [Header("Настройки камеры")]
     public Camera mainCamera;

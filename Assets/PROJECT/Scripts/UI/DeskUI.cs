@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 using System.Collections;
 
-public class DeskInteraction : MonoBehaviour
+public class DeskUI : MonoBehaviour
 {
     public GameObject letterPrefab;
     [Header("Canvas Settings")]
@@ -214,7 +214,7 @@ public class DeskInteraction : MonoBehaviour
         var letter = Instantiate(letterPrefab, transform.GetChild(0).GetChild(0));
         letter.transform.localPosition = Vector3.zero;
 
-        var drag = letter.GetComponent<DraggableUI>();
+        var drag = letter.GetComponent<DeskLetterUI>();
         if (drag != null)
         {
             drag.recipient = task.recieverName;
@@ -249,7 +249,7 @@ public class DeskInteraction : MonoBehaviour
             var img = randomImages[i];
             if (img != null)
             {
-                var draggable = img.GetComponent<DraggableUI>();
+                var draggable = img.GetComponent<DeskLetterUI>();
                 if (draggable != null && draggable.id == taskId)
                 {
                     Destroy(img.gameObject);

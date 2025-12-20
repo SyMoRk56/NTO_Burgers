@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-public class ObjectMovement : MonoBehaviour
+public class PaperShipMovement : MonoBehaviour
 {
     [System.Serializable]
     public class DropZoneData
