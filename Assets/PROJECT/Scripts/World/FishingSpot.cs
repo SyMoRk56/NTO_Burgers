@@ -47,7 +47,7 @@ public class FishingSpot : MonoBehaviour
     private float fishGrowthTime;
 
     // Компоненты игрока
-    private playerAnimations playerAnim;
+    private PlayerAnimations playerAnim;
     private PlayerManager playerManager;
     private CharacterController characterController;
     private Transform playerModel;
@@ -119,7 +119,7 @@ public class FishingSpot : MonoBehaviour
     private void StartFishing()
     {
         // Получаем компоненты
-        playerAnim = currentPlayer.GetComponent<playerAnimations>();
+        playerAnim = currentPlayer.GetComponent<PlayerAnimations>();
         playerManager = currentPlayer.GetComponent<PlayerManager>();
         characterController = currentPlayer.GetComponent<CharacterController>();
 

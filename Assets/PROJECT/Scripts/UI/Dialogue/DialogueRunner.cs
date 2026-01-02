@@ -2,7 +2,7 @@
 using UnityEngine.UI;
 using System.Collections;
 
-public class DialogueRunner : MonoBehaviour
+public class DialogueRunner : MonoBehaviour, IInteractObject
 {
     [Header("Настройки диалога")]
     public string ownerName;
@@ -385,6 +385,49 @@ public class DialogueRunner : MonoBehaviour
                     }
                 }
             }
+        }
+    }
+
+    public int InteractPriority()
+    {
+        return -1;
+    }
+
+    public bool CheckInteract()
+    {
+        return true;
+    }
+
+    public void Interact()
+    {
+        if(TryGetComponent(out MailBox box))
+        {
+            box.Interact();
+        }
+        else
+        {
+            StartDialogue(false);
+        }
+    }
+
+    public void OnBeginInteract()
+    {
+        var npc = GetComponent<NPCBehaviour>();
+        if (npc != null)
+        {
+            npc.dialogueActive = true;
+            npc.Stop();
+        }
+    }
+
+    public void OnEndInteract(bool succes)
+    {
+        if (succes) return;
+        var npc = GetComponent<NPCBehaviour>();
+        if (npc != null)
+        {
+            npc.dialogueActive = face;
+            npc.Resume();
         }
     }
 }

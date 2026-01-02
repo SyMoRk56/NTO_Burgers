@@ -3,7 +3,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class EnterToHouse : MonoBehaviour
+public class EnterToHouse : MonoBehaviour, IInteractObject
 {
     public Transform teleportTo;
     public Image blackScreen;
@@ -66,5 +66,31 @@ public class EnterToHouse : MonoBehaviour
         print("Dip from black");
         blackScreen.DOFade(0, 4);
 
+    }
+
+    public int InteractPriority()
+    {
+        return 0;
+    }
+
+    public bool CheckInteract()
+    {
+        var tran = false;
+        foreach (var e in FindObjectsByType<EnterToHouse>(FindObjectsSortMode.None))
+        {
+            tran |= e.isInTransition;
+
+        }
+        return tran;
+    }
+
+    public void OnBeginInteract()
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public void OnEndInteract(bool success)
+    {
+        throw new System.NotImplementedException();
     }
 }

@@ -1,7 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
+using static UnityEngine.SpriteMask;
 
-public class MailBox : MonoBehaviour
+public class MailBox : MonoBehaviour, IInteractObject
 {
     [Header("Mailbox Settings")]
     public string mailboxAddress;
@@ -10,7 +11,7 @@ public class MailBox : MonoBehaviour
     public DialogueRunner dialogueRunner;
     public bool triggerDialogueAfterDelivery = true;
     public float dialogueDelay = 0.3f; // Задержка перед запуском диалога
-
+    public AudioSource mailSource;
     public void Interact()
     {
         if (PlayerMailInventory.Instance == null)
@@ -32,6 +33,9 @@ public class MailBox : MonoBehaviour
             if (triggerDialogueAfterDelivery && dialogueRunner != null)
             {
                 StartCoroutine(StartDialogueWithDelay(true)); // true для диалога с письмом
+                if(GetComponent<NPCBehaviour>() == null)
+                mailSource.Play();
+
             }
         }
         else
@@ -80,5 +84,25 @@ public class MailBox : MonoBehaviour
         }
 
         Debug.Log($"✓ Письмо успешно доставлено!");
+    }
+
+    public int InteractPriority()
+    {
+        return 10;
+    }
+
+    public bool CheckInteract()
+    {
+        return PlayerMailInventory.Instance.HasMailForAddress(mailboxAddress) || dialogueRunner != null;
+    }
+
+    public void OnBeginInteract()
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public void OnEndInteract(bool success)
+    {
+        throw new System.NotImplementedException();
     }
 }

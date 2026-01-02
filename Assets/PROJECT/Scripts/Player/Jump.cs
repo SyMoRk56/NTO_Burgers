@@ -11,14 +11,14 @@ public class Jumps : MonoBehaviour
     private Rigidbody rb;
     private bool isGrounded = false;
 
-    public playerAnimations animScript;
+    public PlayerAnimations animScript;
 
 
     void Start()
     {
         rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true;
-        animScript = GetComponent<playerAnimations>();
+        animScript = GetComponent<PlayerAnimations>();
     }
 
     void Update()

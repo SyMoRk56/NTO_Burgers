@@ -1,10 +1,37 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using System.Linq;
+using Unity.VisualScripting;
+using UnityEngine;
+using UnityEngine.TextCore.Text;
 
 public class PlayerInteraction : MonoBehaviour
 {
     public PlayerManager manager;
     public AudioSource mailSource;
     public PlayerMovement mov;
+
+    IEnumerator HoldInteract(IInteractObject interactObject)
+    {
+        PlayerManager.instance.CanMove = false;
+        float r = 0;
+        interactObject.OnBeginInteract();
+        bool succes = false;
+        while (Input.GetKey(KeyCode.E))
+        {
+            r+= Time.deltaTime;
+            if (r > 1)
+            {
+                succes = true;
+                break;
+            }
+            yield return null;
+        }
+        interactObject.OnEndInteract(succes);
+        PlayerManager.instance.CanMove = true;
+        if (succes) Interact(interactObject);
+
+
+    }
     private void Update()
     {
         if (!manager.CanMove) return;
@@ -15,84 +42,43 @@ public class PlayerInteraction : MonoBehaviour
             Debug.Log($"Найдено объектов в радиусе: {hits.Length}");
 
             bool interactionHandled = false;
-
+            var interactables = hits.Select(c => c.GetComponent<IInteractObject>()).Where(i => i != null).ToArray();
+            if (CheckInteract(interactables, out IInteractObject interactObject))
+            {
+                StartCoroutine(HoldInteract(interactObject));
+            }
             // ПЕРВЫЙ ПРИОРИТЕТ: Почтовые ящики
-            foreach (var hit in hits)
-            {
-                if (hit.TryGetComponent(out MailBox box))
-                {
-                    Debug.Log($"✓ ВЗАИМОДЕЙСТВИЕ С ПОЧТОВЫМ ЯЩИКОМ");
-                    Debug.Log($"  Ящик: {box.name}");
-                    Debug.Log($"  Адрес ящика: '{box.mailboxAddress}'");
-
-                    // Проверяем состояние инвентаря перед взаимодействием
-                    if (PlayerMailInventory.Instance != null)
-                    {
-                        var allMails = PlayerMailInventory.Instance.GetAllMails();
-                        Debug.Log($"  Писем в инвентаре: {allMails.Count}");
-                        foreach (var mail in allMails)
-                        {
-                            Debug.Log($"    - {mail.recieverName} -> '{mail.adress}'");
-                        }
-                    }
-
-                    box.Interact();
-                    interactionHandled = true;
-                    mailSource.Play();
-                    break;
-                }
-            }
-
-            if (interactionHandled) return;
-
-            // ВТОРОЙ ПРИОРИТЕТ: Остальные взаимодействия
-            foreach (var hit in hits)
-            {
-                Debug.Log($"Объект: {hit.name} (тег: {hit.tag})");
-
-                if (hit.CompareTag("Dialog"))
-                {
-                    mov.animScript.HeroIdleAnim();
-
-                    Debug.Log("Взаимодействие с диалогом");
-                    hit.GetComponent<DialogueRunner>().StartDialogue(false);
-                    interactionHandled = true;
-                    break;
-                }
-
-                if (hit.CompareTag("Pickup"))
-                {
-                    Debug.Log("Взаимодействие с пикапом");
-                    PickupObject(hit.gameObject);
-                    interactionHandled = true;
-                    break;
-                }
-
-                if (hit.TryGetComponent(out EnterToHouse enter))
-                {
-                    if (!enter.enabled) return;
-                    Debug.Log("Вход в дом");
-                    enter.Interact();
-                    interactionHandled = true;
-                    break;
-                }
-                if(hit.TryGetComponent(out Appletree applet))
-                {
-                    applet.Interact();
-                    interactionHandled = true;
-                    break;
-                }
-            }
-
-            if (!interactionHandled)
-            {
-                Debug.Log("✗ Ни один объект не обработан");
-            }
+            //Interact(hits, ref interactionHandled);
         }
+    }
+
+    private void Interact(IInteractObject interactObject)
+    {
+        interactObject.Interact();
+        return;
     }
 
     public void PickupObject(GameObject go)
     {
+        
         Debug.Log("Подобран объект: " + go.name);
     }
+    public bool CheckInteract(IInteractObject[] hits, out IInteractObject interactObject)
+    {
+        print("Check interact");
+        interactObject = null;
+        hits.OrderByDescending((a) => a.InteractPriority());
+        bool can = false;
+        foreach (IInteractObject interact in hits)
+        {
+            if (interact.CheckInteract())
+            {
+                interactObject = interact;
+                can = true;
+                break;
+            }
+        }
+        return can;
+    }
+    
 }

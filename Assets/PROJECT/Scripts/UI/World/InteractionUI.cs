@@ -40,13 +40,19 @@ public class InteractionUI : MonoBehaviour
             {
                 if (!deskInteraction.IsCanvasOpen)
                 {
-                    ShowPopup();
+                    if (GetComponentInParent<IInteractObject>().CheckInteract())
+                    {
+                        ShowPopup();
+                    }
                 }
             }
             else
             {
                 // NPC и другие объекты без DeskInteraction
-                ShowPopup();
+                if (GetComponentInParent<IInteractObject>().CheckInteract())
+                {
+                    ShowPopup();
+                }
             }
 
             // Уведомляем скрипт стола о том, что игрок вошел в зону

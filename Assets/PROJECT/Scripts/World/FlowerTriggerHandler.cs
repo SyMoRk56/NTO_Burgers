@@ -28,7 +28,7 @@ public class FlowerTriggerHandler : MonoBehaviour
     private GameObject player;
     private ParticleSystem sneezeVFX;
     private PlayerMovement playerMovement;
-    private playerAnimations playerAnim;
+    private PlayerAnimations playerAnim;
 
     void Start()
     {
@@ -39,7 +39,7 @@ public class FlowerTriggerHandler : MonoBehaviour
             if (player != null)
             {
                 playerMovement = player.GetComponent<PlayerMovement>();
-                playerAnim = player.GetComponent<playerAnimations>();
+                playerAnim = player.GetComponent<PlayerAnimations>();
             }
         }
 

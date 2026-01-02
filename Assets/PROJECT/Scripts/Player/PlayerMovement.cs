@@ -18,7 +18,7 @@ public class PlayerMovement : MonoBehaviour
     public float maxViewAngle = 85f;
     public LayerMask groundLayer;
 
-    public playerAnimations animScript;
+    public PlayerAnimations animScript;
 
     public float idleTimeThreshold = 60f;
     public ParticleSystem idleVFX;
@@ -73,7 +73,7 @@ public class PlayerMovement : MonoBehaviour
 
         rb = GetComponent<Rigidbody>();
         col = GetComponent<CapsuleCollider>();
-        animScript = GetComponent<playerAnimations>();
+        animScript = GetComponent<PlayerAnimations>();
 
         rb.mass = mass;
         rb.interpolation = RigidbodyInterpolation.Interpolate;
