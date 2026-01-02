@@ -2,29 +2,44 @@ using UnityEngine;
 
 public class PickupItem : MonoBehaviour, IInteractObject
 {
+    bool parented = false;
     public bool CheckInteract()
     {
-        throw new System.NotImplementedException();
+        print("PickupItem check interact");
+        SetParent(false);
+        return true;
     }
 
     public void Interact()
     {
-        throw new System.NotImplementedException();
+        SetParent(!parented);
+    }
+
+    private void SetParent(bool parented)
+    {
+        this.parented = parented;
+        transform.SetParent(!parented ? null : PlayerManager.instance.hand);
+        if (parented)
+        {
+            transform.localRotation = Quaternion.identity;
+            transform.localPosition = Vector3.zero;
+        }
+       
+        GetComponent<Collider>().enabled = !parented;
+        GetComponent<Rigidbody>().isKinematic = parented;
     }
 
     public int InteractPriority()
     {
-        throw new System.NotImplementedException();
+        return parented ? 30 : 0;
     }
 
     public void OnBeginInteract()
     {
-        throw new System.NotImplementedException();
     }
 
     public void OnEndInteract(bool success)
     {
-        throw new System.NotImplementedException();
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created

@@ -6,6 +6,7 @@ public class PlayerManager : MonoBehaviour
     public GameObject cinemachineCamera;
     bool canMove = true;
     public static PlayerManager instance;
+    public Transform hand;
     public bool CanMove { get { return canMove; } set { print("Set can move: " + value); cinemachineCamera.GetComponent<CinemachineInputAxisController>().enabled = value; canMove = value; } }
 
     private void Awake()

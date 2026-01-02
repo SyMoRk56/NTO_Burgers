@@ -37,10 +37,18 @@ public class PlayerInteraction : MonoBehaviour
         if (!manager.CanMove) return;
         if (Input.GetKeyDown(KeyCode.E))
         {
-            Collider[] hits = Physics.OverlapSphere(transform.position, GameConfig.interactionRange);
+            if(PlayerManager.instance.hand.childCount != 0)
+            {
+                PlayerManager.instance.hand.GetChild(0).GetComponent<IInteractObject>().Interact();
+                return;
+            }
+            Collider[] hits = Physics.OverlapSphere(transform.position, GameConfig.interactionRange, ~0, QueryTriggerInteraction.Collide);
             Debug.Log($"=== ПОИСК ВЗАИМОДЕЙСТВИЙ ===");
             Debug.Log($"Найдено объектов в радиусе: {hits.Length}");
-
+            foreach(var h in hits)
+            {
+                print(Time.time.ToString() + h.gameObject.name);
+            }
             bool interactionHandled = false;
             var interactables = hits.Select(c => c.GetComponent<IInteractObject>()).Where(i => i != null).ToArray();
             if (CheckInteract(interactables, out IInteractObject interactObject))
@@ -58,19 +66,15 @@ public class PlayerInteraction : MonoBehaviour
         return;
     }
 
-    public void PickupObject(GameObject go)
-    {
-        
-        Debug.Log("Подобран объект: " + go.name);
-    }
     public bool CheckInteract(IInteractObject[] hits, out IInteractObject interactObject)
     {
-        print("Check interact");
+        print("Check interact" + Time.time.ToString() + " " + hits.Length);
         interactObject = null;
         hits.OrderByDescending((a) => a.InteractPriority());
         bool can = false;
         foreach (IInteractObject interact in hits)
         {
+            print(Time.time.ToString()+interact);
             if (interact.CheckInteract())
             {
                 interactObject = interact;
