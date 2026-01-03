@@ -62,5 +62,15 @@ public class Settings : MonoBehaviour
     {
         LocalizationManager.Instance.SetLanguage(langDropdown.value == 0 ? "RU" : "EN");
     }
+    public void OnEnable()
+    {
+        FindFirstObjectByType<MenuCamera>().enabled = false;
+        FindFirstObjectByType<FishWater>().enabled = false;
+    }
+    void OnDisable()
+    {
+        FindFirstObjectByType<MenuCamera>().enabled = true;
+        FindFirstObjectByType<FishWater>().enabled = true;
+    }
 }
 

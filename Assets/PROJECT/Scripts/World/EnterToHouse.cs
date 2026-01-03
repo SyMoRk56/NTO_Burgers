@@ -81,16 +81,14 @@ public class EnterToHouse : MonoBehaviour, IInteractObject
             tran |= e.isInTransition;
 
         }
-        return tran;
+        return !tran;
     }
 
     public void OnBeginInteract()
     {
-        throw new System.NotImplementedException();
     }
 
     public void OnEndInteract(bool success)
     {
-        throw new System.NotImplementedException();
     }
 }

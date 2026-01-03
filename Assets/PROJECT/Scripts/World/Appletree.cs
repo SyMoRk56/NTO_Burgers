@@ -28,11 +28,9 @@ public class Appletree : MonoBehaviour, IInteractObject
 
     public void OnBeginInteract()
     {
-        throw new System.NotImplementedException();
     }
 
-    public void OnEndInteract(bool succes)
+    public void OnEndInteract(bool success)
     {
-        throw new System.NotImplementedException();
     }
 }
