@@ -282,7 +282,6 @@ public class SaveGameManager : MonoBehaviour
                 ShowSaveIndicator();
             }
         }
-
         Debug.Log("Manual save created -> " + jsonPath);
     }
 

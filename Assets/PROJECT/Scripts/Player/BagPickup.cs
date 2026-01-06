@@ -88,18 +88,18 @@ public class BagPickup : MonoBehaviour, IInteractObject
             bagInstance.transform.localEulerAngles = localRotation;
 
             Debug.Log("Bag picked up!");
-
+            print("SetH Enabled " + PlayerMailInventory.Instance.carriedMails[0].id);
+            if (PlayerMailInventory.Instance.carriedMails[0].id == "Tutorial_1")
+            {
+                PlayerMailInventory.Instance.RemoveFirstMail();
+            }
             // ДОБАВЛЕНО: запускаем автосохранение после подбора сумки
             if (SaveGameManager.Instance != null)
             {
                 SaveGameManager.Instance.SaveAuto(true);
             }
             h.enabled = true;
-            print("SetH Enabled " + PlayerMailInventory.Instance.carriedMails[0].id);
-            if (PlayerMailInventory.Instance.carriedMails[0].id == "Tutorial_1")
-            {
-                PlayerMailInventory.Instance.RemoveFirstMail();
-            }
+            
         }
 
         Destroy(gameObject);
