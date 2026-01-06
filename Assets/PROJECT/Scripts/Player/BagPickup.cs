@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class BagPickup : MonoBehaviour
+public class BagPickup : MonoBehaviour, IInteractObject
 {
     [Header("Bag Settings")]
     public GameObject bagPrefab;
@@ -32,10 +32,10 @@ public class BagPickup : MonoBehaviour
     public EnterToHouse h;
     void Update()
     {
-        if (playerInRange && Input.GetKeyDown(pickupKey))
-        {
-            PickUpBag();
-        }
+        //if (playerInRange && Input.GetKeyDown(pickupKey))
+        //{
+        //    PickUpBag();
+        //}
     }
 
     void OnTriggerEnter(Collider other)
@@ -95,7 +95,11 @@ public class BagPickup : MonoBehaviour
                 SaveGameManager.Instance.SaveAuto(true);
             }
             h.enabled = true;
-            print("SetH Enabled");
+            print("SetH Enabled " + PlayerMailInventory.Instance.carriedMails[0].id);
+            if (PlayerMailInventory.Instance.carriedMails[0].id == "Tutorial_1")
+            {
+                PlayerMailInventory.Instance.RemoveFirstMail();
+            }
         }
 
         Destroy(gameObject);
@@ -127,5 +131,30 @@ public class BagPickup : MonoBehaviour
             }
         }
         return false;
+    }
+
+    public int InteractPriority()
+    {
+        return 0;
+    }
+
+    public bool CheckInteract()
+    {
+        return !HasBagAlready();
+    }
+
+    public void Interact()
+    {
+        PickUpBag();
+    }
+
+    public void OnBeginInteract()
+    {
+
+    }
+
+    public void OnEndInteract(bool success)
+    {
+
     }
 }

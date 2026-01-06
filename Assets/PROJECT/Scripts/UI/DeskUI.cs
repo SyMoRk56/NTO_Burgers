@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 using System.Collections;
 
-public class DeskUI : MonoBehaviour
+public class DeskUI : MonoBehaviour, IInteractObject
 {
     public GameObject letterPrefab;
     [Header("Canvas Settings")]
@@ -104,6 +104,11 @@ public class DeskUI : MonoBehaviour
 
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
+
+        if (PlayerMailInventory.Instance.carriedMails[0].id == "Tutorial_2")
+        {
+            PlayerMailInventory.Instance.RemoveFirstMail();
+        }
     }
 
     // Оставляем основной метод как private
@@ -280,5 +285,30 @@ public class DeskUI : MonoBehaviour
         playerInRange = false;
         if (isCanvasOpen)
             CloseDeskCanvas();
+    }
+
+    public int InteractPriority()
+    {
+        return 0;
+    }
+
+    public bool CheckInteract()
+    {
+        return HasBag();
+    }
+
+    public void Interact()
+    {
+        OpenDeskCanvas();
+    }
+
+    public void OnBeginInteract()
+    {
+
+    }
+
+    public void OnEndInteract(bool success)
+    {
+
     }
 }

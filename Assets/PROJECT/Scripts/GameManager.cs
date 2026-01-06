@@ -61,6 +61,7 @@ public class GameManager : MonoBehaviour
 
         yield return new WaitForEndOfFrame();
 
+        yield return null;
         // Теперь мы точно можем загружать сейв
         OnStartGame();
     }
@@ -92,8 +93,18 @@ public class GameManager : MonoBehaviour
         FindFirstObjectByType<CheckForInHouse>().OnStartGame();
         Time.timeScale = 1;
 
+        Invoke(nameof(AddTutorial), 1f);
     }
-
+    void AddTutorial()
+    {
+        if (PlayerMailInventory.Instance.GetSaveData().carriedMails.Count == 0)
+        {
+            var len = TaskManager.Instance.tasks.Count - 1;
+            PlayerMailInventory.Instance.AddMailToInventory(TaskManager.Instance.tasks[len - 0]);
+            PlayerMailInventory.Instance.AddMailToInventory(TaskManager.Instance.tasks[len - 1]);
+            PlayerMailInventory.Instance.AddMailToInventory(TaskManager.Instance.tasks[len - 2]);
+        }
+    }
     public GameObject GetPlayer()
     {
         if (player != null) return player;

@@ -9,7 +9,7 @@ public class TaskUI : MonoBehaviour
     public GameObject taskCanvas;
     public GameObject taskPanel;
     public TMP_Text reciever;
-    public TMP_Text adress;
+    [SerializeField] TMP_Text adress;
     public TMP_Text countText;
 
     public string adressT;
@@ -21,10 +21,27 @@ public class TaskUI : MonoBehaviour
             taskCanvas.SetActive(false);
 
         LocalizationManager.Instance.OnLanguageChanged += () => UpdateText();
-    }
 
+        reciever.text = "";
+        print("R " + reciever.text);
+        
+        
+    }
+    private void OnEnable()
+    {
+        reciever.text = "";
+        print("R OnEn" + reciever.text);
+
+        UpdateText();
+    }
+    private void Start()
+    {
+        reciever.text = "";
+    }
     public void SetTask(Task task, int remainingCount)
     {
+        print("R " + reciever.text);
+
         print("Set task " + task.recieverName + task.adress + " remaining: " + remainingCount);
 
         if (taskCanvas != null)
@@ -37,7 +54,8 @@ public class TaskUI : MonoBehaviour
             return;
         }
 
-        reciever.text = LocalizationManager.Instance.Get(!task.adress.Contains("NPC") ? "Reciever" : "Reciever_npc");
+        reciever.text = GetRecieverText(task.adress);
+        print(GetRecieverText(task.adress));
         adress.text = LocalizationManager.Instance.Get(task.adress);
         adressT = task.adress;
         if (remainingCount > 0)
@@ -45,10 +63,18 @@ public class TaskUI : MonoBehaviour
         else
             countText.text = "";
     }
-    void UpdateText()
+    public void UpdateText()
     {
+        print("R " + reciever.text);
+
         adress.text = LocalizationManager.Instance.Get(adressT);
-        reciever.text = LocalizationManager.Instance.Get(!adressT.Contains("NPC") ? "Reciever" : "Reciever_npc");
+        reciever.text = GetRecieverText(adressT);
+
+    }
+    public string GetRecieverText(string adress)
+    {
+        print("GetRecieverText: " + adress + " " + LocalizationManager.Instance.Get(adress.Contains("Tutorial") ? "" : (!adress.Contains("NPC") ? "Reciever" : "Reciever_npc")));
+        return LocalizationManager.Instance.Get(adress.Contains("Tutorial") ? "" : (!adress.Contains("NPC") ? "Reciever" : "Reciever_npc"));
 
     }
     public void HideTask()
