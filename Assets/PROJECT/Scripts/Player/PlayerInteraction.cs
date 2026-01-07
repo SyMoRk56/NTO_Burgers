@@ -3,29 +3,50 @@ using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.TextCore.Text;
+using UnityEngine.UI;
 
 public class PlayerInteraction : MonoBehaviour
 {
     public PlayerManager manager;
     public AudioSource mailSource;
     public PlayerMovement mov;
+    public GameObject interactionCanvas;
+    public Image interactionCircle;
 
-    IEnumerator HoldInteract(IInteractObject interactObject)
+    private void Start()
     {
+        interactionCanvas.SetActive(false);
+    }
+    IEnumerator HoldInteract((Transform,IInteractObject) interactObjectPair)
+    {
+        yield return 0;
+        Transform target = interactObjectPair.Item1;
+        var interactObject = interactObjectPair.Item2;
+        interactionCanvas.SetActive(true);
         PlayerManager.instance.CanMove = false;
         float r = 0;
         interactObject.OnBeginInteract();
         bool succes = false;
-        while (Input.GetKey(KeyCode.E))
-        {
-            r+= Time.deltaTime;
-            if (r > 1)
-            {
-                succes = true;
-                break;
-            }
-            yield return null;
-        }
+        //while (Input.GetKey(KeyCode.E))
+        //{
+        //    Vector3 screenPos = Camera.main.WorldToScreenPoint(target.position + new Vector3(0, .5f, 0));
+        //    interactionCircle.transform.position = screenPos;
+        //    interactionCircle.fillAmount = r;
+        //    r += Time.deltaTime;
+        //    if (r > 1)
+        //    {
+                
+        //        succes = true;
+        //        break;
+        //    }
+        //    yield return null;
+        //}
+
+        // обычный режим
+        succes = true;
+        // конец обычного режима
+        interactionCircle.fillAmount = 0;
+        interactionCanvas.SetActive(false);
         interactObject.OnEndInteract(succes);
         PlayerManager.instance.CanMove = true;
         if (succes) Interact(interactObject);
@@ -35,30 +56,43 @@ public class PlayerInteraction : MonoBehaviour
     private void Update()
     {
         if (!manager.CanMove) return;
+
         if (Input.GetKeyDown(KeyCode.E))
         {
-            if(PlayerManager.instance.hand.childCount != 0)
+            // Если что-то в руке — взаимодействуем с этим
+            if (PlayerManager.instance.hand.childCount != 0)
             {
-                PlayerManager.instance.hand.GetChild(0).GetComponent<IInteractObject>().Interact();
+                var interact = PlayerManager.instance.hand
+                    .GetChild(0)
+                    .GetComponent<IInteractObject>();
+
+                interact?.Interact();
                 return;
             }
-            Collider[] hits = Physics.OverlapSphere(transform.position, GameConfig.interactionRange, ~0, QueryTriggerInteraction.Collide);
-            Debug.Log($"=== ПОИСК ВЗАИМОДЕЙСТВИЙ ===");
+
+            Collider[] hits = Physics.OverlapSphere(
+                transform.position,
+                GameConfig.interactionRange,
+                ~0,
+                QueryTriggerInteraction.Collide
+            );
+
+            Debug.Log("=== ПОИСК ВЗАИМОДЕЙСТВИЙ ===");
             Debug.Log($"Найдено объектов в радиусе: {hits.Length}");
-            foreach(var h in hits)
-            {
-                print(Time.time.ToString() + h.gameObject.name);
-            }
-            bool interactionHandled = false;
-            var interactables = hits.Select(c => c.GetComponent<IInteractObject>()).Where(i => i != null).ToArray();
-            if (CheckInteract(interactables, out IInteractObject interactObject))
+
+            // Формируем пары (Transform, IInteractObject)
+            var interactables = hits
+                .Select(c => (c.transform, c.GetComponent<IInteractObject>()))
+                .Where(pair => pair.Item2 != null)
+                .ToArray();
+
+            if (CheckInteract(interactables, out var interactObject))
             {
                 StartCoroutine(HoldInteract(interactObject));
             }
-            // ПЕРВЫЙ ПРИОРИТЕТ: Почтовые ящики
-            //Interact(hits, ref interactionHandled);
         }
     }
+
 
     private void Interact(IInteractObject interactObject)
     {
@@ -66,23 +100,29 @@ public class PlayerInteraction : MonoBehaviour
         return;
     }
 
-    public bool CheckInteract(IInteractObject[] hits, out IInteractObject interactObject)
+    public bool CheckInteract((Transform transform, IInteractObject interact)[] hits, out (Transform,IInteractObject) interactObject)
     {
-        print("Check interact" + Time.time.ToString() + " " + hits.Length);
-        interactObject = null;
-        hits.OrderByDescending((a) => a.InteractPriority());
-        bool can = false;
-        foreach (IInteractObject interact in hits)
+        print($"Check interact {Time.time} {hits.Length}");
+
+        interactObject = (null,null);
+
+        // ВАЖНО: OrderBy возвращает новый IEnumerable
+        var orderedHits = hits
+            .OrderByDescending(h => h.interact.InteractPriority());
+
+        foreach (var hit in orderedHits)
         {
-            print(Time.time.ToString()+interact);
-            if (interact.CheckInteract())
+            print($"{Time.time} {hit.transform.name}");
+
+            if (hit.interact.CheckInteract())
             {
-                interactObject = interact;
-                can = true;
-                break;
+                interactObject = (hit.transform, hit.interact);
+                return true;
             }
         }
-        return can;
+
+        return false;
     }
-    
+
+
 }
