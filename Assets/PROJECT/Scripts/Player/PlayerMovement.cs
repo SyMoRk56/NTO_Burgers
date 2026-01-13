@@ -110,6 +110,7 @@ public class PlayerMovement : MonoBehaviour
         HandleLook();
         UpdateIdleTimer();
 
+        if(manager.CanMove)
         if (isGrounded && Keyboard.current.spaceKey.wasPressedThisFrame)
         {
             jumpRequested = true;
