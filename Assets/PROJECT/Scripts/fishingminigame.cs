@@ -1,12 +1,13 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using DG.Tweening;
 
 public class FishingMinigame : MonoBehaviour
 {
     [Header("UI Elements")]
     public RectTransform bar;
-    public RectTransform fish;
+    public RectTransform fish, fishChild;
     public RectTransform playerZone;
     public float barMinY = 0f;
     public float barMaxY = 400f;
@@ -56,6 +57,7 @@ public class FishingMinigame : MonoBehaviour
         // Проверка попадания рыбы в зону
         if (IsFishInZone())
         {
+            fishChild.DOShakePosition(.3f, 1f);
             inZoneTimer += delta;
             if (inZoneTimer >= currentFish.fishingTime)
                 Finish(true); // Поймал

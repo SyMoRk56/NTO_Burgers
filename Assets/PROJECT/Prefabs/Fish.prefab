@@ -98,6 +98,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e6970bda2fbef104bb3cce7d43f78df8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  positionOffset: {x: 0, y: 0, z: 0.12}
+  rotationOffset: {x: 0, y: 90, z: 0}
 --- !u!114 &6152846305635223242
 MonoBehaviour:
   m_ObjectHideFlags: 0

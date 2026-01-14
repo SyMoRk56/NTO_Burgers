@@ -23,7 +23,6 @@ public class FishingSpot : MonoBehaviour, IInteractObject
     public float fishFlyDuration = 2f;
     public float minFishSize = 0.2f;
     public float maxFishSize = 3f;
-    public float maxGrowthTime = 10f;
 
     [Header("Cooldown")]
     public float cooldownDuration = 30f;

@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class PickupItem : MonoBehaviour, IInteractObject
 {
+    [SerializeField] public Vector3 positionOffset, rotationOffset;
     bool parented = false;
     public bool CheckInteract()
     {
@@ -21,8 +22,8 @@ public class PickupItem : MonoBehaviour, IInteractObject
         transform.SetParent(!parented ? null : PlayerManager.instance.hand);
         if (parented)
         {
-            transform.localRotation = Quaternion.identity;
-            transform.localPosition = Vector3.zero;
+            transform.localRotation = Quaternion.Euler(rotationOffset);
+            transform.localPosition = positionOffset;
         }
        
         GetComponent<Collider>().enabled = !parented;
