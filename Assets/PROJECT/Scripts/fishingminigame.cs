@@ -1,4 +1,4 @@
-using UnityEngine;
+Ôªøusing UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 
@@ -15,14 +15,23 @@ public class FishingMinigame : MonoBehaviour
     public float fishSpeed = 150f;
     public float zoneSpeed = 200f;
     public float gameDuration = 10f;
-    public float requiredInZoneTime = 3f;
 
-    [HideInInspector] public System.Action<bool> OnFinish;
+    [HideInInspector] public System.Action<bool, FishScriptableObject> OnFinish;
 
     private float direction;
     private float timer;
     private float inZoneTimer;
     private bool gameActive;
+
+    [SerializeField] string fishResourcesPath = "Fish";
+
+    FishScriptableObject currentFish;
+
+    float currentSpeed;
+    float changeTimer;
+
+
+    public Image progressBar;
 
     void OnEnable()
     {
@@ -35,56 +44,92 @@ public class FishingMinigame : MonoBehaviour
 
         float delta = Time.deltaTime;
 
-        // ”Ô‡‚ÎÂÌËÂ ÁÓÌÓÈ Ë„ÓÍ‡
+        // –£–ø—Ä–∞–≤–ª–µ–Ω–∏–µ –∑–æ–Ω–æ–π –∏–≥—Ä–æ–∫–∞
         if (Input.GetKey(KeyCode.W))
             MovePlayerZone(zoneSpeed * delta);
         else if (Input.GetKey(KeyCode.S))
             MovePlayerZone(-zoneSpeed * delta);
 
-        // ƒ‚ËÊÂÌËÂ ˚·˚
+        // –î–≤–∏–∂–µ–Ω–∏–µ —Ä—ã–±—ã
         MoveFish(delta);
 
-        // œÓ‚ÂÍ‡ ÔÓÔ‡‰‡ÌËˇ ˚·˚ ‚ ÁÓÌÛ
+        // –ü—Ä–æ–≤–µ—Ä–∫–∞ –ø–æ–ø–∞–¥–∞–Ω–∏—è —Ä—ã–±—ã –≤ –∑–æ–Ω—É
         if (IsFishInZone())
         {
             inZoneTimer += delta;
-            if (inZoneTimer >= requiredInZoneTime)
-                Finish(true); // œÓÈÏ‡Î
+            if (inZoneTimer >= currentFish.fishingTime)
+                Finish(true); // –ü–æ–π–º–∞–ª
         }
         else
         {
-            inZoneTimer = 0f;
+            inZoneTimer -= Time.deltaTime * 2.5f;
+            inZoneTimer = Mathf.Clamp(inZoneTimer, 0, 10000000);
         }
 
-        // “‡ÈÏÂ Ë„˚
+        // –¢–∞–π–º–µ—Ä –∏–≥—Ä—ã
         timer -= delta;
+        progressBar.fillAmount = (inZoneTimer/currentFish.fishingTime);
         if (timer <= 0f)
-            Finish(false); // œÓÏ‡ı
+            Finish(false); // –ü—Ä–æ–º–∞—Ö
     }
+    void LoadRandomFishByWeight()
+    {
+        FishScriptableObject[] fishes =
+            Resources.LoadAll<FishScriptableObject>(fishResourcesPath);
 
+        if (fishes == null || fishes.Length == 0)
+        {
+            Debug.LogError("FishingMinigame: –≤ Resources/Fish –Ω–µ—Ç —Ä—ã–±");
+            return;
+        }
+
+        int totalWeight = 0;
+        foreach (var fish in fishes)
+            totalWeight += fish.Weight;
+
+        if (totalWeight <= 0)
+        {
+            Debug.LogError("FishingMinigame: —Å—É–º–º–∞—Ä–Ω—ã–π –≤–µ—Å —Ä—ã–± = 0");
+            return;
+        }
+
+        int roll = Random.Range(0, totalWeight);
+        int current = 0;
+
+        foreach (var fish in fishes)
+        {
+            current += fish.Weight;
+            if (roll < current)
+            {
+                currentFish = fish;
+                return;
+            }
+        }
+    }
     void StartGame()
     {
+        LoadRandomFishByWeight();
         if (fish == null || playerZone == null || bar == null)
         {
-            Debug.LogError("FishingMinigame: ÌÂ Ì‡ÁÌ‡˜ÂÌ˚ ‚ÒÂ UI ˝ÎÂÏÂÌÚ˚!");
+            Debug.LogError("FishingMinigame: –Ω–µ –Ω–∞–∑–Ω–∞—á–µ–Ω—ã –≤—Å–µ UI —ç–ª–µ–º–µ–Ω—Ç—ã!");
             gameActive = false;
             return;
         }
 
-        // —‰ÂÎ‡Ú¸ fish Ë playerZone ‰Ó˜ÂÌËÏË bar
+        // –°–¥–µ–ª–∞—Ç—å fish –∏ playerZone –¥–æ—á–µ—Ä–Ω–∏–º–∏ bar
         fish.SetParent(bar, false);
         playerZone.SetParent(bar, false);
 
-        // —ÎÛ˜‡ÈÌ‡ˇ ÔÓÁËˆËˇ ˚·˚
+        // –°–ª—É—á–∞–π–Ω–∞—è –ø–æ–∑–∏—Ü–∏—è —Ä—ã–±—ã
         float fishMinY = barMinY + fish.rect.height / 2f;
         float fishMaxY = barMaxY - fish.rect.height / 2f;
         fish.anchoredPosition = new Vector2(fish.anchoredPosition.x, Random.Range(fishMinY, fishMaxY));
 
-        // PlayerZone ‚ ˆÂÌÚÂ bar
+        // PlayerZone –≤ —Ü–µ–Ω—Ç—Ä–µ bar
         float zoneY = Mathf.Clamp((barMinY + barMaxY) / 2f, barMinY + playerZone.rect.height / 2f, barMaxY - playerZone.rect.height / 2f);
         playerZone.anchoredPosition = new Vector2(playerZone.anchoredPosition.x, zoneY);
 
-        // —ÎÛ˜‡ÈÌÓÂ Ì‡Ô‡‚ÎÂÌËÂ
+        // –°–ª—É—á–∞–π–Ω–æ–µ –Ω–∞–ø—Ä–∞–≤–ª–µ–Ω–∏–µ
         direction = Random.value > 0.5f ? 1f : -1f;
 
         timer = gameDuration;
@@ -96,11 +141,21 @@ public class FishingMinigame : MonoBehaviour
     {
         if (!gameActive || fish == null) return;
 
-        float newY = fish.anchoredPosition.y + direction * fishSpeed * delta;
-
         float minY = barMinY + fish.rect.height / 2f;
         float maxY = barMaxY - fish.rect.height / 2f;
 
+        // ‚è± —Ç–∞–π–º–µ—Ä —Ö–∞–æ—Å–∞
+        changeTimer -= delta;
+        if (changeTimer <= 0f)
+        {
+            direction = Random.value > 0.5f ? 1f : -1f;
+            currentSpeed = Random.Range(currentFish.MinSpeed, currentFish.MaxSpeed);
+            changeTimer = Random.Range(currentFish.DirectionChangeIntervalMin, currentFish.DirectionChangeIntervalMax);
+        }
+
+        float newY = fish.anchoredPosition.y + direction * currentSpeed * delta;
+
+        // üöß –∫—Ä–∞—è
         if (newY > maxY)
         {
             newY = maxY;
@@ -114,6 +169,9 @@ public class FishingMinigame : MonoBehaviour
 
         fish.anchoredPosition = new Vector2(fish.anchoredPosition.x, newY);
     }
+
+
+
 
     void MovePlayerZone(float deltaY)
     {
@@ -140,7 +198,7 @@ public class FishingMinigame : MonoBehaviour
     void Finish(bool success)
     {
         gameActive = false;
-        OnFinish?.Invoke(success);
+        OnFinish?.Invoke(success, currentFish);
         gameObject.SetActive(false);
         Debug.Log("FishingMinigame finished! Success: " + success);
     }

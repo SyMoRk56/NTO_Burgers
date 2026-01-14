@@ -10,7 +10,7 @@ public class FishingSpot : MonoBehaviour, IInteractObject
     public Transform fishSpawnPoint;
     public FishingMinigame fishingMinigame;
     public GameObject fishingCanvas;
-    public Text cooldownText;
+    public TMPro.TMP_Text cooldownText;
 
     [Header("Rod Settings")]
     public Vector3 rodStartRotation;
@@ -88,7 +88,7 @@ public class FishingSpot : MonoBehaviour, IInteractObject
     {
         fishingCanvas.SetActive(true);
         fishingMinigame.gameObject.SetActive(true);
-        fishingMinigame.OnFinish = OnMinigameFinished;
+        fishingMinigame.OnFinish += OnMinigameFinished;
 
         rodAnimationCoroutine = StartCoroutine(AnimateRod(rodCastRotation, rodCastPosition, rodAnimationDuration));
 
@@ -96,19 +96,19 @@ public class FishingSpot : MonoBehaviour, IInteractObject
         Debug.Log("Удочка заброшена! Мини-игра началась.");
     }
 
-    void OnMinigameFinished(bool success)
+    void OnMinigameFinished(bool success, FishScriptableObject fish)
     {
         fishingCanvas.SetActive(false);
 
         if (success)
         {
-            SpawnFish();
+            SpawnFish(fish.prefab);
         }
 
         EndFishing();
     }
 
-    void SpawnFish()
+    void SpawnFish(GameObject fishPrefab)
     {
         if (fishPrefab == null || fishSpawnPoint == null) return;
 
