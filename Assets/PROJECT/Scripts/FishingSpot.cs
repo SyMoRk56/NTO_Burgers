@@ -117,8 +117,9 @@ public class FishingSpot : MonoBehaviour, IInteractObject
         fish.transform.localScale = Vector3.one * size;
 
         StartCoroutine(FlyFish(fish));
-        Destroy(fish, 20f);
+        //Destroy(fish, 20f);
         Debug.Log($"Рыба поймана! Размер: {size:F2}");
+        fishingMinigame.OnFinish -= OnMinigameFinished;
     }
 
     IEnumerator FlyFish(GameObject fish)
