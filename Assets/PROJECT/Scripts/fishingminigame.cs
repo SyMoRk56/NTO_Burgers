@@ -2,6 +2,7 @@
 using UnityEngine.UI;
 using System.Collections;
 using DG.Tweening;
+using Unity.VisualScripting;
 
 public class FishingMinigame : MonoBehaviour
 {
@@ -37,8 +38,19 @@ public class FishingMinigame : MonoBehaviour
     void OnEnable()
     {
         StartGame();
+        StartCoroutine(Shake());
     }
-
+    IEnumerator Shake()
+    {
+        while (true)
+        {
+            if (IsFishInZone())
+            {
+                fishChild.DOShakePosition(.3f, 5f);
+            }
+            yield return new WaitForSeconds(.3f);
+        }
+    }
     void Update()
     {
         if (!gameActive) return;
@@ -57,7 +69,6 @@ public class FishingMinigame : MonoBehaviour
         // Проверка попадания рыбы в зону
         if (IsFishInZone())
         {
-            fishChild.DOShakePosition(.3f, 1f);
             inZoneTimer += delta;
             if (inZoneTimer >= currentFish.fishingTime)
                 Finish(true); // Поймал
