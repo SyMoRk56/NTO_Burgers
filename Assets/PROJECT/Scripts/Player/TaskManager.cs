@@ -6,7 +6,7 @@ public class TaskManager : MonoBehaviour
     public static TaskManager Instance;
 
     public List<Task> tasks = new();
-
+    public MailCatalog mailCatalog;
     private void Awake()
     {
         if (Instance == this)
@@ -22,8 +22,8 @@ public class TaskManager : MonoBehaviour
             Instance = this;
         }
         tasks = new();
-        var m = Resources.LoadAll<MailCatalog>("");
-        foreach(var n in m[0].mails)
+        var m = mailCatalog.mails;
+        foreach(var n in m)
         {
             tasks.Add(new Task(n.reciever, n.adress, n.id));
         }

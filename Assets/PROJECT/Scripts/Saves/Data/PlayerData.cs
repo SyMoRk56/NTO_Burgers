@@ -5,4 +5,5 @@ public class PlayerData
 {
     public float[] position;
     public bool hasBag; // ДОБАВЛЕНО: наличие сумки у игрока
+    public bool collectedAdditionalLetters;
 }

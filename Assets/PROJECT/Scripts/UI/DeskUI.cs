@@ -203,7 +203,7 @@ public class DeskUI : MonoBehaviour, IInteractObject
             foreach (var task in availableTasks)
             {
                 print(task.adress);
-                if (!PlayerMailInventory.Instance.ContainsTask(task.id))
+                if (!PlayerMailInventory.Instance.ContainsTask(task.id) && !task.id.Contains("Tutorial"))
                 {
                     print("1123;");
                     CreateMailUI(task);

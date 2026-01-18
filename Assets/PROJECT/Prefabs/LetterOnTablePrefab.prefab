@@ -131,7 +131,7 @@ GameObject:
   - component: {fileID: 4323347308554706628}
   - component: {fileID: 690869235672452157}
   - component: {fileID: 2564421102818399027}
-  - component: {fileID: 8414967937455607964}
+  - component: {fileID: 2713404263448776691}
   m_Layer: 6
   m_Name: LetterOnTablePrefab
   m_TagString: Untagged
@@ -197,7 +197,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &8414967937455607964
+--- !u!114 &2713404263448776691
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -206,9 +206,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 8771368665007675212}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a456f4f7145409429f8495b150de8db, type: 3}
+  m_Script: {fileID: 11500000, guid: 418467c4bdfd48e4e8a164ed3438f33c, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DraggableUI
+  m_EditorClassIdentifier: 
   recipient: 
   address: 
   id: 

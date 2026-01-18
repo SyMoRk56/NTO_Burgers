@@ -34,7 +34,8 @@ public class PlayerSaveSystem : MonoBehaviour
                 player.position.y,
                 player.position.z,
             },
-            hasBag = HasBag() // Сохраняем состояние сумки
+            hasBag = HasBag(), // Сохраняем состояние сумки
+            collectedAdditionalLetters = !FindFirstObjectByType<AdditionalLetters>().hasMails
         };
     }
 
@@ -67,6 +68,7 @@ public class PlayerSaveSystem : MonoBehaviour
             {
                 g.enabled = true;
             }
+            FindFirstObjectByType<AdditionalLetters>().hasMails = !data.collectedAdditionalLetters;
         }
 
     }

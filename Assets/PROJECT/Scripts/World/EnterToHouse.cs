@@ -86,9 +86,21 @@ public class EnterToHouse : MonoBehaviour, IInteractObject
             tran |= e.isInTransition;
 
         }
-        return !tran;
+        return !tran && FindChildWithTag(PlayerManager.instance.transform, "Bag") != null;
     }
+    private Transform FindChildWithTag(Transform parent, string tag)
+    {
+        foreach (Transform child in parent)
+        {
+            if (child.CompareTag(tag))
+                return child;
 
+            Transform result = FindChildWithTag(child, tag);
+            if (result != null)
+                return result;
+        }
+        return null;
+    }
     public void OnBeginInteract()
     {
     }
