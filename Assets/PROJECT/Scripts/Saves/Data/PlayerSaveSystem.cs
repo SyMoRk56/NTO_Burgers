@@ -35,7 +35,8 @@ public class PlayerSaveSystem : MonoBehaviour
                 player.position.z,
             },
             hasBag = HasBag(), // Сохраняем состояние сумки
-            collectedAdditionalLetters = !FindFirstObjectByType<AdditionalLetters>().hasMails
+            collectedAdditionalLetters = !FindFirstObjectByType<AdditionalLetters>().hasMails,
+            complitedMainIslandMainTasks = PlayerMailInventory.Instance.complitedMainLine,
         };
     }
 
@@ -69,6 +70,8 @@ public class PlayerSaveSystem : MonoBehaviour
                 g.enabled = true;
             }
             FindFirstObjectByType<AdditionalLetters>().hasMails = !data.collectedAdditionalLetters;
+            PlayerMailInventory.Instance.complitedMainLine = data.complitedMainIslandMainTasks;
+            PlayerManager.instance.SetThunder(!data.complitedMainIslandMainTasks);
         }
 
     }

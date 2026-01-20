@@ -7,6 +7,7 @@ public class PlayerMailInventory : MonoBehaviour
 
     public List<Task> carriedMails = new List<Task>();
 
+    public bool complitedMainLine;
     private void Awake()
     {
         if (Instance == null)
@@ -135,8 +136,14 @@ public class PlayerMailInventory : MonoBehaviour
     {
         if (carriedMails.Count > 0)
         {
+            if (carriedMails[0].recieverName == "NPC_koala")
+            {
+                complitedMainLine = true;
+                PlayerManager.instance.SetThunder(false);
+            }
             carriedMails.RemoveAt(0);
             UpdateTaskUI();
+            
         }
     }
 

@@ -1,5 +1,7 @@
+using System.Collections;
 using Unity.Cinemachine;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
 public class PlayerManager : MonoBehaviour
 {
@@ -41,4 +43,43 @@ public class PlayerManager : MonoBehaviour
         print("Components setuped");
     }
     #endregion
+
+    private void Update()
+    {
+#if UNITY_EDITOR
+        if (Input.GetKeyDown(KeyCode.I))
+        {
+            SetThunder(true);
+        }
+        if (Input.GetKeyDown(KeyCode.O))
+        {
+            SetThunder(false);
+        }
+#endif
+    }
+    [SerializeField] FullScreenPassRendererFeature feature;
+    public void SetThunder(bool set)
+    {
+        print("Set Thunder");
+        StartCoroutine(ThunderMaterialInOut(set));
+    }
+    IEnumerator ThunderMaterialInOut(bool IN)
+    {
+        var mat = feature.passMaterial;
+        float start = mat.GetFloat("_FogDensity");
+        float target = IN ? 1 : 0f;
+
+        float t = 0f;
+
+        while (t < 3)
+        {
+            t += Time.deltaTime;
+            float value = Mathf.Lerp(start, target, t / 3);
+            mat.SetFloat("_FogDensity", value);
+            print("SET " + value);
+            yield return null;
+        }
+
+        mat.SetFloat("_FogDensity", target);
+    }
 }

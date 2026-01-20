@@ -15,9 +15,9 @@ RenderSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 10
   m_Fog: 0
-  m_FogColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  m_FogColor: {r: 0.6, g: 0.87843144, b: 0.6156863, a: 1}
   m_FogMode: 3
-  m_FogDensity: 0.01
+  m_FogDensity: 0.06
   m_LinearFogStart: 0
   m_LinearFogEnd: 300
   m_AmbientSkyColor: {r: 0.5999999, g: 0.48053923, b: 0, a: 1}
@@ -27,7 +27,7 @@ RenderSettings:
   m_AmbientMode: 0
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
   m_SkyboxMaterial: {fileID: 2100000, guid: 9a29616e33093784abb6eba9919b70b3, type: 2}
-  m_HaloStrength: 0.5
+  m_HaloStrength: 0.229
   m_FlareStrength: 1
   m_FlareFadeSpeed: 3
   m_HaloTexture: {fileID: 0}
@@ -4258,6 +4258,14 @@ PrefabInstance:
       propertyPath: hand
       value: 
       objectReference: {fileID: 1563245998}
+    - target: {fileID: 5753725550323785935, guid: 0910cd8d95f59a742a5e020e2f8b9ddb, type: 3}
+      propertyPath: feature
+      value: 
+      objectReference: {fileID: -1613736363518323148, guid: 31863cb3242860047bf1ead585d6dd09, type: 2}
+    - target: {fileID: 5753725550323785935, guid: 0910cd8d95f59a742a5e020e2f8b9ddb, type: 3}
+      propertyPath: thunderMaterial
+      value: 
+      objectReference: {fileID: -876546973899608171, guid: 97961ee99a89ac540bf3217e674d6d77, type: 3}
     - target: {fileID: 5955099624294003426, guid: 0910cd8d95f59a742a5e020e2f8b9ddb, type: 3}
       propertyPath: m_Layer
       value: 8
