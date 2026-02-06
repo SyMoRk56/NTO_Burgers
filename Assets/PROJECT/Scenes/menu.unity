@@ -2445,6 +2445,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: TerrainAndWater
       objectReference: {fileID: 0}
+    - target: {fileID: 8056329603135034733, guid: 95708a5ac72cf914d8f51846620e4fe5, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -3195,6 +3199,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 56e48249ba45db943ab89bec55a708a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  data: {fileID: -6971358153309359932, guid: 31863cb3242860047bf1ead585d6dd09, type: 2}
   savesPanel: {fileID: 2040623151}
   autosaveButton: {fileID: 858821263}
 --- !u!1001 &1439384953219994452

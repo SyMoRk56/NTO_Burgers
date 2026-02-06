@@ -7,7 +7,7 @@ public class InteractionUI : MonoBehaviour
     public SphereCollider trigger;
     public DeskUI deskInteraction; // Опционально, только для объектов с UI
 
-    private Image popupImage;
+    private Image popupImage, popupImageBackground;
     private bool playerInRange = false;
 
     private void Start()
@@ -16,6 +16,7 @@ public class InteractionUI : MonoBehaviour
 
         // Получаем компонент Image из popup
         popupImage = popup.GetComponent<Image>();
+        //popup.transform.GetChild(0).GetComponent<Image>();
         if (popupImage == null)
         {
             Debug.LogWarning("Popup doesn't have an Image component!");

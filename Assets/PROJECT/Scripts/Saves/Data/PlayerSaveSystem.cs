@@ -25,14 +25,15 @@ public class PlayerSaveSystem : MonoBehaviour
             return null;
         }
         print("PlayerSaveSystem:  get data" + player.transform.position);
-
+        var p = RespawnPlayer.instance.GetPositionBeforeFall();
         return new PlayerData
         {
+            
             position = new float[]
             {
-                player.position.x,
-                player.position.y,
-                player.position.z,
+                p.x,
+                p.y,
+                p.z,
             },
             hasBag = HasBag(), // Сохраняем состояние сумки
             collectedAdditionalLetters = !FindFirstObjectByType<AdditionalLetters>().hasMails,

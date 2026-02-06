@@ -395,7 +395,14 @@ public class DialogueRunner : MonoBehaviour, IInteractObject
 
     public bool CheckInteract()
     {
-        return true;
+        if (TryGetComponent(out MailBox box))
+        {
+            return box.CheckInteract();
+        }
+        else
+        {
+            return true;
+        }
     }
 
     public void Interact()

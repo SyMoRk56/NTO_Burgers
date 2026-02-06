@@ -1,7 +1,10 @@
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
 public class CheckForInHouse : MonoBehaviour
 {
+    public FullScreenPassRendererFeature data;
+    int counter = 0;
     public void OnStartGame()
     {
 
@@ -9,6 +12,15 @@ public class CheckForInHouse : MonoBehaviour
         if((GameManager.Instance.GetPlayer().transform.position - transform.position).magnitude < 40)
         {
             CameraSwitcher.Instance.Switch();
+        }
+    }
+    private void FixedUpdate()
+    {
+        counter += 1;
+        if(counter > 4)
+        {
+            counter = 0;
+            data.SetActive((GameManager.Instance.GetPlayer().transform.position - transform.position).magnitude > 40);
         }
     }
 }

@@ -67,6 +67,7 @@ public class PlayerMovement : MonoBehaviour
     [Header("Рыбалка")]
     public bool isFishing = false; // Новый флаг для рыбалки
 
+    public PhysicsMaterial mat;
     void Start()
     {
         terrainData = terrain.terrainData;
@@ -182,7 +183,11 @@ public class PlayerMovement : MonoBehaviour
             moveInput.x += 1;
             animScript.HeroWalkAnim(isCarrying);
         }
-
+        mat.staticFriction = 0;
+        if(Mathf.Abs(moveInput.x) +  Mathf.Abs(moveInput.y) == 0 && isGrounded)
+        {
+            mat.staticFriction = .34f;
+        } 
         moveInput = Vector2.ClampMagnitude(moveInput, 1f);
 
         isRunning = Keyboard.current.leftShiftKey.isPressed;
