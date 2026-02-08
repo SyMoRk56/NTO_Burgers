@@ -18,8 +18,8 @@ public class InteractionUI : MonoBehaviour
     private void Start()
     {
         trigger.isTrigger = true;
-        trigger.radius = GameConfig.interactionRange;
-
+        trigger.radius = outerRadius;
+        innerRadius = GameConfig.interactionRange;
         player = GameObject.FindGameObjectWithTag("Player")?.transform;
 
         HideAllPopups();
@@ -77,10 +77,12 @@ public class InteractionUI : MonoBehaviour
 
         if (distance <= innerRadius)
         {
+            print("Inner" + innerRadius);
             ShowInnerPopup();
         }
         else if(distance <= outerRadius)
         {
+            print("Outer " + outerRadius);
             ShowOuterPopup();
         }
     }
