@@ -71,6 +71,7 @@ public class MainMenuSaves : MonoBehaviour
         }
         if (p)
             warningPanel.SetActive(true);
+        autosaveButton.GetComponent<Button>().interactable = SaveGameManager.Instance.HasAutosave();
     }
 
     private void Awake()
@@ -155,5 +156,6 @@ public class MainMenuSaves : MonoBehaviour
         print(i);
         saves[i].screenshot.texture = null;
         saves[i].dateText.text = "";
+        RefreshPanels();
     }
 }

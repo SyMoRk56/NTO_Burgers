@@ -11,15 +11,16 @@ public class InteractionUI : MonoBehaviour
 
     [Header("Radii")]
     public float innerRadius = 3, outerRadius = 7;
-
+    public float innerRadiusMultiplier = 1;
     private bool playerInRange = false;
     private Transform player;
 
     private void Start()
     {
+        innerRadius = GameConfig.innerInteractionRange * innerRadiusMultiplier;
+        outerRadius = GameConfig.outerInteractionRange;
         trigger.isTrigger = true;
         trigger.radius = outerRadius;
-        innerRadius = GameConfig.interactionRange;
         player = GameObject.FindGameObjectWithTag("Player")?.transform;
 
         HideAllPopups();

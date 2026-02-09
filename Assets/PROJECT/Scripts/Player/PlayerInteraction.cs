@@ -72,7 +72,7 @@ public class PlayerInteraction : MonoBehaviour
 
             Collider[] hits = Physics.OverlapSphere(
                 transform.position,
-                GameConfig.interactionRange,
+                GameConfig.innerInteractionRange,
                 ~0,
                 QueryTriggerInteraction.Collide
             );
