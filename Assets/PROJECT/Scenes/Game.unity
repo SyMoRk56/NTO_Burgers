@@ -20,11 +20,11 @@ RenderSettings:
   m_FogDensity: 0.06
   m_LinearFogStart: 0
   m_LinearFogEnd: 300
-  m_AmbientSkyColor: {r: 0.5999999, g: 0.48053923, b: 0, a: 1}
+  m_AmbientSkyColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
   m_AmbientEquatorColor: {r: 0.114, g: 0.125, b: 0.133, a: 1}
   m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
   m_AmbientIntensity: 1
-  m_AmbientMode: 0
+  m_AmbientMode: 3
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
   m_SkyboxMaterial: {fileID: 2100000, guid: 9a29616e33093784abb6eba9919b70b3, type: 2}
   m_HaloStrength: 0.229
@@ -2083,8 +2083,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 171159015}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.40821788, y: -0.23456968, z: 0.10938163, w: 0.8754261}
-  m_LocalPosition: {x: 0, y: 3, z: 269.1}
+  m_LocalRotation: {x: 0.010790444, y: -0.97592765, z: 0.049651463, w: 0.21209316}
+  m_LocalPosition: {x: -0.0102367215, y: 3.065168, z: 268.9533}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -5823,6 +5823,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 6417294859893324076, guid: 0910cd8d95f59a742a5e020e2f8b9ddb, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1106435122}
+    - targetCorrespondingSourceObject: {fileID: 6417294859893324076, guid: 0910cd8d95f59a742a5e020e2f8b9ddb, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1106435123}
   m_SourcePrefab: {fileID: 100100000, guid: 0910cd8d95f59a742a5e020e2f8b9ddb, type: 3}
 --- !u!114 &581461771 stripped
 MonoBehaviour:
@@ -8908,6 +8911,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 9141572527326855920, guid: 8ba1789805992f244acf02fc1a5ed286, type: 3}
       insertIndex: -1
       addedObject: {fileID: 884564033}
+    - targetCorrespondingSourceObject: {fileID: 9141572527326855920, guid: 8ba1789805992f244acf02fc1a5ed286, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 884564034}
   m_SourcePrefab: {fileID: 100100000, guid: 8ba1789805992f244acf02fc1a5ed286, type: 3}
 --- !u!1 &884564031 stripped
 GameObject:
@@ -8938,6 +8944,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 785ef4c8faa027b42b87a7e30829b999, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &884564034
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 884564031}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 26cb1b9acca4c404c9714aa8278f37cd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  dawnSkybox: {fileID: 2100000, guid: 538b23b2b6f17fe43b9203e0e9bd9d0f, type: 2}
+  daySkybox: {fileID: 2100000, guid: 9a29616e33093784abb6eba9919b70b3, type: 2}
+  sunsetSkybox: {fileID: 2100000, guid: 9c5bde8b4f1761441952359766ca81ee, type: 2}
+  nightSkybox: {fileID: 2100000, guid: 052adecbb0795cc46a4656d367a81238, type: 2}
 --- !u!1001 &891708963
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -10839,6 +10861,22 @@ AudioListener:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1106435121}
   m_Enabled: 1
+--- !u!114 &1106435123
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1106435121}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 26cb1b9acca4c404c9714aa8278f37cd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  dawnSkybox: {fileID: 2100000, guid: 538b23b2b6f17fe43b9203e0e9bd9d0f, type: 2}
+  daySkybox: {fileID: 2100000, guid: 9a29616e33093784abb6eba9919b70b3, type: 2}
+  sunsetSkybox: {fileID: 2100000, guid: 9c5bde8b4f1761441952359766ca81ee, type: 2}
+  nightSkybox: {fileID: 2100000, guid: 052adecbb0795cc46a4656d367a81238, type: 2}
 --- !u!1001 &1111875052
 PrefabInstance:
   m_ObjectHideFlags: 0

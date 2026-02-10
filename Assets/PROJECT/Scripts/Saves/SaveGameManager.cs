@@ -401,6 +401,19 @@ public class SaveGameManager : MonoBehaviour
         {
             data.objectStates = new DictionaryData();
         }
+        try
+        {
+            DayNightCycle cycle = FindObjectOfType<DayNightCycle>();
+            if (cycle != null)
+            {
+                data.timeOfDayIndex = cycle.GetTimeIndex();
+            }
+        }
+        catch
+        {
+            data.timeOfDayIndex = 0; // безопасный дефолт
+        }
+
 
         data.saveDate = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
         data.timestamp = System.DateTimeOffset.Now.ToUnixTimeSeconds();
@@ -473,6 +486,18 @@ public class SaveGameManager : MonoBehaviour
             player.GetComponent<Rigidbody>()
                   .MovePosition(new Vector3(floatArray[0], floatArray[1], floatArray[2]));
         }
+        //  ЗАГРУЗКА ВРЕМЕНИ СУТОК
+        DayNightCycle cycle = FindObjectOfType<DayNightCycle>();
+        if (cycle != null)
+        {
+            cycle.SetTimeIndex(data.timeOfDayIndex);
+            Debug.Log($"Загружено время суток: {data.timeOfDayIndex}");
+        }
+        else
+        {
+            Debug.LogWarning("DayNightCycle не найден при загрузке!");
+        }
+
     }
 
     // ======================= UI =======================
