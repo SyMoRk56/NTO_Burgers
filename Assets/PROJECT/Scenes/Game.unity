@@ -4999,6 +4999,23 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &533818656
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 533818640}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f145206d02f200d458267f3159c39418, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  dawnSkybox: {fileID: 2100000, guid: 538b23b2b6f17fe43b9203e0e9bd9d0f, type: 2}
+  daySkybox: {fileID: 2100000, guid: 9a29616e33093784abb6eba9919b70b3, type: 2}
+  sunsetSkybox: {fileID: 2100000, guid: 9c5bde8b4f1761441952359766ca81ee, type: 2}
+  nightSkybox: {fileID: 2100000, guid: 052adecbb0795cc46a4656d367a81238, type: 2}
+  timeIndex: 1
 --- !u!1001 &539785830
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -8713,6 +8730,23 @@ MonoBehaviour:
   sequenceSound: {fileID: 0}
   soundVolume: 1
   disablePlayerControl: 1
+--- !u!114 &869411313
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 869411284}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f145206d02f200d458267f3159c39418, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  dawnSkybox: {fileID: 2100000, guid: 538b23b2b6f17fe43b9203e0e9bd9d0f, type: 2}
+  daySkybox: {fileID: 2100000, guid: 9a29616e33093784abb6eba9919b70b3, type: 2}
+  sunsetSkybox: {fileID: 2100000, guid: 9c5bde8b4f1761441952359766ca81ee, type: 2}
+  nightSkybox: {fileID: 2100000, guid: 052adecbb0795cc46a4656d367a81238, type: 2}
+  timeIndex: 1
 --- !u!1 &875126587
 GameObject:
   m_ObjectHideFlags: 0
@@ -15735,6 +15769,8 @@ MonoBehaviour:
     interactionTrigger: 
     interactionDistance: 0
     interactionDuration: 5
+  homePoint: {fileID: 0}
+  reactsToDayNight: 1
   dialogueActive: 0
 --- !u!114 &1422409736
 MonoBehaviour:
@@ -15874,6 +15910,23 @@ MonoBehaviour:
   vfxTag: PickupVFX
   vfxDuration: 3
   isGoingForFish: 0
+--- !u!114 &1422409743
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1422409731}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f145206d02f200d458267f3159c39418, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  dawnSkybox: {fileID: 2100000, guid: 538b23b2b6f17fe43b9203e0e9bd9d0f, type: 2}
+  daySkybox: {fileID: 2100000, guid: 9a29616e33093784abb6eba9919b70b3, type: 2}
+  sunsetSkybox: {fileID: 2100000, guid: 9c5bde8b4f1761441952359766ca81ee, type: 2}
+  nightSkybox: {fileID: 2100000, guid: 052adecbb0795cc46a4656d367a81238, type: 2}
+  timeIndex: 1
 --- !u!1 &1423562797 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6290509173877665932, guid: 894ced3cc3deb714a9bc514d9a87cc55, type: 3}
@@ -17138,6 +17191,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 1174058656270132492, guid: 241a84a441f699145a90940f564bd83d, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1422409738}
+    - targetCorrespondingSourceObject: {fileID: 1174058656270132492, guid: 241a84a441f699145a90940f564bd83d, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1422409743}
   m_SourcePrefab: {fileID: 100100000, guid: 241a84a441f699145a90940f564bd83d, type: 3}
 --- !u!1001 &1547822380
 PrefabInstance:
@@ -27307,6 +27363,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 1598006357080986620, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1972728486}
+    - targetCorrespondingSourceObject: {fileID: 1598006357080986620, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1972728497}
     - targetCorrespondingSourceObject: {fileID: 7763716450364597886, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
       insertIndex: -1
       addedObject: {fileID: 533818647}
@@ -27316,6 +27375,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 7763716450364597886, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
       insertIndex: -1
       addedObject: {fileID: 533818649}
+    - targetCorrespondingSourceObject: {fileID: 7763716450364597886, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 533818656}
     - targetCorrespondingSourceObject: {fileID: 8101248466795976677, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
       insertIndex: -1
       addedObject: {fileID: 20446415}
@@ -27331,6 +27393,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 6446355342838543400, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
       insertIndex: -1
       addedObject: {fileID: 869411304}
+    - targetCorrespondingSourceObject: {fileID: 6446355342838543400, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 869411313}
     - targetCorrespondingSourceObject: {fileID: 827336006912540476, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2141412979}
@@ -27343,6 +27408,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 827336006912540476, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2141412990}
+    - targetCorrespondingSourceObject: {fileID: 827336006912540476, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2141412999}
     - targetCorrespondingSourceObject: {fileID: 6050794669778105593, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1278141761}
@@ -27361,6 +27429,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8759513271123885076, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1972728487}
+    - targetCorrespondingSourceObject: {fileID: 8759513271123885076, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1972728490}
     - targetCorrespondingSourceObject: {fileID: 4582036754662117997, guid: 301be24f8501a8e44938f1f257b2e3aa, type: 3}
       insertIndex: -1
       addedObject: {fileID: 232310339}
@@ -27631,6 +27702,40 @@ MonoBehaviour:
   sequenceSound: {fileID: 0}
   soundVolume: 1
   disablePlayerControl: 1
+--- !u!114 &1972728490
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 738422885}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f145206d02f200d458267f3159c39418, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  dawnSkybox: {fileID: 2100000, guid: 538b23b2b6f17fe43b9203e0e9bd9d0f, type: 2}
+  daySkybox: {fileID: 2100000, guid: 9a29616e33093784abb6eba9919b70b3, type: 2}
+  sunsetSkybox: {fileID: 2100000, guid: 9c5bde8b4f1761441952359766ca81ee, type: 2}
+  nightSkybox: {fileID: 2100000, guid: 052adecbb0795cc46a4656d367a81238, type: 2}
+  timeIndex: 1
+--- !u!114 &1972728497
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1972728482}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f145206d02f200d458267f3159c39418, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  dawnSkybox: {fileID: 2100000, guid: 538b23b2b6f17fe43b9203e0e9bd9d0f, type: 2}
+  daySkybox: {fileID: 2100000, guid: 9a29616e33093784abb6eba9919b70b3, type: 2}
+  sunsetSkybox: {fileID: 2100000, guid: 9c5bde8b4f1761441952359766ca81ee, type: 2}
+  nightSkybox: {fileID: 2100000, guid: 052adecbb0795cc46a4656d367a81238, type: 2}
+  timeIndex: 1
 --- !u!1001 &1978926428
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -29727,6 +29832,23 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &2141412999
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2141412970}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f145206d02f200d458267f3159c39418, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  dawnSkybox: {fileID: 2100000, guid: 538b23b2b6f17fe43b9203e0e9bd9d0f, type: 2}
+  daySkybox: {fileID: 2100000, guid: 9a29616e33093784abb6eba9919b70b3, type: 2}
+  sunsetSkybox: {fileID: 2100000, guid: 9c5bde8b4f1761441952359766ca81ee, type: 2}
+  nightSkybox: {fileID: 2100000, guid: 052adecbb0795cc46a4656d367a81238, type: 2}
+  timeIndex: 1
 --- !u!23 &1525782054524328
 MeshRenderer:
   m_ObjectHideFlags: 0

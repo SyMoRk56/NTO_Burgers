@@ -1,7 +1,10 @@
-using UnityEngine;
+п»їusing UnityEngine;
+using System;
 
 public class DayNightCycle : MonoBehaviour
 {
+    public static event Action<int> OnTimeOfDayChanged;
+
     public Material dawnSkybox;
     public Material daySkybox;
     public Material sunsetSkybox;
@@ -16,12 +19,9 @@ public class DayNightCycle : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.BackQuote)) // `
+        if (Input.GetKeyDown(KeyCode.BackQuote))
         {
-            timeIndex++;
-            if (timeIndex > 3)
-                timeIndex = 0;
-
+            timeIndex = (timeIndex + 1) % 4;
             SetTimeOfDay();
         }
     }
@@ -32,37 +32,29 @@ public class DayNightCycle : MonoBehaviour
         {
             case 0:
                 RenderSettings.skybox = dawnSkybox;
-                Debug.Log("Время суток: Рассвет");
                 break;
-
             case 1:
                 RenderSettings.skybox = daySkybox;
-                Debug.Log("Время суток: День");
                 break;
-
             case 2:
                 RenderSettings.skybox = sunsetSkybox;
-                Debug.Log("Время суток: Закат");
                 break;
-
             case 3:
                 RenderSettings.skybox = nightSkybox;
-                Debug.Log("Время суток: Ночь");
                 break;
         }
 
-        // Обновляем освещение
         DynamicGI.UpdateEnvironment();
+
+        // рџ”Ґ СѓРІРµРґРѕРјР»СЏРµРј РІСЃРµС… NPC
+        OnTimeOfDayChanged?.Invoke(timeIndex);
     }
-    public int GetTimeIndex()
-    {
-        return timeIndex;
-    }
+
+    public int GetTimeIndex() => timeIndex;
 
     public void SetTimeIndex(int index)
     {
         timeIndex = Mathf.Clamp(index, 0, 3);
         SetTimeOfDay();
     }
-
 }

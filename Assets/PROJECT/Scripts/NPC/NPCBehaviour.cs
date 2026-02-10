@@ -14,11 +14,31 @@ public class NPCBehaviour : MonoBehaviour
     [Header("Action Sequence")]
     [SerializeField] private NPCAction[] actions;
 
+    [Header("Day / Night")]
+    [SerializeField] private Transform homePoint;
+    [SerializeField] private bool reactsToDayNight = true;
+
     [HideInInspector] public bool dialogueActive = false;
 
     // ДЛЯ СИСТЕМЫ СОХРАНЕНИЙ
     public int CurrentActionIndex { get; private set; } = 0;
     public string CurrentTargetName { get; private set; } = "";
+
+    private bool isNight = false;
+    private Coroutine actionCoroutine;
+
+    // ======================================================
+    // UNITY
+    // ======================================================
+    private void OnEnable()
+    {
+        DayNightCycle.OnTimeOfDayChanged += OnTimeOfDayChanged;
+    }
+
+    private void OnDisable()
+    {
+        DayNightCycle.OnTimeOfDayChanged -= OnTimeOfDayChanged;
+    }
 
     private void Start()
     {
@@ -27,15 +47,77 @@ public class NPCBehaviour : MonoBehaviour
 
         agent.updateRotation = false;
 
-        StartCoroutine(ActionRoutine());
+        actionCoroutine = StartCoroutine(ActionRoutine());
     }
 
     private void Update()
     {
-        if (!dialogueActive)
+        if (!dialogueActive && !isNight)
             RotateTowardsMovementDirection();
     }
 
+    // ======================================================
+    // DAY / NIGHT REACTION
+    // ======================================================
+    private void OnTimeOfDayChanged(int timeIndex)
+    {
+        if (!reactsToDayNight) return;
+
+        switch (timeIndex)
+        {
+            case 2: // 🌇 закат
+                GoHomeAtSunset();
+                break;
+
+            case 3: // 🌙 ночь
+                EnterNight();
+                break;
+
+            case 0: // 🌅 рассвет
+                ExitNight();
+                break;
+        }
+    }
+
+    private void GoHomeAtSunset()
+    {
+        if (homePoint == null || isNight) return;
+
+        StopAllCoroutines();
+        Stop();
+
+        agent.isStopped = false;
+        agent.SetDestination(homePoint.position);
+
+        animator.SetBool(moveAnimParameter, true);
+    }
+
+    private void EnterNight()
+    {
+        if (isNight) return;
+        isNight = true;
+
+        StopAllCoroutines();
+        Stop();
+
+        agent.isStopped = true;
+        SetVisible(false);
+    }
+
+    private void ExitNight()
+    {
+        if (!isNight) return;
+        isNight = false;
+
+        SetVisible(true);
+        agent.isStopped = false;
+
+        actionCoroutine = StartCoroutine(ActionRoutineFromIndex());
+    }
+
+    // ======================================================
+    // CONTROL
+    // ======================================================
     public void Stop()
     {
         if (agent != null)
@@ -44,11 +126,8 @@ public class NPCBehaviour : MonoBehaviour
             agent.velocity = Vector3.zero;
         }
 
-        if (animator != null)
-        {
-            animator.SetBool(moveAnimParameter, false);
-            animator.SetTrigger("isIdle");
-        }
+        animator.SetBool(moveAnimParameter, false);
+        animator.SetTrigger("isIdle");
     }
 
     public void Resume()
@@ -57,9 +136,9 @@ public class NPCBehaviour : MonoBehaviour
             agent.isStopped = false;
     }
 
-    // ============================================
-    //   MAIN ROUTINE
-    // ============================================
+    // ======================================================
+    // MAIN ROUTINE
+    // ======================================================
     private IEnumerator ActionRoutine()
     {
         while (true)
@@ -87,109 +166,6 @@ public class NPCBehaviour : MonoBehaviour
         }
     }
 
-    // ============================================
-    //   WALK ROUTINE
-    // ============================================
-    private IEnumerator WalkToTarget(Transform target, Vector2 waitRange)
-    {
-        if (target == null) yield break;
-
-        CurrentTargetName = target.name;
-
-        agent.isStopped = false;
-        agent.SetDestination(target.position);
-
-        if (animator != null)
-            animator.SetBool(moveAnimParameter, true);
-
-        while (agent.pathPending ||
-               agent.remainingDistance > agent.stoppingDistance ||
-               agent.velocity.sqrMagnitude > 0.01f)
-        {
-            if (dialogueActive)
-            {
-                Stop();
-                yield break;
-            }
-
-            yield return null;
-        }
-
-        animator.SetBool(moveAnimParameter, false);
-
-        float r = Random.Range(waitRange.x, waitRange.y);
-        yield return new WaitForSeconds(r);
-    }
-
-    // ============================================
-    //   INTERACT ROUTINE
-    // ============================================
-    private IEnumerator InteractWithObject(NPCAction act)
-    {
-        if (act.interactObject == null) yield break;
-
-        CurrentTargetName = act.interactObject.name;
-
-        agent.isStopped = false;
-        agent.SetDestination(act.interactObject.position);
-
-        animator.SetBool(moveAnimParameter, true);
-
-        while (Vector3.Distance(
-            new Vector3(transform.position.x, 0, transform.position.z),
-            new Vector3(act.interactObject.position.x, 0, act.interactObject.position.z)
-        ) > act.interactionDistance)
-        {
-            if (dialogueActive)
-            {
-                Stop();
-                yield break;
-            }
-
-            yield return null;
-        }
-
-        agent.isStopped = true;
-        animator.SetBool(moveAnimParameter, false);
-
-        animator.SetTrigger(act.interactionTrigger);
-
-        yield return new WaitForSeconds(act.interactionDuration);
-
-        agent.isStopped = false;
-    }
-
-    // ============================================
-    //   RESTORE FROM SAVE
-    // ============================================
-    public void RestoreStateFromSave(NPCSaveData d)
-    {
-        StopAllCoroutines();
-
-        CurrentActionIndex = d.currentActionIndex;
-        CurrentTargetName = d.currentTargetName;
-
-        // Ищем цель по имени
-        Transform target = null;
-
-        foreach (var a in actions)
-        {
-            if (a.walkTarget != null && a.walkTarget.name == d.currentTargetName)
-                target = a.walkTarget;
-
-            if (a.interactObject != null && a.interactObject.name == d.currentTargetName)
-                target = a.interactObject;
-        }
-
-        if (target != null)
-        {
-            agent.isStopped = false;
-            agent.SetDestination(target.position);
-        }
-
-        StartCoroutine(ActionRoutineFromIndex());
-    }
-
     private IEnumerator ActionRoutineFromIndex()
     {
         while (true)
@@ -213,17 +189,116 @@ public class NPCBehaviour : MonoBehaviour
         }
     }
 
-    // ============================================
-    //   ROTATION
-    // ============================================
+    // ======================================================
+    // WALK
+    // ======================================================
+    private IEnumerator WalkToTarget(Transform target, Vector2 waitRange)
+    {
+        if (target == null) yield break;
+
+        CurrentTargetName = target.name;
+
+        agent.isStopped = false;
+        agent.SetDestination(target.position);
+
+        animator.SetBool(moveAnimParameter, true);
+
+        while (agent.pathPending ||
+               agent.remainingDistance > agent.stoppingDistance ||
+               agent.velocity.sqrMagnitude > 0.01f)
+        {
+            if (dialogueActive || isNight)
+            {
+                Stop();
+                yield break;
+            }
+
+            yield return null;
+        }
+
+        animator.SetBool(moveAnimParameter, false);
+
+        float r = Random.Range(waitRange.x, waitRange.y);
+        yield return new WaitForSeconds(r);
+    }
+
+    // ======================================================
+    // INTERACT
+    // ======================================================
+    private IEnumerator InteractWithObject(NPCAction act)
+    {
+        if (act.interactObject == null) yield break;
+
+        CurrentTargetName = act.interactObject.name;
+
+        agent.isStopped = false;
+        agent.SetDestination(act.interactObject.position);
+
+        animator.SetBool(moveAnimParameter, true);
+
+        while (Vector3.Distance(
+            new Vector3(transform.position.x, 0, transform.position.z),
+            new Vector3(act.interactObject.position.x, 0, act.interactObject.position.z)
+        ) > act.interactionDistance)
+        {
+            if (dialogueActive || isNight)
+            {
+                Stop();
+                yield break;
+            }
+
+            yield return null;
+        }
+
+        agent.isStopped = true;
+        animator.SetBool(moveAnimParameter, false);
+
+        animator.SetTrigger(act.interactionTrigger);
+
+        yield return new WaitForSeconds(act.interactionDuration);
+
+        agent.isStopped = false;
+    }
+
+    // ======================================================
+    // SAVE RESTORE
+    // ======================================================
+    public void RestoreStateFromSave(NPCSaveData d)
+    {
+        StopAllCoroutines();
+
+        CurrentActionIndex = d.currentActionIndex;
+        CurrentTargetName = d.currentTargetName;
+
+        Transform target = null;
+
+        foreach (var a in actions)
+        {
+            if (a.walkTarget != null && a.walkTarget.name == d.currentTargetName)
+                target = a.walkTarget;
+
+            if (a.interactObject != null && a.interactObject.name == d.currentTargetName)
+                target = a.interactObject;
+        }
+
+        if (target != null)
+        {
+            agent.isStopped = false;
+            agent.SetDestination(target.position);
+        }
+
+        actionCoroutine = StartCoroutine(ActionRoutineFromIndex());
+    }
+
+    // ======================================================
+    // ROTATION & VISIBILITY
+    // ======================================================
     private void RotateTowardsMovementDirection()
     {
         if (agent.velocity.sqrMagnitude < 0.01f) return;
 
         Vector3 dir = agent.velocity.normalized;
         dir.y = 0;
-
-        if (dir == Vector3.zero) return;
 
         Quaternion targetRot = Quaternion.LookRotation(dir);
 
@@ -232,6 +307,12 @@ public class NPCBehaviour : MonoBehaviour
             targetRot,
             Time.deltaTime * 8f
         );
+    }
+
+    private void SetVisible(bool value)
+    {
+        foreach (var r in GetComponentsInChildren<Renderer>())
+            r.enabled = value;
     }
 }
 
@@ -254,3 +335,4 @@ public class NPCAction
     public float interactionDistance = 1.5f;
     public float interactionDuration = 2f;
 }
+    
