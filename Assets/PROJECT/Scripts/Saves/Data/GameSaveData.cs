@@ -14,6 +14,7 @@ public class GameSaveData
 
     public List<NPCSaveData> npcData = new List<NPCSaveData>();
     public TutorialSaveData tutorialData;
+    public int timeOfDayIndex;
 }
 
 // Класс для сохранения данных туториала
