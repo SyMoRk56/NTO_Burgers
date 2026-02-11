@@ -32,12 +32,12 @@ public class NPCBehaviour : MonoBehaviour
     // ======================================================
     private void OnEnable()
     {
-        DayNightCycle.OnTimeOfDayChanged += OnTimeOfDayChanged;
+        NPCDayNightCycle.OnTimeOfDayChanged += OnTimeOfDayChanged;
     }
 
     private void OnDisable()
     {
-        DayNightCycle.OnTimeOfDayChanged -= OnTimeOfDayChanged;
+        NPCDayNightCycle.OnTimeOfDayChanged -= OnTimeOfDayChanged;
     }
 
     private void Start()
@@ -65,15 +65,16 @@ public class NPCBehaviour : MonoBehaviour
 
         switch (timeIndex)
         {
-            case 2: // 🌇 закат
+            case 2: // 🌇 закат - идём домой
                 GoHomeAtSunset();
                 break;
 
-            case 3: // 🌙 ночь
+            case 3: // 🌙 ночь - ждём
                 EnterNight();
                 break;
 
-            case 0: // 🌅 рассвет
+            case 0: // 🌅 рассвет - продолжаем маршрут
+            case 1: // ☀️ день - продолжаем маршрут
                 ExitNight();
                 break;
         }
@@ -86,10 +87,25 @@ public class NPCBehaviour : MonoBehaviour
         StopAllCoroutines();
         Stop();
 
+        agent.enabled = true;
         agent.isStopped = false;
         agent.SetDestination(homePoint.position);
 
         animator.SetBool(moveAnimParameter, true);
+
+        StartCoroutine(CheckArrivalAtHome());
+    }
+
+    private IEnumerator CheckArrivalAtHome()
+    {
+        while (Vector3.Distance(transform.position, homePoint.position) > agent.stoppingDistance + 0.1f)
+        {
+            yield return null;
+        }
+
+        // NPC достиг дома — делаем невидимым и неактивным
+        agent.isStopped = true;
+        SetInvisibleAndDisable();
     }
 
     private void EnterNight()
@@ -100,8 +116,7 @@ public class NPCBehaviour : MonoBehaviour
         StopAllCoroutines();
         Stop();
 
-        agent.isStopped = true;
-        SetVisible(false);
+        SetInvisibleAndDisable();
     }
 
     private void ExitNight()
@@ -109,7 +124,7 @@ public class NPCBehaviour : MonoBehaviour
         if (!isNight) return;
         isNight = false;
 
-        SetVisible(true);
+        SetVisibleAndEnable();
         agent.isStopped = false;
 
         actionCoroutine = StartCoroutine(ActionRoutineFromIndex());
@@ -261,7 +276,7 @@ public class NPCBehaviour : MonoBehaviour
     }
 
     // ======================================================
-    // SAVE RESTORE
+    // SAVE / RESTORE
     // ======================================================
     public void RestoreStateFromSave(NPCSaveData d)
     {
@@ -309,10 +324,31 @@ public class NPCBehaviour : MonoBehaviour
         );
     }
 
-    private void SetVisible(bool value)
+    private void SetInvisibleAndDisable()
     {
         foreach (var r in GetComponentsInChildren<Renderer>())
-            r.enabled = value;
+            r.enabled = false;
+
+        foreach (var c in GetComponentsInChildren<Collider>())
+            c.enabled = false;
+
+        if (agent != null)
+        {
+            agent.isStopped = true;
+            agent.enabled = false;
+        }
+    }
+
+    private void SetVisibleAndEnable()
+    {
+        foreach (var r in GetComponentsInChildren<Renderer>())
+            r.enabled = true;
+
+        foreach (var c in GetComponentsInChildren<Collider>())
+            c.enabled = true;
+
+        if (agent != null)
+            agent.enabled = true;
     }
 }
 
@@ -335,4 +371,3 @@ public class NPCAction
     public float interactionDistance = 1.5f;
     public float interactionDuration = 2f;
 }
-    
