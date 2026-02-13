@@ -89,8 +89,8 @@ public class PlayerMovement : MonoBehaviour
 
         if (idleVFX != null && idleVFX.isPlaying)
             idleVFX.Stop();
+        
     }
-
     void Update()
     {
         // НЕ ВЫХОДИМ из Update при блокировке движения - проверяем рыбалку
@@ -102,11 +102,11 @@ public class PlayerMovement : MonoBehaviour
                 animScript.HeroIdleAnim(isCarrying);
             }
             ResetIdleTimer();
-
+            moveInput = new Vector2();
             // Выходим только если не рыбалка
             if (!isFishing) return;
         }
-
+        
         GetInput();
         HandleLook();
         UpdateIdleTimer();

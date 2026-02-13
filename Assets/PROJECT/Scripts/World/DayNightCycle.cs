@@ -31,7 +31,7 @@ public class DayNightCycle : MonoBehaviour
             if (sunLight == null || sunLight.type != LightType.Directional)
                 Debug.LogError("DayNightCycle: Объект с тегом 'Sun' не найден или не Directional Light!");
         }
-
+        return;
         // Загружаем время из сохранения или ставим день по умолчанию
         timeIndex = PlayerPrefs.GetInt(SAVE_KEY, 1);
 
@@ -54,6 +54,7 @@ public class DayNightCycle : MonoBehaviour
     // ================= CORE =================
     private void ApplyTime()
     {
+        return;
         switch (timeIndex)
         {
             case 0: // рассвет

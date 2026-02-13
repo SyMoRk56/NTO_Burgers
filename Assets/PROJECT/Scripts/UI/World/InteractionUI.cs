@@ -14,9 +14,10 @@ public class InteractionUI : MonoBehaviour
     public float innerRadiusMultiplier = 1;
     private bool playerInRange = false;
     private Transform player;
-
+    IInteractObject io;
     private void Start()
     {
+        io = GetComponentInParent<IInteractObject>();
         innerRadius = GameConfig.innerInteractionRange * innerRadiusMultiplier;
         outerRadius = GameConfig.outerInteractionRange;
         trigger.isTrigger = true;
@@ -76,12 +77,12 @@ public class InteractionUI : MonoBehaviour
 
         float distance = Vector3.Distance(transform.position, player.position);
 
-        if (distance <= innerRadius)
+        if (distance <= innerRadius && io.CheckInteract())
         {
             print("Inner" + innerRadius);
             ShowInnerPopup();
         }
-        else if(distance <= outerRadius)
+        else if(distance <= outerRadius || (distance <= innerRadius && !io.CheckInteract()))
         {
             print("Outer " + outerRadius);
             ShowOuterPopup();

@@ -112,6 +112,7 @@ public class MainMenuSaves : MonoBehaviour
         if (!File.Exists(panel.screenshotPath))
         {
             panel.screenshot.texture = null;
+            panel.screenshot.CrossFadeAlpha(0, 0, false);
             return;
         }
 
@@ -121,6 +122,8 @@ public class MainMenuSaves : MonoBehaviour
         tex.LoadImage(bytes);
 
         panel.screenshot.texture = tex;
+        panel.screenshot.CrossFadeAlpha(1, 0, false);
+
     }
 
     public void LoadSave(int num)
@@ -155,6 +158,8 @@ public class MainMenuSaves : MonoBehaviour
         int i = int.Parse(saveName)-1;
         print(i);
         saves[i].screenshot.texture = null;
+        saves[i].screenshot.CrossFadeAlpha(0, 0, false);
+
         saves[i].dateText.text = "";
         RefreshPanels();
     }

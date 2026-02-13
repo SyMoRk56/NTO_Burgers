@@ -25,7 +25,9 @@ public class PlayerSaveSystem : MonoBehaviour
             return null;
         }
         print("PlayerSaveSystem:  get data" + player.transform.position);
-        var p = RespawnPlayer.instance.GetPositionBeforeFall();
+        var p = new Vector3(0, 0, 0);
+        if(RespawnPlayer.instance != null)
+          p = RespawnPlayer.instance.GetPositionBeforeFall();
         return new PlayerData
         {
             
