@@ -142,6 +142,7 @@ public class DialogueRunner : MonoBehaviour, IInteractObject
                 {
                     playerManager.ShowCursor(true);
                     playerManager.CanMove = false;
+                    PlayerManager.instance.playerMovement.moveInput = Vector2.zero;
                 }
             }
         }

@@ -26,7 +26,7 @@ public class PlayerMovement : MonoBehaviour
 
     private Rigidbody rb;
     private CapsuleCollider col;
-    private Vector2 moveInput;
+    public Vector2 moveInput;
     private Vector2 lookInput;
     private float xRotation = 0f;
 
@@ -93,6 +93,8 @@ public class PlayerMovement : MonoBehaviour
     }
     void Update()
     {
+        HandleLook();
+
         // НЕ ВЫХОДИМ из Update при блокировке движения - проверяем рыбалку
         if (!manager.CanMove)
         {
@@ -103,12 +105,14 @@ public class PlayerMovement : MonoBehaviour
             }
             ResetIdleTimer();
             moveInput = new Vector2();
+            targetVelocity = Vector2.zero;
+            
             // Выходим только если не рыбалка
             if (!isFishing) return;
+            return;
         }
         
         GetInput();
-        HandleLook();
         UpdateIdleTimer();
 
         if(manager.CanMove)
