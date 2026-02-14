@@ -34,8 +34,8 @@ public class PlayerMovement : MonoBehaviour
     public bool isRunning = false;
     private bool jumpRequested = false;
 
-    private Vector3 targetVelocity;
-    private Vector3 currentVelocity;
+    public Vector3 targetVelocity;
+    public Vector3 currentVelocity;
 
     public PlayerManager manager;
 
@@ -106,7 +106,7 @@ public class PlayerMovement : MonoBehaviour
             ResetIdleTimer();
             moveInput = new Vector2();
             targetVelocity = Vector2.zero;
-            
+            currentVelocity = Vector2.zero;
             // Выходим только если не рыбалка
             if (!isFishing) return;
             return;

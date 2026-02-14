@@ -84,7 +84,9 @@ public class DialogueRunner : MonoBehaviour, IInteractObject
     void Update()
     {
         if (!isRunning) return;
-
+        PlayerManager.instance.playerMovement.targetVelocity = Vector3.zero;
+        PlayerManager.instance.playerMovement.currentVelocity = Vector3.zero;
+        PlayerManager.instance.GetComponent<Rigidbody>().linearVelocity = Vector3.zero;
         var block = isLetter ? letterDialogues[currentDialogueIndex] : defaultDialogues[currentDialogueIndex];
         bool isAtChoicePoint = currentPhraseIndex >= block.phrases.Length;
 
@@ -92,6 +94,7 @@ public class DialogueRunner : MonoBehaviour, IInteractObject
            (Input.GetKeyDown(KeyCode.Space) ||
             Input.GetKeyDown(KeyCode.E) ||
             Input.GetMouseButtonDown(0)))
+            
         {
             NextPhrase();
         }

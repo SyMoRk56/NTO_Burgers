@@ -406,7 +406,7 @@ public class SaveGameManager : MonoBehaviour
             DayNightCycle cycle = FindObjectOfType<DayNightCycle>();
             if (cycle != null)
             {
-                data.timeOfDayIndex = cycle.GetTimeIndex();
+                //data.timeOfDayIndex = cycle.GetTimeIndex();
             }
         }
         catch
@@ -490,7 +490,7 @@ public class SaveGameManager : MonoBehaviour
         DayNightCycle cycle = FindObjectOfType<DayNightCycle>();
         if (cycle != null)
         {
-            cycle.SetTimeIndex(data.timeOfDayIndex);
+            //cycle.SetTimeIndex(data.timeOfDayIndex);
             Debug.Log($"Загружено время суток: {data.timeOfDayIndex}");
         }
         else

@@ -16,6 +16,7 @@ public class NPCDayNightCycle : MonoBehaviour
 
     private void Start()
     {
+        return;
         ApplyTimeOfDay();
     }
 
