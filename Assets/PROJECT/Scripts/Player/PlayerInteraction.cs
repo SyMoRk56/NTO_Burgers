@@ -72,7 +72,7 @@ public class PlayerInteraction : MonoBehaviour
 
             Collider[] hits = Physics.OverlapSphere(
                 transform.position,
-                GameConfig.innerInteractionRange,
+                GameConfig.outerInteractionRange,
                 ~0,
                 QueryTriggerInteraction.Collide
             );
@@ -97,6 +97,8 @@ public class PlayerInteraction : MonoBehaviour
     private void Interact(IInteractObject interactObject)
     {
         interactObject.Interact();
+        PlayerManager.instance.playerMovement.currentVelocity = Vector3.zero;
+        PlayerManager.instance.playerMovement.targetVelocity = Vector3.zero;
         return;
     }
 
@@ -107,14 +109,14 @@ public class PlayerInteraction : MonoBehaviour
         interactObject = (null,null);
 
         // ВАЖНО: OrderBy возвращает новый IEnumerable
-        var orderedHits = hits
-            .OrderByDescending(h => h.interact.InteractPriority());
+        var orderedHits = hits;
+            //.OrderByDescending(h => h.interact.InteractPriority());
 
         foreach (var hit in orderedHits)
         {
             print($"{Time.time} {hit.transform.name}");
 
-            if (hit.interact.CheckInteract())
+            if (hit.interact.CheckInteract() && hit.interact.CheckDistance())
             {
                 interactObject = (hit.transform, hit.interact);
                 return true;

@@ -2,6 +2,10 @@ using UnityEngine;
 
 public class PickupItem : MonoBehaviour, IInteractObject
 {
+    public bool CheckDistance()
+    {
+        return GetComponentInChildren<InteractionUI>().CheckDistance();
+    }
     [SerializeField] public Vector3 positionOffset, rotationOffset;
     bool parented = false;
     public bool CheckInteract()

@@ -2,6 +2,10 @@ using UnityEngine;
 
 public class IslandTransfer : MonoBehaviour, IInteractObject
 {
+    public bool CheckDistance()
+    {
+        return GetComponentInChildren<InteractionUI>().CheckDistance();
+    }
     [Header("Teleport settings")]
     public float interactRadius = 2f;
 

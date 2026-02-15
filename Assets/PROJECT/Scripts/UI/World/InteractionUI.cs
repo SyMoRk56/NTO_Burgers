@@ -11,7 +11,7 @@ public class InteractionUI : MonoBehaviour
 
     [Header("Radii")]
     public float innerRadius = 3, outerRadius = 7;
-    public float innerRadiusMultiplier = 1;
+    public float innerRadiusMultiplier = 1, outerRadiusMultiplier = 1;
     private bool playerInRange = false;
     private Transform player;
     IInteractObject io;
@@ -19,11 +19,23 @@ public class InteractionUI : MonoBehaviour
     {
         io = GetComponentInParent<IInteractObject>();
         innerRadius = GameConfig.innerInteractionRange * innerRadiusMultiplier;
-        outerRadius = GameConfig.outerInteractionRange;
+        outerRadius = GameConfig.outerInteractionRange * outerRadiusMultiplier;
         trigger.isTrigger = true;
         trigger.radius = outerRadius;
         player = GameObject.FindGameObjectWithTag("Player")?.transform;
+        if (transform.parent == null)
+        {
+            transform.localScale = Vector3.one;
+            return;
+        }
 
+        Vector3 parentScale = transform.parent.lossyScale;
+
+        transform.localScale = new Vector3(
+            Vector3.one.x / parentScale.x,
+            Vector3.one.y / parentScale.y,
+            Vector3.one.z / parentScale.z
+        );
         HideAllPopups();
     }
 
@@ -90,7 +102,15 @@ public class InteractionUI : MonoBehaviour
     }
 
     // ===== ”œ–¿¬À≈Õ»≈ POPUP =====
-
+    public bool CheckDistance()
+    {
+        if (playerInRange)
+        {
+            float distance = Vector3.Distance(transform.position, player.position);
+            if (distance < innerRadius) return true;
+        }
+        return false;
+    }
     private void ShowOuterPopup()
     {
         if (!outerPopup.activeSelf)

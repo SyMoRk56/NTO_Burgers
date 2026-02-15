@@ -2,6 +2,10 @@ using UnityEngine;
 
 public class BagPickup : MonoBehaviour, IInteractObject
 {
+    public bool CheckDistance()
+    {
+        return GetComponentInChildren<InteractionUI>().CheckDistance();
+    }
     [Header("Bag Settings")]
     public GameObject bagPrefab;
     public KeyCode pickupKey = KeyCode.E;

@@ -4,6 +4,10 @@ using static UnityEngine.SpriteMask;
 
 public class MailBox : MonoBehaviour, IInteractObject
 {
+    public bool CheckDistance()
+    {
+        return GetComponentInChildren<InteractionUI>().CheckDistance();
+    }
     [Header("Mailbox Settings")]
     public string mailboxAddress;
 

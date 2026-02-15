@@ -2,6 +2,10 @@ using UnityEngine;
 
 public class Appletree : MonoBehaviour, IInteractObject
 {
+    public bool CheckDistance()
+    {
+        return GetComponentInChildren<InteractionUI>().CheckDistance();
+    }
     public GameObject[] apple;
     public AudioSource audioSource;
 

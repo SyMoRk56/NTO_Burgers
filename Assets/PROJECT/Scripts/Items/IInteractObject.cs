@@ -9,4 +9,6 @@ public interface IInteractObject
     public void OnBeginInteract();
 
     public void OnEndInteract(bool success);
+
+    public bool CheckDistance();
 }

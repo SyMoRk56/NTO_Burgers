@@ -5,6 +5,10 @@ using UnityEngine.UI;
 
 public class EnterToHouse : MonoBehaviour, IInteractObject
 {
+    public bool CheckDistance()
+    {
+        return GetComponentInChildren<InteractionUI>().CheckDistance();
+    }
     public Transform teleportTo;
     public Image blackScreen;
     Coroutine t;

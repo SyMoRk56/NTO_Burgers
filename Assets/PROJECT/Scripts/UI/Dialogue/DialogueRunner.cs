@@ -441,4 +441,9 @@ public class DialogueRunner : MonoBehaviour, IInteractObject
             npc.Resume();
         }
     }
+
+    public bool CheckDistance()
+    {
+        return GetComponentInChildren<InteractionUI>().CheckDistance();
+    }
 }

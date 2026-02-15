@@ -6,6 +6,10 @@ using System.Collections.Generic;
 
 public class SlideInteract : MonoBehaviour, IInteractObject
 {
+    public bool CheckDistance()
+    {
+        return GetComponentInChildren<InteractionUI>().CheckDistance();
+    }
     [Header("Slide")]
     public Transform slideStartPoint;
 

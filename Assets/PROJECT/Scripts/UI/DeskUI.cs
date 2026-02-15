@@ -5,6 +5,10 @@ using System.Collections;
 
 public class DeskUI : MonoBehaviour, IInteractObject
 {
+    public bool CheckDistance()
+    {
+        return GetComponentInChildren<InteractionUI>().CheckDistance();
+    }
     public GameObject letterPrefab;
     [Header("Canvas Settings")]
     public Canvas deskCanvas;
@@ -42,15 +46,15 @@ public class DeskUI : MonoBehaviour, IInteractObject
 
     void Update()
     {
-        if (playerInRange && Input.GetKeyDown(KeyCode.E))
-        {
-            if (!isCanvasOpen && HasBag())
-                OpenDeskCanvas();
-            else if (!HasBag())
-            {
-                Debug.Log("You need a bag to interact with the desk!");
-            }
-        }
+        //if (playerInRange && Input.GetKeyDown(KeyCode.E))
+        //{
+        //    if (!isCanvasOpen && HasBag())
+        //        OpenDeskCanvas();
+        //    else if (!HasBag())
+        //    {
+        //        Debug.Log("You need a bag to interact with the desk!");
+        //    }
+        //}
 
         if (isCanvasOpen && Input.GetKeyDown(KeyCode.Escape))
         {

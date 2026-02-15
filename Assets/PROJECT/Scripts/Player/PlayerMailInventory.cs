@@ -94,7 +94,16 @@ public class PlayerMailInventory : MonoBehaviour
     {
         if (carriedMails.Count > 0 && TaskUI.Instance != null)
         {
-            TaskUI.Instance.SetTask(carriedMails[0], carriedMails.Count);
+            var remain = 0;
+            foreach (var task in carriedMails)
+            {
+                print("AD "+task.adress);
+                if (!task.adress.Contains("Tutorial"))
+                {
+                    remain ++;  
+                }
+            }
+            TaskUI.Instance.SetTask(carriedMails[0], remain);
             Debug.Log($"✓ UI обновлено: {carriedMails[0].recieverName} (+{carriedMails.Count - 1} других)");
         }
         else if (TaskUI.Instance != null)

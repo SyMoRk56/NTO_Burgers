@@ -3,6 +3,10 @@ using UnityEngine;
 
 public class AdditionalLetters : MonoBehaviour, IInteractObject
 {
+    public bool CheckDistance()
+    {
+        return GetComponentInChildren<InteractionUI>().CheckDistance();
+    }
     public bool hasMails = true;
     public MailCatalog mails;
     public bool CheckInteract()

@@ -4,6 +4,10 @@ using UnityEngine.UI;
 
 public class FishingSpot : MonoBehaviour, IInteractObject
 {
+    public bool CheckDistance()
+    {
+        return GetComponentInChildren<InteractionUI>().CheckDistance();
+    }
     [Header("References")]
     public Transform fishingRod;
     public GameObject fishPrefab;
