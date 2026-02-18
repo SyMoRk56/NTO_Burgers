@@ -217,21 +217,32 @@ public class NPCBehaviour : MonoBehaviour
         agent.SetDestination(target.position);
 
         animator.SetBool(moveAnimParameter, true);
-
+        print("IS BUNNY? " +( gameObject.name == "NPC - BUNNY"));
         while (agent.pathPending ||
                agent.remainingDistance > agent.stoppingDistance ||
                agent.velocity.sqrMagnitude > 0.01f)
         {
+            target.position = new Vector3(target.position.x, transform.position.y, target.position.z);
+            if (gameObject.name == "NPC - BUNNY")
+            {
+                print("BUNNY: WALK " + (agent.remainingDistance > agent.stoppingDistance));
+            }
             if (dialogueActive || isNight)
             {
                 Stop();
+                
                 yield break;
             }
 
             yield return null;
         }
 
+        if(gameObject.name == "NPC - BUNNY")
+        {
+            print("BUNNY: IDLE");
+        }
         animator.SetBool(moveAnimParameter, false);
+        animator.SetTrigger("isIdle");
 
         float r = Random.Range(waitRange.x, waitRange.y);
         yield return new WaitForSeconds(r);
@@ -249,6 +260,7 @@ public class NPCBehaviour : MonoBehaviour
         agent.isStopped = false;
         agent.SetDestination(act.interactObject.position);
 
+        
         animator.SetBool(moveAnimParameter, true);
 
         while (Vector3.Distance(
