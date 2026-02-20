@@ -55,7 +55,7 @@ public class DialogueRunner : MonoBehaviour, IInteractObject
         }
 
         dialogueUI = GetComponentInChildren<DialogueUI>(true);
-        dialogueUI.transform.GetChild(0).GetComponent<Button>().onClick.AddListener(() => NextPhrase());
+        dialogueUI.transform.GetChild(0).GetComponent<Button>().onClick.AddListener(() => CheckSkip());
         if (audioSource == null)
         {
             audioSource = gameObject.AddComponent<AudioSource>();
@@ -90,11 +90,22 @@ public class DialogueRunner : MonoBehaviour, IInteractObject
         var block = isLetter ? letterDialogues[currentDialogueIndex] : defaultDialogues[currentDialogueIndex];
         bool isAtChoicePoint = currentPhraseIndex >= block.phrases.Length;
 
-        if (!isChoosing && !isAtChoicePoint &&
-           (Input.GetKeyDown(KeyCode.Space) ||
-            Input.GetKeyDown(KeyCode.E) ||
-            Input.GetMouseButtonDown(0)))
-            
+        if (!isChoosing &&
+   (Input.GetKeyDown(KeyCode.Space) ||
+    Input.GetKeyDown(KeyCode.E)))
+        {
+            CheckSkip();
+        }
+
+    }
+
+    private void CheckSkip()
+    {
+        if (dialogueUI.IsTyping)
+        {
+            dialogueUI.CompleteTypingInstantly();
+        }
+        else
         {
             NextPhrase();
         }
