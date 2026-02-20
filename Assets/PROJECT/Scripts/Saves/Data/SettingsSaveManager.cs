@@ -41,6 +41,7 @@ public class SettingsSaveManager : MonoBehaviour
         string json = File.ReadAllText(settingsPath);
         SettingsData data = JsonUtility.FromJson<SettingsData>(json);
 
+        print("SETTINGS PATH " + settingsFolder);
         SettingsSaveSystem.Instance.LoadData(data);
         Debug.Log("Settings loaded");
     }

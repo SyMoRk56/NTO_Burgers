@@ -22,6 +22,7 @@ public class Headbob : MonoBehaviour
 
     private void Start()
     {
+        
         if (virtualCamera != null)
         {
             noise = virtualCamera.GetComponent<CinemachineBasicMultiChannelPerlin>();
@@ -35,7 +36,7 @@ public class Headbob : MonoBehaviour
 
         bool isMoving = characterController.linearVelocity.magnitude > velocityThreshold && movement.isGrounded;
 
-        float targetAmplitude = isMoving ? amplitude : 0f;
+        float targetAmplitude = isMoving ? amplitude * SettingsSaveSystem.Instance.GetData().shakeScale * 2 : 0f;
         float targetFrequency = isMoving ? frequency : 0f;
 
         currentAmplitude = Mathf.SmoothDamp(currentAmplitude, targetAmplitude * (movement.isRunning ? movement.walkSpeed / movement.runSpeed : 1), ref currentVelocity, smoothTime);
