@@ -3643,6 +3643,14 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 3219539444260320773}
     - target: {fileID: 936709233368181333, guid: 0910cd8d95f59a742a5e020e2f8b9ddb, type: 3}
+      propertyPath: runSpeed
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 936709233368181333, guid: 0910cd8d95f59a742a5e020e2f8b9ddb, type: 3}
+      propertyPath: walkSpeed
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 936709233368181333, guid: 0910cd8d95f59a742a5e020e2f8b9ddb, type: 3}
       propertyPath: defaultStepSound
       value: 
       objectReference: {fileID: 8300000, guid: b62eca4217454e94fb49c0340c48b7c4, type: 3}
