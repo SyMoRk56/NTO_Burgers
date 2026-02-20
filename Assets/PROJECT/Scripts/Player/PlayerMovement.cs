@@ -68,6 +68,8 @@ public class PlayerMovement : MonoBehaviour
     public bool isFishing = false; // Новый флаг для рыбалки
 
     public PhysicsMaterial mat;
+
+    public float animSpeed = 1;
     void Start()
     {
         terrainData = terrain.terrainData;
@@ -233,7 +235,7 @@ public class PlayerMovement : MonoBehaviour
         currentVelocity.y = rb.linearVelocity.y;
         rb.linearVelocity = currentVelocity;
 
-        animScript.anim.SetFloat("MoveSpeed", !isRunning ? 1 : runSpeed / walkSpeed);
+        animScript.anim.SetFloat("MoveSpeed", (!isRunning ? 1 : runSpeed / walkSpeed) * animSpeed);
     }
 
     void ApplyFriction()
