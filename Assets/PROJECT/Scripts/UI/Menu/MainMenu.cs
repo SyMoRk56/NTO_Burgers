@@ -34,7 +34,7 @@ public class MainMenu : MonoBehaviour
         }
         else
         {
-            FindFirstObjectByType<MainMenuSaves>(FindObjectsInactive.Include).LoadSave(0);
+            FindFirstObjectByType<MainMenuSaves>(FindObjectsInactive.Include).LoadSave(1);
         }
     }
     public void ExitGame()
