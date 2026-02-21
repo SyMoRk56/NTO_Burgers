@@ -11,8 +11,6 @@ public class TaskUI : MonoBehaviour
     [SerializeField] TMP_Text adress;
     public TMP_Text countText;
 
-    [Header("Player")]
-    public GameObject currentPlayer;
 
     public bool hasBag = false;
     private bool isOpen = false;
@@ -49,7 +47,7 @@ public class TaskUI : MonoBehaviour
         taskPanel.SetActive(true);
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
-        currentPlayer.GetComponent<PlayerManager>().CanMove = false;
+        PlayerManager.instance.CanMove = false;
         isOpen = true;
 
         if (AdressListMenu.Instance != null)
@@ -65,7 +63,7 @@ public class TaskUI : MonoBehaviour
         taskPanel.SetActive(false);
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
-        currentPlayer.GetComponent<PlayerManager>().CanMove = true;
+        PlayerManager.instance.CanMove = true;
         isOpen = false;
 
         if (AdressListMenu.Instance != null)
