@@ -92,24 +92,33 @@ public class PlayerMailInventory : MonoBehaviour
 
     private void UpdateTaskUI()
     {
+        Debug.Log($"[UpdateTaskUI] вызван, писем: {carriedMails.Count}");
+        Debug.Log($"[UpdateTaskUI] TaskUI.Instance: {TaskUI.Instance}");
+        Debug.Log($"[UpdateTaskUI] AdressListMenu.Instance: {AdressListMenu.Instance}");
+
         if (carriedMails.Count > 0 && TaskUI.Instance != null)
         {
             var remain = 0;
             foreach (var task in carriedMails)
             {
-                print("AD "+task.adress);
                 if (!task.adress.Contains("Tutorial"))
-                {
-                    remain ++;  
-                }
+                    remain++;
             }
             TaskUI.Instance.SetTask(carriedMails[0], remain);
-            Debug.Log($"✓ UI обновлено: {carriedMails[0].recieverName} (+{carriedMails.Count - 1} других)");
         }
         else if (TaskUI.Instance != null)
         {
             TaskUI.Instance.HideTask();
-            Debug.Log("✓ UI скрыто - нет писем");
+        }
+
+        if (AdressListMenu.Instance != null)
+        {
+            Debug.Log("[UpdateTaskUI] вызываем AdressListMenu.UpdateTasks()");
+            AdressListMenu.Instance.UpdateTasks();
+        }
+        else
+        {
+            Debug.LogError("[UpdateTaskUI] AdressListMenu.Instance == null!");
         }
     }
 

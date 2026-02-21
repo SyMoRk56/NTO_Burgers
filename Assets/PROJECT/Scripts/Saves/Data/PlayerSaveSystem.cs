@@ -55,15 +55,14 @@ public class PlayerSaveSystem : MonoBehaviour
             Debug.LogError("Player cannot be assigned during load!");
             return;
         }
+
         print("Set player position " + data.position.Length);
         if (data.position.Length == 3) StartCoroutine(SetPlayerPosDelay(data.position));
-
         else
         {
             player.GetComponent<PlayerMovement>().enabled = true;
         }
 
-        // Восстанавливаем состояние сумки
         if (data.hasBag && !HasBag())
         {
             CreateBagForPlayer();
@@ -77,6 +76,9 @@ public class PlayerSaveSystem : MonoBehaviour
             PlayerManager.instance.SetThunder(!data.complitedMainIslandMainTasks);
         }
 
+        // Пробрасываем hasBag в TaskUI
+        if (TaskUI.Instance != null)
+            TaskUI.Instance.hasBag = data.hasBag;
     }
     IEnumerator SetPlayerPosDelay(float[] pos)
     {

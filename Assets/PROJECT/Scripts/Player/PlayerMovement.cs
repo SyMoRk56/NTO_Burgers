@@ -98,20 +98,20 @@ public class PlayerMovement : MonoBehaviour
         // НЕ ВЫХОДИМ из Update при блокировке движения - проверяем рыбалку
         if (!manager.CanMove)
         {
-            // Если мы в рыбалке - не меняем анимацию на idle
             if (!isFishing)
             {
                 animScript.HeroIdleAnim(isCarrying);
             }
             ResetIdleTimer();
-            moveInput = new Vector2();
-            targetVelocity = Vector2.zero;
-            currentVelocity = Vector2.zero;
-            // Выходим только если не рыбалка
+            moveInput = Vector2.zero;
+            targetVelocity = Vector3.zero;
+            currentVelocity = Vector3.zero;
+            // Сбрасываем горизонтальную скорость rigidbody, вертикальную (гравитацию) оставляем
+            rb.linearVelocity = new Vector3(0, rb.linearVelocity.y, 0);
             if (!isFishing) return;
             return;
         }
-        
+
         GetInput();
         UpdateIdleTimer();
 

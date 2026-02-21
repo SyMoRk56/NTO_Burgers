@@ -97,13 +97,15 @@ public class BagPickup : MonoBehaviour, IInteractObject
             {
                 PlayerMailInventory.Instance.RemoveFirstMail();
             }
-            // ДОБАВЛЕНО: запускаем автосохранение после подбора сумки
+
+            // Разблокируем Tab
+            if (TaskUI.Instance != null)
+                TaskUI.Instance.hasBag = true;
+
             if (SaveGameManager.Instance != null)
-            {
                 SaveGameManager.Instance.SaveAuto(true);
-            }
+
             h.enabled = true;
-            
         }
 
         Destroy(gameObject);

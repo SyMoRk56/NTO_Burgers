@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using TMPro;
+using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
@@ -13,16 +15,21 @@ public class DeskLetterUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEnd
     public string recipient;
     public string address;
     public string id;
-    public float zoomScale = 1.7f;
-    public float zoomDuration = 0.2f;
 
-    private bool isZoomed = false;
-    private Vector3 originalScale;
-    private int originalSiblingIndex;
-    private bool isDragging = false;
+    [Header("Flip Animation")]
+    public float flipDuration = 0.2f;
+
+    [Header("Back Side")]
+    public GameObject backSide;
+    public TMP_Text receiverText;
+    public TMP_Text addressText;
 
     [Header("Button Reference")]
     public Button actionButton;
+
+    private bool isFlipped = false;
+    private bool isDragging = false;
+    private bool isAnimating = false;
 
     void OnEnable()
     {
@@ -33,9 +40,6 @@ public class DeskLetterUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEnd
         if (canvasGroup == null)
             canvasGroup = gameObject.AddComponent<CanvasGroup>();
 
-        originalScale = transform.localScale;
-        originalSiblingIndex = transform.GetSiblingIndex();
-
         if (actionButton == null)
             actionButton = GetComponentInChildren<Button>();
 
@@ -45,6 +49,10 @@ public class DeskLetterUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEnd
             actionButton.onClick.RemoveAllListeners();
             actionButton.onClick.AddListener(OnActionButtonClick);
         }
+
+        // Скрываем обратную сторону по умолчанию
+        if (backSide != null)
+            backSide.SetActive(false);
 
         CalculateDragBounds();
     }
@@ -81,10 +89,8 @@ public class DeskLetterUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEnd
         if (rectTransform == null || canvas == null) return;
 
         Vector2 pos = rectTransform.anchoredPosition + eventData.delta / canvas.scaleFactor;
-
         pos.x = Mathf.Clamp(pos.x, minDragBound.x, maxDragBound.x);
         pos.y = Mathf.Clamp(pos.y, minDragBound.y, maxDragBound.y);
-
         rectTransform.anchoredPosition = pos;
     }
 
@@ -97,68 +103,68 @@ public class DeskLetterUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEnd
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        if (isDragging) return;
-        ToggleZoom();
+        if (isDragging || isAnimating) return;
+        StartCoroutine(FlipAnimation());
     }
 
-    void ToggleZoom()
+    private IEnumerator FlipAnimation()
     {
-        if (isZoomed)
-        {
-            transform.localScale = originalScale;
-            transform.SetSiblingIndex(originalSiblingIndex);
-            isZoomed = false;
+        isAnimating = true;
 
+        // Сплющиваем до нуля
+        float t = 0f;
+        Vector3 originalScale = transform.localScale;
+        while (t < flipDuration)
+        {
+            t += Time.deltaTime;
+            float scaleX = Mathf.Lerp(originalScale.x, 0f, t / flipDuration);
+            transform.localScale = new Vector3(scaleX, originalScale.y, originalScale.z);
+            yield return null;
+        }
+        transform.localScale = new Vector3(0f, originalScale.y, originalScale.z);
+
+        // Меняем содержимое в середине анимации
+        isFlipped = !isFlipped;
+        if (backSide != null)
+            backSide.SetActive(isFlipped);
+
+        if (isFlipped)
+        {
+            // Заполняем данными
+            var mail = MailManager.Instance.GetMailById(id);
+            if (mail != null)
+            {
+                if (receiverText != null)
+                    receiverText.text = LocalizationManager.Instance.Get(mail.reciever);
+                if (addressText != null)
+                    addressText.text = LocalizationManager.Instance.Get(mail.adress);
+            }
+            // Скрываем кнопку на обратной стороне
             if (actionButton != null)
                 actionButton.gameObject.SetActive(false);
         }
-        else
-        {
-            transform.localScale = originalScale * zoomScale;
-            transform.SetAsLastSibling();
-            isZoomed = true;
 
-            if (actionButton != null)
-                actionButton.gameObject.SetActive(true);
+        // Растягиваем обратно
+        t = 0f;
+        while (t < flipDuration)
+        {
+            t += Time.deltaTime;
+            float scaleX = Mathf.Lerp(0f, originalScale.x, t / flipDuration);
+            transform.localScale = new Vector3(scaleX, originalScale.y, originalScale.z);
+            yield return null;
         }
+        transform.localScale = originalScale;
+
+        isAnimating = false;
     }
 
     private void OnActionButtonClick()
     {
-        // Берем письмо в инвентарь
         if (PlayerMailInventory.Instance != null)
         {
-            // СОЗДАЕМ структуру Task вместо класса
             Task newTask = new Task(recipient, address, id);
             PlayerMailInventory.Instance.AddMailToInventory(newTask);
-
-            // Уничтожаем UI элемент письма
             Destroy(gameObject);
         }
-
-        if (isZoomed)
-            ToggleZoom();
-    }
-
-    public void ZoomIn()
-    {
-        if (!isZoomed)
-            ToggleZoom();
-    }
-
-    public void ZoomOut()
-    {
-        if (isZoomed)
-            ToggleZoom();
-    }
-
-    public bool IsZoomed()
-    {
-        return isZoomed;
-    }
-
-    public bool IsDragging()
-    {
-        return isDragging;
     }
 }

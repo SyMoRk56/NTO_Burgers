@@ -6,80 +6,105 @@ public class TaskUI : MonoBehaviour
     public static TaskUI Instance;
 
     [Header("UI References")]
-    public GameObject taskCanvas;
     public GameObject taskPanel;
     public TMP_Text reciever;
     [SerializeField] TMP_Text adress;
     public TMP_Text countText;
 
-    public string adressT;
+    [Header("Player")]
+    public GameObject currentPlayer;
+
+    public bool hasBag = false;
+    private bool isOpen = false;
+    private string adressT;
+
     private void Awake()
     {
         Instance = this;
-
-        if (taskCanvas != null)
-            taskCanvas.SetActive(false);
-
-        LocalizationManager.Instance.OnLanguageChanged += () => UpdateText();
-
+        taskPanel.SetActive(false);
+        LocalizationManager.Instance.OnLanguageChanged += UpdateText;
         reciever.text = "";
-        print("R " + reciever.text);
-        
-        
     }
-    private void OnEnable()
+
+    private void Update()
     {
-        reciever.text = "";
-        print("R OnEn" + reciever.text);
+        if (Input.GetKeyDown(KeyCode.Tab))
+            TogglePanel();
+        if (isOpen && Input.GetKeyDown(KeyCode.Escape))
+            ClosePanel();
+    }
 
-        UpdateText();
-    }
-    private void Start()
+    public void TogglePanel()
     {
-        reciever.text = "";
+        if (!hasBag) return;
+
+        if (isOpen)
+            ClosePanel();
+        else
+            OpenPanel();
     }
+
+    public void OpenPanel()
+    {
+        taskPanel.SetActive(true);
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+        currentPlayer.GetComponent<PlayerManager>().CanMove = false;
+        isOpen = true;
+
+        if (AdressListMenu.Instance != null)
+            AdressListMenu.Instance.SetVisible(false);
+
+        // Заполняем панель письмами
+        if (TaskPanel.Instance != null)
+            TaskPanel.Instance.Populate();
+    }
+
+    public void ClosePanel()
+    {
+        taskPanel.SetActive(false);
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+        currentPlayer.GetComponent<PlayerManager>().CanMove = true;
+        isOpen = false;
+
+        if (AdressListMenu.Instance != null)
+            AdressListMenu.Instance.SetVisible(true);
+
+        // Чистим панель
+        if (TaskPanel.Instance != null)
+            TaskPanel.Instance.Clear();
+    }
+
     public void SetTask(Task task, int remainingCount)
     {
-        print("R " + reciever.text);
-
-        print("Set task " + task.recieverName + task.adress + " remaining: " + remainingCount);
-
-        if (taskCanvas != null)
-            taskCanvas.SetActive(true);
-
-        if (string.IsNullOrEmpty( task.recieverName) && string.IsNullOrEmpty(task.adress))
-        {
-            if (taskCanvas != null)
-                taskCanvas.SetActive(false);
+        if (string.IsNullOrEmpty(task.recieverName) && string.IsNullOrEmpty(task.adress))
             return;
-        }
-
-        reciever.text = GetRecieverText(task.adress);
-        print(GetRecieverText(task.adress));
-        adress.text = LocalizationManager.Instance.Get(task.adress);
         adressT = task.adress;
-        if (remainingCount > 0)
-            countText.text = remainingCount.ToString();
-        else
-            countText.text = "";
+        reciever.text = GetRecieverText(task.adress);
+        adress.text = LocalizationManager.Instance.Get(task.adress);
+        countText.text = remainingCount > 0 ? remainingCount.ToString() : "";
     }
-    public void UpdateText()
-    {
-        print("R " + reciever.text);
 
-        adress.text = LocalizationManager.Instance.Get(adressT);
-        reciever.text = GetRecieverText(adressT);
-
-    }
-    public string GetRecieverText(string adress)
-    {
-        print("GetRecieverText: " + adress + " " + LocalizationManager.Instance.Get(adress.Contains("Tutorial") ? "" : (!adress.Contains("NPC") ? "Reciever" : "Reciever_npc")));
-        return LocalizationManager.Instance.Get(adress.Contains("Tutorial") ? "" : (!adress.Contains("NPC") ? "Reciever" : "Reciever_npc"));
-
-    }
     public void HideTask()
     {
-        if (taskCanvas != null)
-            taskCanvas.SetActive(false);
+        adressT = "";
+        reciever.text = "";
+        adress.text = "";
+        countText.text = "";
+    }
+
+    public void UpdateText()
+    {
+        if (string.IsNullOrEmpty(adressT)) return;
+        adress.text = LocalizationManager.Instance.Get(adressT);
+        reciever.text = GetRecieverText(adressT);
+    }
+
+    public string GetRecieverText(string adress)
+    {
+        if (adress.Contains("Tutorial"))
+            return "";
+        return LocalizationManager.Instance.Get(!adress.Contains("NPC") ? "Reciever" : "Reciever_npc");
     }
 }
