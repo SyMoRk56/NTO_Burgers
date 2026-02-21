@@ -85,7 +85,17 @@ public class SaveGameManager : MonoBehaviour
         if (autosaveIndicator != null)
             autosaveIndicator.SetActive(false);
     }
+    public bool HasSaves()
+    {
+        string manualFolder = Path.Combine(saveFolder, "manual");
 
+        if (!Directory.Exists(manualFolder))
+            return false;
+
+        string[] saveFiles = Directory.GetFiles(manualFolder, "*.json");
+
+        return saveFiles.Length > 0;
+    }
     void Start()
     {
         // Дополнительно отключаем индикатор при старте

@@ -27,8 +27,15 @@ public class MainMenu : MonoBehaviour
     }
     public void PlayGame()
     {
-        savesPanel.SetActive(true);
-        gameObject.SetActive(false);
+        if (SaveGameManager.Instance.HasSaves())
+        {
+            savesPanel.SetActive(true);
+            gameObject.SetActive(false);
+        }
+        else
+        {
+            FindFirstObjectByType<MainMenuSaves>(FindObjectsInactive.Include).LoadSave(0);
+        }
     }
     public void ExitGame()
     {
