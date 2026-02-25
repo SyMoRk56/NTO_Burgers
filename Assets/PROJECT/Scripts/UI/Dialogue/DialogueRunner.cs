@@ -37,7 +37,7 @@ public class DialogueRunner : MonoBehaviour, IInteractObject
 
     // Для запуска дерева после фразы про яблоню
     private bool wasApplePhraseSpoken = false;
-
+    float skipTimer = 0;
     void Start()
     {
         // Инициализация benchScene
@@ -84,6 +84,7 @@ public class DialogueRunner : MonoBehaviour, IInteractObject
     void Update()
     {
         if (!isRunning) return;
+        skipTimer += Time.deltaTime;
         PlayerManager.instance.playerMovement.targetVelocity = Vector3.zero;
         PlayerManager.instance.playerMovement.currentVelocity = Vector3.zero;
         PlayerManager.instance.GetComponent<Rigidbody>().linearVelocity = Vector3.zero;
@@ -101,6 +102,8 @@ public class DialogueRunner : MonoBehaviour, IInteractObject
 
     private void CheckSkip()
     {
+        if (skipTimer < .5f) return;
+        skipTimer = 0;
         if (dialogueUI.IsTyping)
         {
             dialogueUI.CompleteTypingInstantly();
