@@ -3782,6 +3782,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 8
       objectReference: {fileID: 0}
+    - target: {fileID: 5360984353265539779, guid: 0910cd8d95f59a742a5e020e2f8b9ddb, type: 3}
+      propertyPath: m_ControllerManager.Controllers.Array.data[1].Input.Gain
+      value: -1
+      objectReference: {fileID: 0}
     - target: {fileID: 5753725550323785935, guid: 0910cd8d95f59a742a5e020e2f8b9ddb, type: 3}
       propertyPath: hand
       value: 
