@@ -51,6 +51,12 @@ public class SaveGameManager : MonoBehaviour
     private bool isFirstSaveInGame = true;
     private string currentSceneName;
 
+    // ── Туториал: флаг отложенного запуска ──────────────────
+    // Выставляется в true когда создаётся новый слот на сцене Menu.
+    // TutorialManager читает его когда Game сцена загрузится.
+    private bool pendingTutorialStart = false;
+    // ────────────────────────────────────────────────────────
+
     void Awake()
     {
         if (Instance == null)
@@ -105,12 +111,40 @@ public class SaveGameManager : MonoBehaviour
         {
             isFirstSaveInGame = true;
             Debug.Log("First save in Game scene will be hidden");
+
+            // ── Туториал: Game загрузилась — запускаем если нужно ──
+            if (pendingTutorialStart)
+            {
+                pendingTutorialStart = false;
+                Debug.Log("[SaveGame] Game сцена загружена — запускаем туториал");
+                // Откладываем ещё на кадр чтобы все Start() на сцене отработали
+                StartCoroutine(StartTutorialNextFrame());
+            }
+            // ────────────────────────────────────────────────────────
         }
 
         if (autosaveIndicator != null)
             autosaveIndicator.SetActive(false);
     }
 
+    private System.Collections.IEnumerator StartTutorialNextFrame()
+    {
+        // Ждём два кадра — GameManager и TutorialManager должны инициализироваться
+        yield return null;
+        yield return null;
+
+        if (TutorialManager.Instance != null)
+        {
+            Debug.Log("[SaveGame] Вызываем TutorialManager.StartTutorialForNewSlot()");
+            TutorialManager.Instance.StartTutorialForNewSlot();
+        }
+        else
+        {
+            Debug.LogError("[SaveGame] TutorialManager.Instance == NULL после загрузки Game! Убедись что объект TutorialManager есть на сцене Game.");
+        }
+    }
+
+    // ======================= CHECK =======================
     public bool CheckSave(string saveName)
     {
         string folder = Path.Combine(saveFolder, "manual");
@@ -200,9 +234,10 @@ public class SaveGameManager : MonoBehaviour
     // ======================= MANUAL SAVE =======================
     public void SaveManual(string saveName, bool showIndicator = true)
     {
-        // ── ТУТОРИАЛ: проверяем новый слот ДО записи файла ──────
+        // ── Туториал: проверяем новый слот ДО записи ────────
         bool isNewSlot = !HasManual(saveName);
-        // ────────────────────────────────────────────────────────
+        Debug.Log($"[SaveGame] SaveManual '{saveName}', isNewSlot={isNewSlot}, scene={currentSceneName}");
+        // ────────────────────────────────────────────────────
 
         string folder = Path.Combine(saveFolder, "manual");
         Directory.CreateDirectory(folder);
@@ -211,7 +246,6 @@ public class SaveGameManager : MonoBehaviour
         string hashPath = Path.Combine(folder, saveName + ".hash");
 
         string json = CreateSaveJson();
-
         File.WriteAllText(jsonPath, json);
 
         string hash = ComputeHash(json);
@@ -219,13 +253,16 @@ public class SaveGameManager : MonoBehaviour
 
         ScreenCapture.CaptureScreenshot(Path.Combine(folder, saveName + ".png"));
 
-        // ── ТУТОРИАЛ: запускаем при первом сохранении нового слота ──
-        if (isNewSlot && currentSceneName == "Game")
+        // ── Туториал: если новый слот — запомнить флаг ──────
+        // Не вызываем StartTutorialForNewSlot() здесь напрямую —
+        // TutorialManager ещё не существует (мы на сцене Menu).
+        // Флаг сработает в OnSceneLoaded когда загрузится Game.
+        if (isNewSlot)
         {
-            Debug.Log("[SaveGame] Первое сохранение нового слота — запускаем туториал");
-            TutorialManager.Instance?.StartTutorialForNewSlot();
+            pendingTutorialStart = true;
+            Debug.Log("[SaveGame] Новый слот — выставлен pendingTutorialStart=true");
         }
-        // ────────────────────────────────────────────────────────────
+        // ────────────────────────────────────────────────────
 
         if (currentSceneName == "Menu") { Debug.Log("Manual save on Menu scene - indicator hidden"); return; }
 
@@ -319,14 +356,14 @@ public class SaveGameManager : MonoBehaviour
         }
         catch { data.timeOfDayIndex = 0; }
 
-        // ── ТУТОРИАЛ: сохраняем текущую стадию ──────────────────
+        // ── Туториал ─────────────────────────────────────────
         try
         {
             if (TutorialManager.Instance != null)
                 data.tutorialData = TutorialManager.Instance.GetSaveData();
         }
         catch { data.tutorialData = new TutorialSaveData(); }
-        // ────────────────────────────────────────────────────────
+        // ────────────────────────────────────────────────────
 
         data.saveDate = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
         data.timestamp = System.DateTimeOffset.Now.ToUnixTimeSeconds();
@@ -384,13 +421,15 @@ public class SaveGameManager : MonoBehaviour
             player.GetComponent<Rigidbody>().MovePosition(new Vector3(floatArray[0], floatArray[1], floatArray[2]));
 
         DayNightCycle cycle = FindObjectOfType<DayNightCycle>();
-        if (cycle != null) { /* cycle.SetTimeIndex(data.timeOfDayIndex); */ Debug.Log($"Загружено время суток: {data.timeOfDayIndex}"); }
+        if (cycle != null) { Debug.Log($"Загружено время суток: {data.timeOfDayIndex}"); }
         else Debug.LogWarning("DayNightCycle не найден при загрузке!");
 
-        // ── ТУТОРИАЛ: восстанавливаем стадию после загрузки ─────
+        // ── Туториал: восстанавливаем стадию ────────────────
         if (TutorialManager.Instance != null)
             TutorialManager.Instance.LoadTutorialState(data.tutorialData);
-        // ────────────────────────────────────────────────────────
+        else
+            Debug.LogWarning("[SaveGame] LoadFromJson: TutorialManager.Instance == NULL");
+        // ────────────────────────────────────────────────────
     }
 
     // ======================= UI =======================

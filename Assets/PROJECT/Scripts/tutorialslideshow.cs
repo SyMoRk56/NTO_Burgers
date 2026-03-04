@@ -52,6 +52,16 @@ public class TutorialSlideshowUI : MonoBehaviour
         skipButton?.onClick.AddListener(OnSkipClicked);
     }
 
+    void Update()
+    {
+        if (!isShowing) return;
+        if (Cursor.lockState != CursorLockMode.None)
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
+    }
+
     // ── Запуск ────────────────────────────────────────────
 
     /// <summary>Вызывается SaveGameManager при создании нового слота.</summary>
