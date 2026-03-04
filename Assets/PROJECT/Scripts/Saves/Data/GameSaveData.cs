@@ -7,24 +7,24 @@ public class GameSaveData
     public PlayerData playerData;
     public MailSaveData mailData;
     public InventorySaveData inventoryData;
-    public DictionaryData objectStates; // Состояния объектов (скамейка, дерево)
+    public DictionaryData objectStates;
     public string saveDate;
     public long timestamp;
     public float playtime;
-
     public List<NPCSaveData> npcData = new List<NPCSaveData>();
     public TutorialSaveData tutorialData;
     public int timeOfDayIndex;
 }
 
-// Класс для сохранения данных туториала
 [System.Serializable]
 public class TutorialSaveData
 {
+    public int currentStep;
     public List<string> completedTutorialSteps;
 
     public TutorialSaveData()
     {
+        currentStep = 0;
         completedTutorialSteps = new List<string>();
     }
 }
