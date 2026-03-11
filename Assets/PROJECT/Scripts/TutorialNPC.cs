@@ -9,39 +9,45 @@ public enum TutorialDialogueType
     Farewell
 }
 
-/// <summary>
-/// Туториальный NPC.
-/// 
-/// Настройка префаба — точно так же как обычный NPC:
-/// 1. Возьми любой существующий NPC префаб как основу (скопируй)
-/// 2. На DialogueRunner заполни defaultDialogues:
-///    - Element 0 → диалог "Открой инвентарь и посмотри письма"
-///    - Element 1 → диалог "Доставь письмо персонажу X"
-///    - Element 2 → диалог прощания (опционально)
-/// 3. Добавь этот скрипт TutorialNPC на тот же объект
-/// 4. Убедись что DialogueUI назначен в DialogueRunner (как у обычных NPC)
-/// </summary>
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(DialogueRunner))]
 public class TutorialNPC : MonoBehaviour
 {
     [Header("Индексы диалогов в DialogueRunner.defaultDialogues")]
-    [Tooltip("Element 0 в defaultDialogues — 'Открой инвентарь'")]
     public int dialogueIndexOpenInventory = 0;
-
-    [Tooltip("Element 1 в defaultDialogues — 'Доставь письмо'")]
     public int dialogueIndexDeliverLetter = 1;
-
-    [Tooltip("Element 2 в defaultDialogues — прощание")]
     public int dialogueIndexFarewell = 2;
 
     [Header("Движение")]
     public float stopDistance = 2.2f;
 
+    [Header("Уход после туториала")]
+    [Tooltip("Точка куда NPC уйдёт после прощального диалога")]
+    public Transform exitPoint;
+    [Tooltip("Расстояние до exitPoint при котором NPC считается дошедшим")]
+    public float exitStopDistance = 0.5f;
+
     private NavMeshAgent agent;
     private DialogueRunner dialogueRunner;
     private NPCBehaviour npcBehaviour;
     private bool isApproaching = false;
+
+    void Start()
+    {
+        if (exitPoint == null)
+        {
+            GameObject obj = GameObject.FindGameObjectWithTag("TutorialExit");
+
+            if (obj != null)
+            {
+                exitPoint = obj.transform;
+            }
+            else
+            {
+                Debug.LogError("TutorialExit point not found!");
+            }
+        }
+    }
 
     void Awake()
     {
@@ -55,26 +61,23 @@ public class TutorialNPC : MonoBehaviour
         {
             int count = dialogueRunner.defaultDialogues != null ? dialogueRunner.defaultDialogues.Length : 0;
             Debug.Log($"[TutorialNPC] defaultDialogues.Length={count}");
-
             if (count == 0)
-                Debug.LogError("[TutorialNPC] defaultDialogues пуст! Заполни диалоги в DialogueRunner на префабе TutorialNPC.");
+                Debug.LogError("[TutorialNPC] defaultDialogues пуст!");
         }
         else
         {
-            Debug.LogError("[TutorialNPC] DialogueRunner не найден на объекте!");
+            Debug.LogError("[TutorialNPC] DialogueRunner не найден!");
         }
     }
 
-    // ── Движение к игроку ──────────────────────────────────
+    // ── Движение к игроку ─────────────────────────────────
 
     public void ApproachPlayer()
     {
         Debug.Log($"[TutorialNPC] ApproachPlayer. isApproaching={isApproaching}");
         if (isApproaching) return;
-
         isApproaching = true;
 
-        // Останавливаем обычное патрулирование
         if (npcBehaviour != null)
         {
             npcBehaviour.dialogueActive = true;
@@ -93,7 +96,7 @@ public class TutorialNPC : MonoBehaviour
 
         if (!agent.isOnNavMesh)
         {
-            Debug.LogError("[TutorialNPC] NPC не на NavMesh! Проверь точку спавна.");
+            Debug.LogError("[TutorialNPC] NPC не на NavMesh!");
             yield break;
         }
 
@@ -105,7 +108,6 @@ public class TutorialNPC : MonoBehaviour
             if (player == null) yield break;
 
             float dist = Vector3.Distance(transform.position, player.transform.position);
-
             frame++;
             if (frame % 60 == 0)
                 Debug.Log($"[TutorialNPC] Дистанция до игрока: {dist:F1} / {stopDistance}");
@@ -114,7 +116,6 @@ public class TutorialNPC : MonoBehaviour
             {
                 agent.isStopped = true;
 
-                // Повернуться к игроку
                 Vector3 dir = (player.transform.position - transform.position).normalized;
                 dir.y = 0f;
                 if (dir != Vector3.zero)
@@ -133,7 +134,7 @@ public class TutorialNPC : MonoBehaviour
         }
     }
 
-    // ── Диалоги ────────────────────────────────────────────
+    // ── Диалоги ───────────────────────────────────────────
 
     public void ShowDialogue(TutorialDialogueType type)
     {
@@ -153,45 +154,30 @@ public class TutorialNPC : MonoBehaviour
 
         if (dialogueRunner.defaultDialogues == null || index >= dialogueRunner.defaultDialogues.Length)
         {
-            Debug.LogError($"[TutorialNPC] Диалог с индексом {index} не существует! " +
-                           $"defaultDialogues.Length={dialogueRunner.defaultDialogues?.Length ?? 0}. " +
-                           $"Добавь нужные DialogueScriptableObject в DialogueRunner.");
+            Debug.LogError($"[TutorialNPC] Диалог {index} не существует! Length={dialogueRunner.defaultDialogues?.Length ?? 0}");
             return;
         }
 
-        Debug.Log($"[TutorialNPC] ShowDialogue({type}) → index={index}, " +
-                  $"диалог='{dialogueRunner.defaultDialogues[index].name}'");
+        Debug.Log($"[TutorialNPC] ShowDialogue({type}) → index={index}, диалог='{dialogueRunner.defaultDialogues[index].name}'");
 
-        // Если диалог уже запущен — принудительно закрываем
         if (dialogueRunner.IsDialogueActive)
         {
-            Debug.Log("[TutorialNPC] Диалог уже активен — закрываем перед новым");
+            Debug.Log("[TutorialNPC] Диалог активен — закрываем");
             dialogueRunner.ForceCloseDialogue();
         }
 
-        // Устанавливаем стартовый индекс и запускаем
-        // DialogueRunner.StartDialogue() начинает с currentDialogueIndex=0,
-        // поэтому нам нужно запустить нужный блок напрямую через Choose
-        dialogueRunner.StartDialogue(false);
-
-        // Если нужен не нулевой индекс — перематываем через Choose
         if (index > 0)
         {
-            // Форсируем переход к нужному блоку
-            // StartDialogue всегда начинает с 0, поэтому если нам нужен index 1 или 2
-            // — просто переставляем defaultDialogues так чтобы нужный был первым
-            // Это безопаснее чем ломать DialogueRunner
-            dialogueRunner.ForceCloseDialogue();
-
-            // Временно переставляем нужный диалог на первое место
             var temp = dialogueRunner.defaultDialogues[0];
             dialogueRunner.defaultDialogues[0] = dialogueRunner.defaultDialogues[index];
             dialogueRunner.defaultDialogues[index] = temp;
 
             dialogueRunner.StartDialogue(false);
-
-            // Возвращаем обратно после запуска (через кадр)
             StartCoroutine(RestoreDialogueOrder(index, temp));
+        }
+        else
+        {
+            dialogueRunner.StartDialogue(false);
         }
     }
 
@@ -206,19 +192,56 @@ public class TutorialNPC : MonoBehaviour
         }
     }
 
-    // ── Завершение туториала ───────────────────────────────
+    // ── Завершение туториала ──────────────────────────────
 
     public void OnTutorialComplete()
     {
         Debug.Log("[TutorialNPC] OnTutorialComplete");
         ShowDialogue(TutorialDialogueType.Farewell);
-        StartCoroutine(DisappearAfterDelay(6f));
+        StartCoroutine(WalkAwayAfterDialogue());
     }
 
-    private IEnumerator DisappearAfterDelay(float delay)
+    private IEnumerator WalkAwayAfterDialogue()
     {
-        yield return new WaitForSeconds(delay);
-        Debug.Log("[TutorialNPC] NPC исчезает");
+        // Ждём пока диалог закончится
+        yield return new WaitForSeconds(0.5f);
+        while (dialogueRunner.IsDialogueActive)
+            yield return new WaitForSeconds(0.2f);
+
+        Debug.Log("[TutorialNPC] Диалог завершён — идём к exitPoint");
+
+        if (exitPoint == null)
+        {
+            Debug.LogWarning("[TutorialNPC] exitPoint не назначен — просто исчезаем");
+            gameObject.SetActive(false);
+            yield break;
+        }
+
+        if (!agent.isOnNavMesh)
+        {
+            gameObject.SetActive(false);
+            yield break;
+        }
+
+        agent.isStopped = false;
+        agent.SetDestination(exitPoint.position);
+
+        // Идём к точке
+        while (true)
+        {
+            float dist = Vector3.Distance(transform.position, exitPoint.position);
+            if (dist <= exitStopDistance)
+                break;
+
+            // Если NavMesh не может дойти
+            if (!agent.pathPending && agent.remainingDistance < exitStopDistance)
+                break;
+
+            yield return new WaitForSeconds(0.15f);
+        }
+
+        agent.isStopped = true;
+        Debug.Log("[TutorialNPC] Дошли до exitPoint — исчезаем");
         gameObject.SetActive(false);
     }
 }

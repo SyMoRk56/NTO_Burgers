@@ -1,54 +1,66 @@
 ﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
+using UnityEngine.Video;
 
-/// <summary>
-/// Система 1 — Слайдшоу при старте НОВОГО слота сохранения.
-/// 
-/// Настройка в сцене:
-/// 1. Canvas → Panel (весь экран) → добавь этот компонент.
-/// 2. Добавь CanvasGroup на панель.
-/// 3. Назначь в инспекторе: slideImage, nextButton, skipButton.
-/// 4. Заполни массив slides[] спрайтами в нужном порядке.
-/// 5. SaveGameManager вызовет ShowSlideshow() при создании нового слота.
-/// </summary>
 public class TutorialSlideshowUI : MonoBehaviour
 {
     public static TutorialSlideshowUI Instance { get; private set; }
 
     [Header("UI")]
-    public Image slideImage;
-    public TextMeshProUGUI slideCaption;   // Опционально
-    public Button nextButton;
+    public RawImage videoDisplay;
     public Button skipButton;
-    public TextMeshProUGUI pageCounter;    // "1 / 5"
     public CanvasGroup canvasGroup;
 
-    [Header("Слайды")]
-    public Sprite[] slides;
-    public string[] captions;              // Опционально
+    [Header("Видео")]
+    [Tooltip("Название файла в папке Resources без расширения. Например: TutorialVideo")]
+    public string videoResourcePath = "TutorialVideo";
 
     [Header("Анимация")]
     [Range(0.1f, 1f)]
     public float fadeDuration = 0.35f;
 
-    private int currentIndex = 0;
+    private VideoPlayer videoPlayer;
+    private AudioSource videoAudio;
+    private RenderTexture renderTexture;
     private bool isShowing = false;
-
-    // ── Singleton ──────────────────────────────────────────
+    private bool initialized = false;
 
     void Awake()
     {
-        if (Instance == null) Instance = this;
-        else { Destroy(gameObject); return; }
+        if (Instance == null)
+        {
+            Instance = this;
+            Debug.Log("[Video] Awake — Instance создан");
+        }
+        else
+        {
+            Destroy(gameObject);
+            return;
+        }
 
+        InitVideoPlayer();
         gameObject.SetActive(false);
+    }
+
+    void InitVideoPlayer()
+    {
+        if (initialized) return;
+
+        videoAudio = gameObject.AddComponent<AudioSource>();
+        videoPlayer = gameObject.AddComponent<VideoPlayer>();
+        videoPlayer.playOnAwake = false;
+        videoPlayer.renderMode = VideoRenderMode.RenderTexture;
+        videoPlayer.audioOutputMode = VideoAudioOutputMode.AudioSource;
+        videoPlayer.SetTargetAudioSource(0, videoAudio);
+        videoPlayer.loopPointReached += OnVideoFinished;
+
+        initialized = true;
+        Debug.Log("[Video] VideoPlayer инициализирован");
     }
 
     void Start()
     {
-        nextButton?.onClick.AddListener(OnNextClicked);
         skipButton?.onClick.AddListener(OnSkipClicked);
     }
 
@@ -64,87 +76,96 @@ public class TutorialSlideshowUI : MonoBehaviour
 
     // ── Запуск ────────────────────────────────────────────
 
-    /// <summary>Вызывается SaveGameManager при создании нового слота.</summary>
     public void ShowSlideshow()
     {
+        Debug.Log($"[Video] ShowSlideshow. isShowing={isShowing}, initialized={initialized}");
         if (isShowing) return;
 
-        if (slides == null || slides.Length == 0)
+        // Убеждаемся что VideoPlayer создан
+        InitVideoPlayer();
+
+        // Загружаем видео из Resources
+        VideoClip clip = Resources.Load<VideoClip>(videoResourcePath);
+        if (clip == null)
         {
-            Debug.LogWarning("[Slideshow] Массив slides пуст! Заполни слайды в инспекторе.");
-            FinishSlideshow();
+            Debug.LogWarning($"[Video] Видео не найдено: Resources/{videoResourcePath}\n" +
+                             $"Убедись что файл лежит в Assets/Resources/ и имя указано без расширения.");
+            // Пропускаем видео — туториал продолжается без него
+            TutorialManager.Instance?.OnSlideshowFinished();
             return;
         }
 
         isShowing = true;
-        currentIndex = 0;
-
-        // Блокируем управление на время слайдшоу
         BlockPlayer(true);
 
-        gameObject.SetActive(true);
+        // Создаём RenderTexture
+        if (renderTexture != null) renderTexture.Release();
+        renderTexture = new RenderTexture((int)clip.width, (int)clip.height, 0);
+        videoPlayer.targetTexture = renderTexture;
 
+        if (videoDisplay != null)
+            videoDisplay.texture = renderTexture;
+        else
+            Debug.LogWarning("[Video] videoDisplay (RawImage) не назначен в инспекторе!");
+
+        videoPlayer.clip = clip;
+
+        // Активируем объект ПЕРЕД coroutine
+        gameObject.SetActive(true);
         if (canvasGroup != null) canvasGroup.alpha = 0f;
 
-        StartCoroutine(FadeIn(() => ShowSlide(0)));
+        Debug.Log($"[Video] Загружено: {clip.name} ({clip.width}x{clip.height}, {clip.length:F1}s)");
+        StartCoroutine(FadeInThenPlay());
     }
 
-    // ── Навигация по слайдам ───────────────────────────────
-
-    void ShowSlide(int index)
+    private IEnumerator FadeInThenPlay()
     {
-        currentIndex = index;
-        slideImage.sprite = slides[index];
-
-        // Подпись
-        if (slideCaption != null)
-        {
-            bool has = captions != null && index < captions.Length
-                       && !string.IsNullOrEmpty(captions[index]);
-            slideCaption.gameObject.SetActive(has);
-            if (has) slideCaption.text = captions[index];
-        }
-
-        // Счётчик страниц
-        if (pageCounter != null)
-            pageCounter.text = $"{index + 1} / {slides.Length}";
-
-        // На последнем слайде кнопка "Далее" → "Играть"
-        if (nextButton != null)
-        {
-            var lbl = nextButton.GetComponentInChildren<TextMeshProUGUI>();
-            if (lbl != null)
-                lbl.text = (index == slides.Length - 1) ? "Играть" : "Далее →";
-        }
+        yield return StartCoroutine(Fade(0f, 1f));
+        videoPlayer.Play();
+        Debug.Log("[Video] Воспроизведение началось");
     }
 
-    void OnNextClicked()
-    {
-        if (currentIndex < slides.Length - 1)
-            StartCoroutine(CrossfadeTo(currentIndex + 1));
-        else
-            StartCoroutine(FadeOut(FinishSlideshow));
-    }
+    // ── Кнопка пропустить ─────────────────────────────────
 
     void OnSkipClicked()
     {
-        StartCoroutine(FadeOut(FinishSlideshow));
+        Debug.Log("[Video] Пропустить");
+        if (videoPlayer != null) videoPlayer.Stop();
+        StartCoroutine(Fade(1f, 0f, FinishVideo));
     }
 
-    void FinishSlideshow()
-    {
-        isShowing = false;
-        gameObject.SetActive(false);
+    // ── Видео закончилось ─────────────────────────────────
 
+    void OnVideoFinished(VideoPlayer vp)
+    {
+        Debug.Log("[Video] Видео закончилось");
+        StartCoroutine(Fade(1f, 0f, FinishVideo));
+    }
+
+    // ── Завершение ────────────────────────────────────────
+
+    void FinishVideo()
+    {
+        Debug.Log("[Video] FinishVideo");
+        isShowing = false;
+
+        if (videoPlayer != null) videoPlayer.Stop();
+
+        if (renderTexture != null)
+        {
+            renderTexture.Release();
+            renderTexture = null;
+        }
+
+        if (videoDisplay != null) videoDisplay.texture = null;
+
+        gameObject.SetActive(false);
         BlockPlayer(false);
 
-        // Уведомляем TutorialManager
         TutorialManager.Instance?.OnSlideshowFinished();
-
-        Debug.Log("[Slideshow] Завершено");
     }
 
-    // ── Блокировка игрока ──────────────────────────────────
+    // ── Блокировка игрока ─────────────────────────────────
 
     void BlockPlayer(bool block)
     {
@@ -152,65 +173,25 @@ public class TutorialSlideshowUI : MonoBehaviour
         if (player == null) return;
         var pm = player.GetComponent<PlayerManager>();
         if (pm == null) return;
-        pm.ShowCursor(block);
         pm.CanMove = !block;
+        Cursor.lockState = block ? CursorLockMode.None : CursorLockMode.Locked;
+        Cursor.visible = block;
     }
 
-    // ── Анимации ──────────────────────────────────────────
+    // ── Fade ──────────────────────────────────────────────
 
-    IEnumerator CrossfadeTo(int nextIndex)
+    IEnumerator Fade(float from, float to, System.Action onDone = null)
     {
-        yield return FadeImageAlpha(0f, fadeDuration * 0.5f);
-        ShowSlide(nextIndex);
-        yield return FadeImageAlpha(1f, fadeDuration * 0.5f);
-    }
-
-    IEnumerator FadeIn(System.Action onDone = null)
-    {
-        if (canvasGroup != null)
-        {
-            float t = 0f;
-            while (t < fadeDuration)
-            {
-                t += Time.unscaledDeltaTime;
-                canvasGroup.alpha = Mathf.Clamp01(t / fadeDuration);
-                yield return null;
-            }
-            canvasGroup.alpha = 1f;
-        }
-        onDone?.Invoke();
-    }
-
-    IEnumerator FadeOut(System.Action onDone = null)
-    {
-        if (canvasGroup != null)
-        {
-            float t = fadeDuration;
-            while (t > 0f)
-            {
-                t -= Time.unscaledDeltaTime;
-                canvasGroup.alpha = Mathf.Clamp01(t / fadeDuration);
-                yield return null;
-            }
-            canvasGroup.alpha = 0f;
-        }
-        onDone?.Invoke();
-    }
-
-    IEnumerator FadeImageAlpha(float target, float duration)
-    {
-        if (slideImage == null) yield break;
-        Color c = slideImage.color;
-        float start = c.a;
+        if (canvasGroup == null) { onDone?.Invoke(); yield break; }
+        canvasGroup.alpha = from;
         float t = 0f;
-        while (t < duration)
+        while (t < fadeDuration)
         {
             t += Time.unscaledDeltaTime;
-            c.a = Mathf.Lerp(start, target, t / duration);
-            slideImage.color = c;
+            canvasGroup.alpha = Mathf.Lerp(from, to, t / fadeDuration);
             yield return null;
         }
-        c.a = target;
-        slideImage.color = c;
+        canvasGroup.alpha = to;
+        onDone?.Invoke();
     }
 }

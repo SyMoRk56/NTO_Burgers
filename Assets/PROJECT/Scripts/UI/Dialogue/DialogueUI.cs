@@ -1,4 +1,4 @@
-using UnityEngine;
+п»їusing UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 using System.Collections;
@@ -25,7 +25,7 @@ public class DialogueUI : MonoBehaviour
 
     public void ShowPhrase(string name, string text)
     {
-        // ОЧИЩАЕМ всё перед показом новой фразы
+        // РћР§РР©РђР•Рњ РІСЃС‘ РїРµСЂРµРґ РїРѕРєР°Р·РѕРј РЅРѕРІРѕР№ С„СЂР°Р·С‹
         if (typeCoroutine != null)
         {
             StopCoroutine(typeCoroutine);
@@ -35,11 +35,11 @@ public class DialogueUI : MonoBehaviour
         ClearChoices();
         gameObject.SetActive(true);
 
-        // Очищаем текст
+        // РћС‡РёС‰Р°РµРј С‚РµРєСЃС‚
         phraseText.text = "";
         nameText.text = LocalizationManager.Instance.Get(name);
 
-        // Запускаем печать текста
+        // Р—Р°РїСѓСЃРєР°РµРј РїРµС‡Р°С‚СЊ С‚РµРєСЃС‚Р°
         typeCoroutine = StartCoroutine(TypeText(LocalizationManager.Instance.Get(text)));
     }
 
@@ -78,7 +78,7 @@ public class DialogueUI : MonoBehaviour
     {
         print("Hide dialogue");
 
-        // Останавливаем печать текста
+        // РћСЃС‚Р°РЅР°РІР»РёРІР°РµРј РїРµС‡Р°С‚СЊ С‚РµРєСЃС‚Р°
         if (typeCoroutine != null)
         {
             StopCoroutine(typeCoroutine);
@@ -94,7 +94,7 @@ public class DialogueUI : MonoBehaviour
         GameManager.Instance.GetPlayer().GetComponent<PlayerManager>().ShowCursor(false);
     }
 
-    // ДОБАВЛЕНО: метод для принудительного скрытия
+    // Р”РћР‘РђР’Р›Р•РќРћ: РјРµС‚РѕРґ РґР»СЏ РїСЂРёРЅСѓРґРёС‚РµР»СЊРЅРѕРіРѕ СЃРєСЂС‹С‚РёСЏ
     public void ForceHide()
     {
         print("ForceHide dialogue");

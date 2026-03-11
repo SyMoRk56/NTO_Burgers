@@ -4,11 +4,11 @@ using UnityEngine;
 public enum TutorialStep
 {
     None = 0,
-    WaitForNPCSpawn = 1,  // Слайдшоу показано, ждём выхода из дома
-    WaitForNPCApproach = 2,  // NPC заспавнен, идёт к игроку
-    WaitForInventoryOpen = 3,// NPC заговорил "открой инвентарь"
-    WaitForLetterRead = 4,  // Инвентарь открыт, ждём прочтения письма
-    WaitForDelivery = 5,  // Письмо прочитано, ждём доставки
+    WaitForNPCSpawn = 1,
+    WaitForNPCApproach = 2,
+    WaitForInventoryOpen = 3,
+    WaitForLetterRead = 4,
+    WaitForDelivery = 5,
     Completed = 99
 }
 
@@ -17,9 +17,7 @@ public class TutorialManager : MonoBehaviour
     public static TutorialManager Instance { get; private set; }
 
     [Header("Туториальный NPC")]
-    [Tooltip("Префаб туториального NPC")]
     public GameObject tutorialNPCPrefab;
-    [Tooltip("Точка спавна — рядом с выходом из дома")]
     public Transform npcSpawnPoint;
 
     [Header("Hint UI")]
@@ -34,20 +32,12 @@ public class TutorialManager : MonoBehaviour
     private bool tutorialCompleted = false;
     private TutorialNPC spawnedNPC;
 
-    // ── Singleton ──────────────────────────────────────────
-
     void Awake()
     {
         if (Instance == null) Instance = this;
         else { Destroy(gameObject); return; }
     }
 
-    // ── Запуск нового слота ────────────────────────────────
-
-    /// <summary>
-    /// Вызывается SaveGameManager при создании НОВОГО слота.
-    /// Запускает слайдшоу; после него ждём выхода из дома.
-    /// </summary>
     public void StartTutorialForNewSlot()
     {
         if (tutorialCompleted) return;
@@ -60,20 +50,11 @@ public class TutorialManager : MonoBehaviour
             Debug.LogWarning("[Tutorial] TutorialSlideshowUI не найден!");
     }
 
-    // ── Вызов из TutorialSlideshowUI ──────────────────────
-
-    /// <summary>Слайдшоу закрыто — теперь ждём триггера двери.</summary>
     public void OnSlideshowFinished()
     {
-        // Шаг уже WaitForNPCSpawn, просто логируем
         Debug.Log("[Tutorial] Слайдшоу завершено — ждём выхода из дома");
     }
 
-    // ── Триггер двери дома ─────────────────────────────────
-
-    /// <summary>
-    /// Вызывается HouseExitTrigger когда игрок вышел из дома.
-    /// </summary>
     public void OnPlayerExitedHouse()
     {
         if (CurrentStep != TutorialStep.WaitForNPCSpawn) return;
@@ -84,9 +65,6 @@ public class TutorialManager : MonoBehaviour
         SaveProgress();
     }
 
-    // ── События от игровых систем ──────────────────────────
-
-    /// <summary>TutorialNPC вызывает, когда подошёл к игроку и начал диалог.</summary>
     public void OnNPCReachedPlayer()
     {
         if (CurrentStep != TutorialStep.WaitForNPCApproach) return;
@@ -95,10 +73,6 @@ public class TutorialManager : MonoBehaviour
         SaveProgress();
     }
 
-    /// <summary>
-    /// Добавь в метод открытия инвентаря:
-    ///   TutorialManager.Instance?.OnInventoryOpened();
-    /// </summary>
     public void OnInventoryOpened()
     {
         if (CurrentStep != TutorialStep.WaitForInventoryOpen) return;
@@ -108,11 +82,6 @@ public class TutorialManager : MonoBehaviour
         SaveProgress();
     }
 
-    /// <summary>
-    /// Добавь в ShowLetter(mail):
-    ///   if (mail.id == TutorialManager.Instance?.tutorialMailId)
-    ///       TutorialManager.Instance.OnTutorialLetterRead();
-    /// </summary>
     public void OnTutorialLetterRead()
     {
         if (CurrentStep != TutorialStep.WaitForLetterRead) return;
@@ -123,19 +92,12 @@ public class TutorialManager : MonoBehaviour
         SaveProgress();
     }
 
-    /// <summary>
-    /// Добавь в MailManager.SetDelivered():
-    ///   if (delivered && mailId == TutorialManager.Instance?.tutorialMailId)
-    ///       TutorialManager.Instance.OnTutorialLetterDelivered();
-    /// </summary>
     public void OnTutorialLetterDelivered()
     {
         if (CurrentStep != TutorialStep.WaitForDelivery) return;
         Debug.Log("[Tutorial] Письмо доставлено — туториал завершён!");
         CompleteTutorial();
     }
-
-    // ── Завершение ─────────────────────────────────────────
 
     private void CompleteTutorial()
     {
@@ -146,9 +108,6 @@ public class TutorialManager : MonoBehaviour
         SaveProgress();
     }
 
-    // ── Загрузка сохранения ────────────────────────────────
-
-    /// <summary>Вызывается SaveGameManager.LoadFromJson() в конце загрузки.</summary>
     public void LoadTutorialState(TutorialSaveData saveData)
     {
         if (saveData == null) return;
@@ -165,7 +124,6 @@ public class TutorialManager : MonoBehaviour
 
         TutorialStep restored = (TutorialStep)saveData.currentStep;
         Debug.Log($"[Tutorial] Восстанавливаем стадию: {restored}");
-        // Откладываем на кадр — сцена должна полностью загрузиться
         StartCoroutine(ResumeNextFrame(restored));
     }
 
@@ -182,7 +140,7 @@ public class TutorialManager : MonoBehaviour
         switch (step)
         {
             case TutorialStep.WaitForNPCSpawn:
-                // Слайдшоу уже было — просто ждём триггера двери
+                // Просто ждём выхода из дома
                 break;
 
             case TutorialStep.WaitForNPCApproach:
@@ -190,8 +148,8 @@ public class TutorialManager : MonoBehaviour
                 break;
 
             case TutorialStep.WaitForInventoryOpen:
+                // NPC уже говорил — просто спавним рядом и показываем подсказку
                 SpawnAtPositionIfNeeded();
-                spawnedNPC?.ShowDialogue(TutorialDialogueType.OpenInventory);
                 hintUI?.ShowInventoryHint();
                 break;
 
@@ -201,14 +159,12 @@ public class TutorialManager : MonoBehaviour
                 break;
 
             case TutorialStep.WaitForDelivery:
+                // NPC уже говорил — просто спавним рядом и показываем подсказку
                 SpawnAtPositionIfNeeded();
-                spawnedNPC?.ShowDialogue(TutorialDialogueType.DeliverLetter);
                 hintUI?.ShowDeliveryHint(tutorialRecipientNpcId);
                 break;
         }
     }
-
-    // ── Спавн NPC ──────────────────────────────────────────
 
     private void SpawnAndApproach()
     {
@@ -219,7 +175,7 @@ public class TutorialManager : MonoBehaviour
     private void SpawnAtPositionIfNeeded()
     {
         if (spawnedNPC != null) return;
-        SpawnNPC(); // NPC появляется рядом, не идёт к игроку
+        SpawnNPC();
     }
 
     private TutorialNPC SpawnNPC()
@@ -235,15 +191,14 @@ public class TutorialManager : MonoBehaviour
             : GameManager.Instance.GetPlayer().transform.position + Vector3.forward * 4f;
 
         GameObject obj = Instantiate(tutorialNPCPrefab, pos, Quaternion.identity);
+        obj.SetActive(true);
         spawnedNPC = obj.GetComponent<TutorialNPC>();
 
         if (spawnedNPC == null)
             Debug.LogError("[Tutorial] На префабе NPC нет компонента TutorialNPC!");
 
         return spawnedNPC;
-    }
-
-    // ── Утилиты ────────────────────────────────────────────
+    }   
 
     private void SetStep(TutorialStep step)
     {
