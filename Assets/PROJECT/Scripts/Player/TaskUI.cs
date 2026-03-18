@@ -1,5 +1,6 @@
 ﻿using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class TaskUI : MonoBehaviour
 {
@@ -10,7 +11,7 @@ public class TaskUI : MonoBehaviour
     public TMP_Text reciever;
     [SerializeField] TMP_Text adress;
     public TMP_Text countText;
-
+    public Image bagButton; // ← назначь Image сумки в инспекторе
 
     public bool hasBag = false;
     private bool isOpen = false;
@@ -22,6 +23,10 @@ public class TaskUI : MonoBehaviour
         taskPanel.SetActive(false);
         LocalizationManager.Instance.OnLanguageChanged += UpdateText;
         reciever.text = "";
+
+        // Скрываем сумку по умолчанию
+        if (bagButton != null)
+            bagButton.gameObject.SetActive(false);
     }
 
     private void Update()
@@ -32,14 +37,18 @@ public class TaskUI : MonoBehaviour
             ClosePanel();
     }
 
+    public void SetHasBag(bool value)
+    {
+        hasBag = value;
+        if (bagButton != null)
+            bagButton.gameObject.SetActive(value);
+    }
+
     public void TogglePanel()
     {
         if (!hasBag) return;
-
-        if (isOpen)
-            ClosePanel();
-        else
-            OpenPanel();
+        if (isOpen) ClosePanel();
+        else OpenPanel();
     }
 
     public void OpenPanel()
@@ -49,11 +58,8 @@ public class TaskUI : MonoBehaviour
         Cursor.visible = true;
         PlayerManager.instance.CanMove = false;
         isOpen = true;
-
         if (AdressListMenu.Instance != null)
             AdressListMenu.Instance.SetVisible(false);
-
-        // Заполняем панель письмами
         if (TaskPanel.Instance != null)
             TaskPanel.Instance.Populate();
     }
@@ -65,11 +71,8 @@ public class TaskUI : MonoBehaviour
         Cursor.visible = false;
         PlayerManager.instance.CanMove = true;
         isOpen = false;
-
         if (AdressListMenu.Instance != null)
             AdressListMenu.Instance.SetVisible(true);
-
-        // Чистим панель
         if (TaskPanel.Instance != null)
             TaskPanel.Instance.Clear();
     }

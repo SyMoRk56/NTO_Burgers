@@ -4,9 +4,9 @@ using UnityEngine;
 public class TaskManager : MonoBehaviour
 {
     public static TaskManager Instance;
-
     public List<Task> tasks = new();
     public MailCatalog mailCatalog;
+
     private void Awake()
     {
         if (Instance == this)
@@ -21,9 +21,10 @@ public class TaskManager : MonoBehaviour
             Destroy(Instance.gameObject);
             Instance = this;
         }
+
         tasks = new();
         var m = mailCatalog.mails;
-        foreach(var n in m)
+        foreach (var n in m)
         {
             tasks.Add(new Task(n.reciever, n.adress, n.id));
         }
@@ -31,7 +32,6 @@ public class TaskManager : MonoBehaviour
 
     public void AddTask(string recieverName, string adress, string id)
     {
-        // Проверяем, нет ли уже такого задания
         if (!tasks.Exists(task => task.id == id))
         {
             tasks.Add(new Task(recieverName, adress, id));
@@ -58,7 +58,6 @@ public class TaskManager : MonoBehaviour
         }
     }
 
-    // Метод для проверки состояния
     public void DebugState()
     {
         Debug.Log($"=== СОСТОЯНИЕ TASKMANAGER ===");
