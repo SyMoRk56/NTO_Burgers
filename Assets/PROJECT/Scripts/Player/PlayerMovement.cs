@@ -69,6 +69,8 @@ public class PlayerMovement : MonoBehaviour
     public bool isFishing = false; 
 
     public PhysicsMaterial mat;
+
+    public float animSpeed = 1;
     void Start()
     {
         terrainData = terrain.terrainData;

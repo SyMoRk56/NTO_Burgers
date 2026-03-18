@@ -1754,7 +1754,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -47.607666, y: -50}
+  m_AnchoredPosition: {x: -47.60742, y: -50}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1391048329
@@ -4003,6 +4003,10 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 2040623153}
+    - target: {fileID: 1406764397183417709, guid: 7730c46cd64a73f4e9ebf05eb65a55af, type: 3}
+      propertyPath: m_Color.a
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3615587744091590460, guid: 7730c46cd64a73f4e9ebf05eb65a55af, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -4282,6 +4286,10 @@ PrefabInstance:
       objectReference: {fileID: 2040623153}
     - target: {fileID: 7482189524415027627, guid: a22f0f7f0406b8f40a34e00ca73a32a0, type: 3}
       propertyPath: m_hasFontAssetChanged
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8438348253408062722, guid: a22f0f7f0406b8f40a34e00ca73a32a0, type: 3}
+      propertyPath: m_Color.a
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8935878452436183035, guid: a22f0f7f0406b8f40a34e00ca73a32a0, type: 3}
