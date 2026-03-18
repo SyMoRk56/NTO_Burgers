@@ -17,6 +17,7 @@ public class PlayerMovement : MonoBehaviour
     public Transform cameraTransform;
     public float maxViewAngle = 85f;
     public LayerMask groundLayer;
+    public float animSpeed = 1;
 
     public PlayerAnimations animScript;
 
@@ -234,7 +235,7 @@ public class PlayerMovement : MonoBehaviour
         currentVelocity.y = rb.linearVelocity.y;
         rb.linearVelocity = currentVelocity;
 
-        animScript.anim.SetFloat("MoveSpeed", !isRunning ? 1 : runSpeed / walkSpeed);
+        animScript.anim.SetFloat("MoveSpeed", (!isRunning ? 1 : runSpeed / walkSpeed) * animSpeed);
     }
 
     void ApplyFriction()
