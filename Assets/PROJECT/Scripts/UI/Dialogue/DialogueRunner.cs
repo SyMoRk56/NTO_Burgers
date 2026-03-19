@@ -33,6 +33,7 @@ public class DialogueRunner : MonoBehaviour, IInteractObject
     private FlowerTriggerHandler flowerHandler;
     private bool wasApplePhraseSpoken = false;
 
+
     void Start()
     {
         benchScene = GetComponent<Bench>();
@@ -53,11 +54,7 @@ public class DialogueRunner : MonoBehaviour, IInteractObject
 
         if (dialogueUI != null)
         {
-            var btn = dialogueUI.transform.GetChild(0).GetComponent<Button>();
-            if (btn != null)
-                btn.onClick.AddListener(() => NextPhrase());
-            else
-                Debug.LogWarning($"[DialogueRunner] Кнопка не найдена на {gameObject.name}");
+            dialogueUI.transform.GetChild(0).GetComponent<Button>().onClick.AddListener(() => CheckSkip());
         }
 
         if (audioSource == null)
@@ -94,10 +91,22 @@ public class DialogueRunner : MonoBehaviour, IInteractObject
         var block = isLetter ? letterDialogues[currentDialogueIndex] : defaultDialogues[currentDialogueIndex];
         bool isAtChoicePoint = currentPhraseIndex >= block.phrases.Length;
 
-        if (!isChoosing && !isAtChoicePoint &&
-           (Input.GetKeyDown(KeyCode.Space) ||
-            Input.GetKeyDown(KeyCode.E) ||
-            Input.GetMouseButtonDown(0)))
+        if (!isChoosing &&
+   (Input.GetKeyDown(KeyCode.Space) ||
+    Input.GetKeyDown(KeyCode.E)))
+        {
+            CheckSkip();
+        }
+
+    }
+
+    private void CheckSkip()
+    {
+        if (dialogueUI.IsTyping)
+        {
+            dialogueUI.CompleteTypingInstantly();
+        }
+        else
         {
             NextPhrase();
         }
