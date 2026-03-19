@@ -17,7 +17,6 @@ public class PlayerMovement : MonoBehaviour
     public Transform cameraTransform;
     public float maxViewAngle = 85f;
     public LayerMask groundLayer;
-    public float animSpeed = 1;
 
     public PlayerAnimations animScript;
 

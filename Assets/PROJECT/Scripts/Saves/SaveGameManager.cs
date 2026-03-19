@@ -487,15 +487,4 @@ public class SaveGameManager : MonoBehaviour
             Debug.LogError($"Error deleting save '{saveName}': {ex.Message}");
         }
     }
-    public bool HasSaves()
-    {
-        string manualFolder = Path.Combine(saveFolder, "manual");
-
-        if (!Directory.Exists(manualFolder))
-            return false;
-
-        string[] saveFiles = Directory.GetFiles(manualFolder, "*.json");
-
-        return saveFiles.Length > 0;
-    }
 }
