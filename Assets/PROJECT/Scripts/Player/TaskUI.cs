@@ -11,11 +11,16 @@ public class TaskUI : MonoBehaviour
     public TMP_Text reciever;
     [SerializeField] TMP_Text adress;
     public TMP_Text countText;
-    public Image bagButton; // ← назначь Image сумки в инспекторе
+    public Image bagButton;
 
     public bool hasBag = false;
     private bool isOpen = false;
     private string adressT;
+
+    // Для логики зажатия Tab
+    private float tabHoldTime = 0f;
+    private bool tabWasHeld = false;
+    private const float HOLD_THRESHOLD = 0.3f; // секунд до считания "долгого" зажатия
 
     private void Awake()
     {
@@ -24,15 +29,46 @@ public class TaskUI : MonoBehaviour
         LocalizationManager.Instance.OnLanguageChanged += UpdateText;
         reciever.text = "";
 
-        // Скрываем сумку по умолчанию
         if (bagButton != null)
             bagButton.gameObject.SetActive(false);
     }
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Tab))
-            TogglePanel();
+        if (!hasBag) return;
+
+        // Зажали Tab
+        if (Input.GetKey(KeyCode.Tab))
+        {
+            tabHoldTime += Time.deltaTime;
+
+            // Долгое зажатие — открываем если ещё не открыто
+            if (tabHoldTime >= HOLD_THRESHOLD && !isOpen)
+            {
+                tabWasHeld = true;
+                OpenPanel();
+            }
+        }
+
+        // Отпустили Tab
+        if (Input.GetKeyUp(KeyCode.Tab))
+        {
+            if (tabWasHeld)
+            {
+                // Долго держали — закрываем при отпускании
+                if (isOpen) ClosePanel();
+            }
+            else
+            {
+                // Короткое нажатие — переключаем
+                if (isOpen) ClosePanel();
+                else OpenPanel();
+            }
+
+            tabHoldTime = 0f;
+            tabWasHeld = false;
+        }
+
         if (isOpen && Input.GetKeyDown(KeyCode.Escape))
             ClosePanel();
     }
@@ -42,13 +78,6 @@ public class TaskUI : MonoBehaviour
         hasBag = value;
         if (bagButton != null)
             bagButton.gameObject.SetActive(value);
-    }
-
-    public void TogglePanel()
-    {
-        if (!hasBag) return;
-        if (isOpen) ClosePanel();
-        else OpenPanel();
     }
 
     public void OpenPanel()
