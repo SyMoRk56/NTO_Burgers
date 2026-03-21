@@ -11,7 +11,7 @@ public class PickupItem : MonoBehaviour, IInteractObject
     public bool CheckInteract()
     {
         print("PickupItem check interact");
-        SetParent(false);
+        
         return true;
     }
 
@@ -22,6 +22,7 @@ public class PickupItem : MonoBehaviour, IInteractObject
 
     private void SetParent(bool parented)
     {
+        Debug.LogWarning("Set parent" + parented + "  " + Time.time);
         this.parented = parented;
         transform.SetParent(!parented ? null : PlayerManager.instance.hand);
         if (parented)

@@ -3670,6 +3670,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: -1613736363518323148, guid: 31863cb3242860047bf1ead585d6dd09, type: 2}
     - target: {fileID: 5753725550323785935, guid: 0910cd8d95f59a742a5e020e2f8b9ddb, type: 3}
+      propertyPath: controller
+      value: 
+      objectReference: {fileID: 763870815}
+    - target: {fileID: 5753725550323785935, guid: 0910cd8d95f59a742a5e020e2f8b9ddb, type: 3}
       propertyPath: thunderMaterial
       value: 
       objectReference: {fileID: -876546973899608171, guid: 97961ee99a89ac540bf3217e674d6d77, type: 3}
@@ -4663,6 +4667,17 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 27.928, y: 51.522, z: 4.281}
+--- !u!114 &763870815 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7472569415089433359, guid: 0910cd8d95f59a742a5e020e2f8b9ddb, type: 3}
+  m_PrefabInstance: {fileID: 581461770}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 505ddf3e0ecad9743a1e9fdf8bbe3b53, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CameraController
 --- !u!1 &765528534
 GameObject:
   m_ObjectHideFlags: 0
@@ -10620,8 +10635,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 0}
-  m_sharedMaterial: {fileID: 0}
+  m_fontAsset: {fileID: 11400000, guid: 5835d9e13f96986479bbb6ccc776bb40, type: 2}
+  m_sharedMaterial: {fileID: 3835519015574581668, guid: 5835d9e13f96986479bbb6ccc776bb40, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -10717,7 +10732,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 0}
+  - {fileID: 3835519015574581668, guid: 5835d9e13f96986479bbb6ccc776bb40, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -13435,7 +13450,7 @@ ParticleSystem:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-  moveWithTransform: 0
+  moveWithTransform: 1
   moveWithCustomTransform: {fileID: 0}
   scalingMode: 1
   randomSeed: 0
@@ -25133,7 +25148,7 @@ MonoBehaviour:
   fishFlyDuration: 1
   minFishSize: 0.93
   maxFishSize: 1.19
-  cooldownDuration: 30
+  cooldownDuration: 5
   activeColor: {r: 1, g: 1, b: 1, a: 1}
   cooldownColor: {r: 1, g: 0, b: 0, a: 1}
   isFishingEnding: 0

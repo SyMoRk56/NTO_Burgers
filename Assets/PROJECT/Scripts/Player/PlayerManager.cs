@@ -9,7 +9,8 @@ public class PlayerManager : MonoBehaviour
     bool canMove = true;
     public static PlayerManager instance;
     public Transform hand;
-    public bool CanMove { get { return canMove; } set { print("Set can move: " + value); cinemachineCamera.GetComponent<CinemachineInputAxisController>().enabled = value; canMove = value; GetComponentInChildren<CameraController>().enabled = value; } }
+    public CameraController controller;
+    public bool CanMove { get { return canMove; } set { print("Set can move: " + value); cinemachineCamera.GetComponent<CinemachineInputAxisController>().enabled = value; canMove = value; controller.enabled = value; } }
 
     private void Awake()
     {

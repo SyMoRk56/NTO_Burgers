@@ -67,6 +67,7 @@ public class InteractionUI : MonoBehaviour
 
     private void Update()
     {
+        transform.rotation = Quaternion.identity;
         if (!playerInRange || player == null)
         {
             HideAllPopups();
