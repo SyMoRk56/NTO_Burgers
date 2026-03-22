@@ -15,6 +15,7 @@ public class InteractionUI : MonoBehaviour
     private bool playerInRange = false;
     private Transform player;
     IInteractObject io;
+    public bool needToLockRotation;
     private void Start()
     {
         io = GetComponentInParent<IInteractObject>();
@@ -36,9 +37,10 @@ public class InteractionUI : MonoBehaviour
             Vector3.one.y / parentScale.y,
             Vector3.one.z / parentScale.z
         );
+
+        print(transform.lossyScale);
         HideAllPopups();
     }
-
     private void OnTriggerEnter(Collider other)
     {
         if (!other.CompareTag("Player"))
@@ -67,7 +69,7 @@ public class InteractionUI : MonoBehaviour
 
     private void Update()
     {
-        transform.rotation = Quaternion.identity;
+        if(needToLockRotation)transform.rotation = Quaternion.identity;
         if (!playerInRange || player == null)
         {
             HideAllPopups();

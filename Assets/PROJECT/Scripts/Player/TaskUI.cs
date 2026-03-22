@@ -31,7 +31,7 @@ public class TaskUI : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Tab))
+        if (Input.GetKeyDown(KeyCode.Tab) && PlayerManager.instance.CanMove)
             TogglePanel();
         if (isOpen && Input.GetKeyDown(KeyCode.Escape))
             ClosePanel();
