@@ -9,21 +9,24 @@ public class PlayerManager : MonoBehaviour
     bool canMove = true;
     public static PlayerManager instance;
     public Transform hand;
-    public bool CanMove { get { return canMove; } set { print("Set can move: " + value); cinemachineCamera.GetComponent<CinemachineInputAxisController>().enabled = value; canMove = value; GetComponentInChildren<CameraController>().enabled = value; } }
+    public bool CanMove { get { return canMove; } set { print("Set can move: " + value); if (cinemachineCamera != null) cinemachineCamera.GetComponent<CinemachineInputAxisController>().enabled = value; canMove = value; var cc = GetComponentInChildren<CameraController>(); if (cc != null) cc.enabled = value; } }
 
     private void Awake()
     {
         instance = this;
     }
+
     private void Start()
     {
         SetupComponents();
     }
+
     public void ShowCursor(bool show)
     {
         Cursor.lockState = show ? CursorLockMode.None : CursorLockMode.Locked;
         Cursor.visible = show;
     }
+
     #region Components
     public CameraSwitcher cameraSwitcher;
     public Face playerFace;
@@ -31,7 +34,7 @@ public class PlayerManager : MonoBehaviour
     public PlayerInteraction playerInteraction;
     public PlayerMailInventory playerMailInventory;
     public PlayerMovement playerMovement;
-    
+
     void SetupComponents()
     {
         cameraSwitcher = FindFirstObjectByType<CameraSwitcher>();
@@ -47,30 +50,25 @@ public class PlayerManager : MonoBehaviour
     private void Update()
     {
 #if UNITY_EDITOR
-        if (Input.GetKeyDown(KeyCode.I))
-        {
-            SetThunder(true);
-        }
-        if (Input.GetKeyDown(KeyCode.O))
-        {
-            SetThunder(false);
-        }
+        if (Input.GetKeyDown(KeyCode.I)) SetThunder(true);
+        if (Input.GetKeyDown(KeyCode.O)) SetThunder(false);
 #endif
     }
+
     [SerializeField] FullScreenPassRendererFeature feature;
+
     public void SetThunder(bool set)
     {
         print("Set Thunder");
         StartCoroutine(ThunderMaterialInOut(set));
     }
+
     IEnumerator ThunderMaterialInOut(bool IN)
     {
         var mat = feature.passMaterial;
         float start = mat.GetFloat("_FogDensity");
         float target = IN ? 1 : 0f;
-
         float t = 0f;
-
         while (t < 3)
         {
             t += Time.deltaTime;
@@ -79,7 +77,6 @@ public class PlayerManager : MonoBehaviour
             print("SET " + value);
             yield return null;
         }
-
         mat.SetFloat("_FogDensity", target);
     }
 }

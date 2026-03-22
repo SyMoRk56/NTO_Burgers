@@ -15,12 +15,12 @@ public class TaskUI : MonoBehaviour
 
     public bool hasBag = false;
     private bool isOpen = false;
+    private bool isReady = false; // блокируем ввод пока игра не загрузилась
     private string adressT;
 
-    // Для логики зажатия Tab
     private float tabHoldTime = 0f;
     private bool tabWasHeld = false;
-    private const float HOLD_THRESHOLD = 0.3f; // секунд до считания "долгого" зажатия
+    private const float HOLD_THRESHOLD = 0.3f;
 
     private void Awake()
     {
@@ -33,16 +33,39 @@ public class TaskUI : MonoBehaviour
             bagButton.gameObject.SetActive(false);
     }
 
+    private void Start()
+    {
+        StartCoroutine(RestoreAfterLoad());
+    }
+
+    private System.Collections.IEnumerator RestoreAfterLoad()
+    {
+        // Ждём пока PlayerManager полностью инициализируется
+        yield return new WaitForSeconds(2f);
+
+        var player = GameManager.Instance?.GetPlayer();
+        if (player != null)
+        {
+            foreach (Transform child in player.transform)
+            {
+                if (child.CompareTag("Bag"))
+                {
+                    SetHasBag(true);
+                    break;
+                }
+            }
+        }
+
+        isReady = true;
+    }
+
     private void Update()
     {
-        if (!hasBag) return;
+        if (!hasBag || !isReady) return;
 
-        // Зажали Tab
         if (Input.GetKey(KeyCode.Tab))
         {
             tabHoldTime += Time.deltaTime;
-
-            // Долгое зажатие — открываем если ещё не открыто
             if (tabHoldTime >= HOLD_THRESHOLD && !isOpen)
             {
                 tabWasHeld = true;
@@ -50,17 +73,14 @@ public class TaskUI : MonoBehaviour
             }
         }
 
-        // Отпустили Tab
         if (Input.GetKeyUp(KeyCode.Tab))
         {
             if (tabWasHeld)
             {
-                // Долго держали — закрываем при отпускании
                 if (isOpen) ClosePanel();
             }
             else
             {
-                // Короткое нажатие — переключаем
                 if (isOpen) ClosePanel();
                 else OpenPanel();
             }
@@ -82,6 +102,7 @@ public class TaskUI : MonoBehaviour
 
     public void OpenPanel()
     {
+        if (PlayerManager.instance == null) return;
         taskPanel.SetActive(true);
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
@@ -95,6 +116,7 @@ public class TaskUI : MonoBehaviour
 
     public void ClosePanel()
     {
+        if (PlayerManager.instance == null) return;
         taskPanel.SetActive(false);
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
