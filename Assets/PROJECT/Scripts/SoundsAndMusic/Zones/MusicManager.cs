@@ -10,19 +10,31 @@ public class MusicManager : MonoBehaviour
     public AudioClip defaultClip;
     public MusicMixer defaultMixer;
 
+    [Header("Fade Settings")]
+    public float fadeDuration = 3f;
+
+    [Header("Audio")]
+    public AudioMixerGroup group;
+
     private AudioSource audioSource;
 
     // текущие активные
     private AudioClip currentClip;
     private MusicMixer currentMixer;
-    public AudioMixerGroup group;
+
+    // цель перехода (ВАЖНО для защиты от спама)
+    private AudioClip targetClip;
+    private MusicMixer targetMixer;
+
+    private Coroutine transitionCoroutine;
 
     private void Awake()
     {
         Instance = this;
+
         audioSource = gameObject.AddComponent<AudioSource>();
         audioSource.loop = true;
-        audioSource.volume = .1f;
+        audioSource.volume = 0.1f;
         audioSource.outputAudioMixerGroup = group;
 
         if (defaultMixer != null) PlayMusic(defaultMixer);
@@ -35,18 +47,19 @@ public class MusicManager : MonoBehaviour
 
     public void PlayMusic(AudioClip clip)
     {
-        if (clip == currentClip)
+        // защита от постоянных вызовов
+        if (clip == currentClip || clip == targetClip)
             return;
 
-        SwitchInstant(clip, null);
+        SwitchSmooth(clip, null);
     }
 
     public void PlayMusic(MusicMixer mixer)
     {
-        if (mixer == currentMixer)
+        if (mixer == currentMixer || mixer == targetMixer)
             return;
 
-        SwitchInstant(null, mixer);
+        SwitchSmooth(null, mixer);
     }
 
     public void PlayDefault()
@@ -56,11 +69,36 @@ public class MusicManager : MonoBehaviour
     }
 
     // -----------------------------
-    //      Переключение без fade
+    //      Плавное переключение
     // -----------------------------
-    private void SwitchInstant(AudioClip newClip, MusicMixer newMixer)
+
+    private void SwitchSmooth(AudioClip newClip, MusicMixer newMixer)
     {
-        // стоп старого миксера
+        targetClip = newClip;
+        targetMixer = newMixer;
+
+        if (transitionCoroutine != null)
+            StopCoroutine(transitionCoroutine);
+
+        transitionCoroutine = StartCoroutine(FadeTransition(newClip, newMixer));
+    }
+
+    private IEnumerator FadeTransition(AudioClip newClip, MusicMixer newMixer)
+    {
+        float time = 0f;
+        float startVolume = audioSource.volume;
+
+        // FADE OUT
+        while (time < fadeDuration)
+        {
+            time += Time.deltaTime;
+            audioSource.volume = Mathf.Lerp(startVolume, 0f, time / fadeDuration);
+            yield return null;
+        }
+
+        audioSource.volume = 0f;
+
+        // остановка старого миксера
         if (currentMixer != null)
             currentMixer.Stop();
 
@@ -79,5 +117,20 @@ public class MusicManager : MonoBehaviour
 
         currentClip = newClip;
         currentMixer = newMixer;
+
+        // FADE IN
+        time = 0f;
+        while (time < fadeDuration)
+        {
+            time += Time.deltaTime;
+            audioSource.volume = Mathf.Lerp(0f, startVolume, time / fadeDuration);
+            yield return null;
+        }
+
+        audioSource.volume = startVolume;
+
+        // переход завершён
+        targetClip = null;
+        targetMixer = null;
     }
 }
