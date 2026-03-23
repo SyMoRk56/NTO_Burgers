@@ -38,7 +38,10 @@ public class TaskPanel : MonoBehaviour
         for (int i = lettersContainer.childCount - 1; i >= 0; i--)
             Destroy(lettersContainer.GetChild(i).gameObject);
     }
-
+    private void OnEnable()
+    {
+        UpdatePlayerDot();
+    }
     private void SpawnLetters()
     {
         Clear();
