@@ -13,6 +13,8 @@ public class TaskPanel : MonoBehaviour
     public RectTransform mapRect;   
     public RectTransform playerDot;
 
+    public RectTransform adressDot;
+
     [Header("Map Bounds (мировые координаты)")]
     public Vector2 mapWorldMin; 
     public Vector2 mapWorldMax; 
@@ -25,7 +27,11 @@ public class TaskPanel : MonoBehaviour
     private void Update()
     {
         if (gameObject.activeSelf)
+        {
             UpdatePlayerDot();
+            UpdateAdressDot();
+        }
+            
     }
 
     public void Populate()
@@ -41,6 +47,7 @@ public class TaskPanel : MonoBehaviour
     private void OnEnable()
     {
         UpdatePlayerDot();
+        UpdateAdressDot();
     }
     private void SpawnLetters()
     {
@@ -92,5 +99,26 @@ public class TaskPanel : MonoBehaviour
             (normX - 0.5f) * mapSize.x,
             (normY - 0.5f) * mapSize.y
         );
+    }
+    public void UpdateAdressDot()
+    {
+        foreach(var task in PlayerMailInventory.Instance.carriedMails)
+        {
+            foreach(var mailbox in FindObjectsByType<MailBox>(FindObjectsSortMode.None))
+            {
+                if(mailbox.mailboxAddress == task.adress)
+                {
+                    float normX = Mathf.InverseLerp(mapWorldMin.x, mapWorldMax.x, mailbox.transform.position.x);
+                    float normY = 1f - Mathf.InverseLerp(mapWorldMin.y, mapWorldMax.y, mailbox.transform.position.z);
+
+                    Vector2 mapSize = mapRect.rect.size;
+                    adressDot.anchoredPosition = new Vector2(
+                        (normX - 0.5f) * mapSize.x /*+ adressDot.rect.width * .5f*/ - 10,
+                        (normY - 0.5f) * mapSize.y + adressDot.rect.height * .5f - 10
+                    );
+                    break;
+                }
+            }
+        }
     }
 }
