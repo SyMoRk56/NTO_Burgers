@@ -63,26 +63,22 @@ public class TaskUI : MonoBehaviour
     {
         if (!hasBag || !isReady) return;
 
+        if (Input.GetKeyDown(KeyCode.Tab))
+        {
+            if (isOpen) ClosePanel();
+            else OpenPanel();
+        }
         if (Input.GetKey(KeyCode.Tab))
         {
             tabHoldTime += Time.deltaTime;
-            if (tabHoldTime >= HOLD_THRESHOLD && !isOpen)
-            {
-                tabWasHeld = true;
-                OpenPanel();
-            }
+            tabWasHeld = true;
         }
-
+        
         if (Input.GetKeyUp(KeyCode.Tab))
         {
-            if (tabWasHeld)
+            if (tabWasHeld && tabHoldTime >= HOLD_THRESHOLD)
             {
                 if (isOpen) ClosePanel();
-            }
-            else
-            {
-                if (isOpen) ClosePanel();
-                else OpenPanel();
             }
 
             tabHoldTime = 0f;
