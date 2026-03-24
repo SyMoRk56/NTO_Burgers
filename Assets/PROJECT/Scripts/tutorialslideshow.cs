@@ -45,6 +45,7 @@ public class TutorialSlideshowUI : MonoBehaviour
 
     void InitVideoPlayer()
     {
+        print("TUTORIAL INIT");
         if (initialized) return;
 
         videoAudio = gameObject.AddComponent<AudioSource>();

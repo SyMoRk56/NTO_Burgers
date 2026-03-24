@@ -40,6 +40,7 @@ public class TutorialManager : MonoBehaviour
 
     public void StartTutorialForNewSlot()
     {
+        print("StartTutorialForNewSlot");
         if (tutorialCompleted) return;
         Debug.Log("[Tutorial] Новый слот — запускаем слайдшоу");
         SetStep(TutorialStep.WaitForNPCSpawn);

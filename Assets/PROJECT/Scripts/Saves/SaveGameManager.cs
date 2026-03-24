@@ -139,17 +139,21 @@ public class SaveGameManager : MonoBehaviour
 
     private System.Collections.IEnumerator StartTutorialNextFrame()
     {
+        print("1");
         // Ждём два кадра — GameManager и TutorialManager должны инициализироваться
         yield return null;
         yield return null;
 
+        print("2");
         if (TutorialManager.Instance != null)
         {
             Debug.Log("[SaveGame] Вызываем TutorialManager.StartTutorialForNewSlot()");
+            print("2.1");
             TutorialManager.Instance.StartTutorialForNewSlot();
         }
         else
         {
+            print("2.2");
             Debug.LogError("[SaveGame] TutorialManager.Instance == NULL после загрузки Game! Убедись что объект TutorialManager есть на сцене Game.");
         }
     }
@@ -278,6 +282,7 @@ public class SaveGameManager : MonoBehaviour
 
         if (currentSceneName == "Game")
         {
+            print("Scene game");
             if (isFirstSaveInGame)
             {
                 Debug.Log("First manual save in Game scene - indicator hidden");
