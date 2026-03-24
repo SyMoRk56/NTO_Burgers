@@ -429,6 +429,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 8258953086909395393}
     m_Modifications:
+    - target: {fileID: 383711841568190263, guid: c515f447041bd8e4b854a01c93727e0e, type: 3}
+      propertyPath: m_Material
+      value: 
+      objectReference: {fileID: 2100000, guid: 31d0dcc6f2dd4e4408d18036a2c93862, type: 2}
     - target: {fileID: 698237883493334181, guid: c515f447041bd8e4b854a01c93727e0e, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
       value: 78.39801
@@ -621,6 +625,10 @@ PrefabInstance:
       propertyPath: cameraTransform
       value: 
       objectReference: {fileID: 6855423626443811780}
+    - target: {fileID: 5068167179236629553, guid: c515f447041bd8e4b854a01c93727e0e, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 2.58
+      objectReference: {fileID: 0}
     - target: {fileID: 5285769897873779371, guid: c515f447041bd8e4b854a01c93727e0e, type: 3}
       propertyPath: mailSource
       value: 

@@ -1,15 +1,14 @@
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class AdressListMenu : MonoBehaviour
 {
     public static AdressListMenu Instance;
-
     public GameObject tabTaskUIPrefab;
     public Transform tasksParent;
     public GameObject label;
-
     private const int MAX_TASKS = 3;
 
     private void Awake()
@@ -30,7 +29,9 @@ public class AdressListMenu : MonoBehaviour
         for (int i = tasksParent.childCount - 1; i >= 0; i--)
             Destroy(tasksParent.GetChild(i).gameObject);
 
+        // Сортируем: сюжетные первыми, затем обычные
         var mails = PlayerMailInventory.Instance.carriedMails
+            .OrderByDescending(t => t.isStory)
             .Take(MAX_TASKS)
             .ToList();
 
@@ -38,9 +39,16 @@ public class AdressListMenu : MonoBehaviour
         {
             var go = Instantiate(tabTaskUIPrefab, tasksParent);
             go.SetActive(true);
+
+            // Текст адреса
             var text = go.GetComponentInChildren<TMP_Text>();
             if (text != null)
                 text.text = LocalizationManager.Instance.Get(task.adress);
+
+            // Звезда — активна только для сюжетных
+            var star = go.transform.Find("star");
+            if (star != null)
+                star.gameObject.SetActive(task.isStory);
         }
 
         if (label != null)

@@ -100,7 +100,7 @@ public class BagPickup : MonoBehaviour, IInteractObject
 
             // Разблокируем Tab
             if (TaskUI.Instance != null)
-                TaskUI.Instance.hasBag = true;
+                TaskUI.Instance.SetHasBag(true);
 
             if (SaveGameManager.Instance != null)
                 SaveGameManager.Instance.SaveAuto(true);

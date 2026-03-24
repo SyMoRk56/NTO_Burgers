@@ -20,7 +20,8 @@ public class PlayerCollisionSound : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        float speed = (collision.relativeVelocity - new Vector3(0, collision.relativeVelocity.y)).magnitude;
+        if (collision.gameObject.layer != LayerMask.NameToLayer("Ground")) return;
+        float speed = collision.relativeVelocity.y;
         if (speed < 7) return;
 
         // Проверка что есть террейн

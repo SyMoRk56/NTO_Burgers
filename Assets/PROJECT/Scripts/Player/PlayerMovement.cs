@@ -36,12 +36,12 @@ public class PlayerMovement : MonoBehaviour
 
     public Vector3 targetVelocity;
     public Vector3 currentVelocity;
+    public bool tutorialWalkCompleted = false;
 
     public PlayerManager manager;
 
     public Transform forwardVector;
 
-    // Переменные для отслеживания бездействия
     private float idleTimer = 0f;
     private bool isIdleVFXActive = false;
     private Vector3 lastPosition;
@@ -65,9 +65,11 @@ public class PlayerMovement : MonoBehaviour
     public bool isCarrying = false;
 
     [Header("Рыбалка")]
-    public bool isFishing = false; // Новый флаг для рыбалки
+    public bool isFishing = false; 
 
     public PhysicsMaterial mat;
+
+    public float animSpeed = 1;
     void Start()
     {
         terrainData = terrain.terrainData;
@@ -94,8 +96,6 @@ public class PlayerMovement : MonoBehaviour
     void Update()
     {
         HandleLook();
-
-        // НЕ ВЫХОДИМ из Update при блокировке движения - проверяем рыбалку
         if (!manager.CanMove)
         {
             if (!isFishing)
@@ -106,13 +106,22 @@ public class PlayerMovement : MonoBehaviour
             moveInput = Vector2.zero;
             targetVelocity = Vector3.zero;
             currentVelocity = Vector3.zero;
-            // Сбрасываем горизонтальную скорость rigidbody, вертикальную (гравитацию) оставляем
             rb.linearVelocity = new Vector3(0, rb.linearVelocity.y, 0);
             if (!isFishing) return;
             return;
         }
 
         GetInput();
+        if (!tutorialWalkCompleted && moveInput.magnitude > 0)
+        {
+            if (PlayerMailInventory.Instance != null &&
+                PlayerMailInventory.Instance.carriedMails.Count > 0 &&
+                PlayerMailInventory.Instance.carriedMails[0].id == "Tutorial_0")
+            {
+                PlayerMailInventory.Instance.RemoveFirstMail();
+                tutorialWalkCompleted = true;
+            }
+        }
         UpdateIdleTimer();
 
         if(manager.CanMove)
@@ -125,7 +134,6 @@ public class PlayerMovement : MonoBehaviour
 
     private void OnDisable()
     {
-        // Не меняем анимацию при отключении если мы в рыбалке
         if (!isFishing)
         {
             animScript.HeroIdleAnim(isCarrying);
@@ -134,7 +142,6 @@ public class PlayerMovement : MonoBehaviour
 
     void FixedUpdate()
     {
-        // Если движение заблокировано и не рыбалка - выходим
         if ((!manager.CanMove || !GameManager.Instance.isGameGoing) && !isFishing)
         {
             ResetIdleTimer();
@@ -158,7 +165,6 @@ public class PlayerMovement : MonoBehaviour
 
     void GetInput()
     {
-        // Если рыбалка - игнорируем ввод движения
         if (isFishing)
         {
             moveInput = Vector2.zero;
@@ -198,7 +204,6 @@ public class PlayerMovement : MonoBehaviour
 
         lookInput = Mouse.current.delta.ReadValue() * mouseSensitivity * 0.1f;
 
-        // Если не двигаемся и не прыгаем - idle анимация (кроме рыбалки)
         if (moveInput.magnitude < 0.1f && isGrounded && !jumpRequested && !isFishing)
         {
             animScript.HeroIdleAnim(isCarrying);
@@ -207,12 +212,10 @@ public class PlayerMovement : MonoBehaviour
 
     void HandleLook()
     {
-        // Оставляем пустым или реализуй поворот камеры
     }
 
     void HandleMovement()
     {
-        // Если рыбалка - не двигаемся
         if (isFishing)
         {
             rb.linearVelocity = new Vector3(0, rb.linearVelocity.y, 0);
@@ -233,7 +236,7 @@ public class PlayerMovement : MonoBehaviour
         currentVelocity.y = rb.linearVelocity.y;
         rb.linearVelocity = currentVelocity;
 
-        animScript.anim.SetFloat("MoveSpeed", !isRunning ? 1 : runSpeed / walkSpeed);
+        animScript.anim.SetFloat("MoveSpeed", (!isRunning ? 1 : runSpeed / walkSpeed) * animSpeed);
     }
 
     void ApplyFriction()
@@ -291,11 +294,10 @@ public class PlayerMovement : MonoBehaviour
         return baseSpeed * massSpeedFactor;
     }
 
-    // Методы для управления рыбалкой
     public void StartFishing()
     {
         isFishing = true;
-        isCarrying = true; // В рыбалке мы "переносим" удочку
+        isCarrying = true;
     }
 
     public void EndFishing()
@@ -402,7 +404,6 @@ public class PlayerMovement : MonoBehaviour
 
     void UpdateIdleTimer()
     {
-        // Если рыбалка - не отслеживаем бездействие
         if (isFishing)
         {
             ResetIdleTimer();

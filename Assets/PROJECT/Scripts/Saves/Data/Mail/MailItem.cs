@@ -7,7 +7,10 @@ public class MailItem
     public string id;
     public string reciever;
     public string adress;
+    [Tooltip("—южетное задание Ч показывает звезду в UI")]
+    public bool isStory = false;
 }
+
 [System.Serializable]
 public class MailState
 {

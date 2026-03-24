@@ -1,182 +1,227 @@
+п»їusing System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+public enum TutorialStep
+{
+    None = 0,
+    WaitForNPCSpawn = 1,
+    WaitForNPCApproach = 2,
+    WaitForInventoryOpen = 3,
+    WaitForLetterRead = 4,
+    WaitForDelivery = 5,
+    Completed = 99
+}
 
 public class TutorialManager : MonoBehaviour
 {
-    public static TutorialManager Instance;
+    public static TutorialManager Instance { get; private set; }
 
-    [System.Serializable]
-    public class TutorialArrow
-    {
-        public string stepId; // Уникальный ID шага туториала
-        public GameObject arrowObject; // 3D стрелка
-        public bool hideAfterComplete = true; // Скрывать ли стрелку после выполнения
-    }
+    [Header("РўСѓС‚РѕСЂРёР°Р»СЊРЅС‹Р№ NPC")]
+    public GameObject tutorialNPCPrefab;
+    public Transform npcSpawnPoint;
 
-    public List<TutorialArrow> tutorialArrows = new List<TutorialArrow>();
-    private HashSet<string> completedSteps = new HashSet<string>();
+    [Header("Hint UI")]
+    public TutorialHintUI hintUI;
 
-    private bool isInitialized = false;
+    [Header("РќР°СЃС‚СЂРѕР№РєРё РїРёСЃСЊРјР°")]
+    public string tutorialMailId = "tutorial_letter_01";
+    public string tutorialRecipientNpcId = "npc_grandma";
+
+    public TutorialStep CurrentStep { get; private set; } = TutorialStep.None;
+
+    private bool tutorialCompleted = false;
+    private TutorialNPC spawnedNPC;
 
     void Awake()
     {
-        if (Instance == null)
-        {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
+        if (Instance == null) Instance = this;
+        else { Destroy(gameObject); return; }
+    }
+
+    public void StartTutorialForNewSlot()
+    {
+        if (tutorialCompleted) return;
+        Debug.Log("[Tutorial] РќРѕРІС‹Р№ СЃР»РѕС‚ вЂ” Р·Р°РїСѓСЃРєР°РµРј СЃР»Р°Р№РґС€РѕСѓ");
+        SetStep(TutorialStep.WaitForNPCSpawn);
+
+        if (TutorialSlideshowUI.Instance != null)
+            TutorialSlideshowUI.Instance.ShowSlideshow();
         else
+            Debug.LogWarning("[Tutorial] TutorialSlideshowUI РЅРµ РЅР°Р№РґРµРЅ!");
+    }
+
+    public void OnSlideshowFinished()
+    {
+        Debug.Log("[Tutorial] РЎР»Р°Р№РґС€РѕСѓ Р·Р°РІРµСЂС€РµРЅРѕ вЂ” Р¶РґС‘Рј РІС‹С…РѕРґР° РёР· РґРѕРјР°");
+    }
+
+    public void OnPlayerExitedHouse()
+    {
+        if (CurrentStep != TutorialStep.WaitForNPCSpawn) return;
+
+        Debug.Log("[Tutorial] РРіСЂРѕРє РІС‹С€РµР» РёР· РґРѕРјР° вЂ” СЃРїР°РІРЅРёРј NPC");
+        SetStep(TutorialStep.WaitForNPCApproach);
+        SpawnAndApproach();
+        SaveProgress();
+    }
+
+    public void OnNPCReachedPlayer()
+    {
+        if (CurrentStep != TutorialStep.WaitForNPCApproach) return;
+        SetStep(TutorialStep.WaitForInventoryOpen);
+        hintUI?.ShowInventoryHint();
+        SaveProgress();
+    }
+
+    public void OnInventoryOpened()
+    {
+        if (CurrentStep != TutorialStep.WaitForInventoryOpen) return;
+        Debug.Log("[Tutorial] РРЅРІРµРЅС‚Р°СЂСЊ РѕС‚РєСЂС‹С‚");
+        SetStep(TutorialStep.WaitForLetterRead);
+        hintUI?.ShowLetterHint();
+        SaveProgress();
+    }
+
+    public void OnTutorialLetterRead()
+    {
+        if (CurrentStep != TutorialStep.WaitForLetterRead) return;
+        Debug.Log("[Tutorial] РџРёСЃСЊРјРѕ РїСЂРѕС‡РёС‚Р°РЅРѕ");
+        SetStep(TutorialStep.WaitForDelivery);
+        spawnedNPC?.ShowDialogue(TutorialDialogueType.DeliverLetter);
+        hintUI?.ShowDeliveryHint(tutorialRecipientNpcId);
+        SaveProgress();
+    }
+
+    public void OnTutorialLetterDelivered()
+    {
+        if (CurrentStep != TutorialStep.WaitForDelivery) return;
+        Debug.Log("[Tutorial] РџРёСЃСЊРјРѕ РґРѕСЃС‚Р°РІР»РµРЅРѕ вЂ” С‚СѓС‚РѕСЂРёР°Р» Р·Р°РІРµСЂС€С‘РЅ!");
+        CompleteTutorial();
+    }
+
+    private void CompleteTutorial()
+    {
+        tutorialCompleted = true;
+        SetStep(TutorialStep.Completed);
+        hintUI?.HideAll();
+        spawnedNPC?.OnTutorialComplete();
+        SaveProgress();
+    }
+
+    public void LoadTutorialState(TutorialSaveData saveData)
+    {
+        if (saveData == null) return;
+
+        if (saveData.completedTutorialSteps.Contains("COMPLETED"))
         {
-            Destroy(gameObject);
+            tutorialCompleted = true;
+            CurrentStep = TutorialStep.Completed;
+            Debug.Log("[Tutorial] РўСѓС‚РѕСЂРёР°Р» СѓР¶Рµ РїСЂРѕР№РґРµРЅ");
+            return;
         }
+
+        if (saveData.currentStep <= 0) return;
+
+        TutorialStep restored = (TutorialStep)saveData.currentStep;
+        Debug.Log($"[Tutorial] Р’РѕСЃСЃС‚Р°РЅР°РІР»РёРІР°РµРј СЃС‚Р°РґРёСЋ: {restored}");
+        StartCoroutine(ResumeNextFrame(restored));
     }
 
-    void Start()
+    private IEnumerator ResumeNextFrame(TutorialStep step)
     {
-        InitializeTutorial();
+        yield return null;
+        ResumeFromStep(step);
     }
 
-    // Инициализация туториала (вызывается при старте игры)
-    public void InitializeTutorial()
+    private void ResumeFromStep(TutorialStep step)
     {
-        if (isInitialized) return;
+        CurrentStep = step;
 
-        // Загружаем данные туториала при старте
-        LoadTutorialData();
-
-        // Применяем состояние стрелок
-        ApplyTutorialState();
-
-        isInitialized = true;
-    }
-
-    // Отметить шаг туториала как выполненный
-    public void CompleteTutorialStep(string stepId)
-    {
-        if (completedSteps.Contains(stepId)) return;
-
-        completedSteps.Add(stepId);
-
-        // Скрыть соответствующую стрелку
-        HideArrowForStep(stepId);
-
-        // Сохранить состояние туториала
-        SaveTutorialData();
-
-        Debug.Log($"Tutorial step completed: {stepId}");
-    }
-
-    // Проверить, выполнен ли шаг туториала
-    public bool IsStepCompleted(string stepId)
-    {
-        return completedSteps.Contains(stepId);
-    }
-
-    // Показать стрелку для шага (если она еще не была завершена)
-    public void ShowArrowForStep(string stepId)
-    {
-        if (IsStepCompleted(stepId)) return;
-
-        foreach (var arrow in tutorialArrows)
+        switch (step)
         {
-            if (arrow.stepId == stepId && arrow.arrowObject != null)
-            {
-                arrow.arrowObject.SetActive(true);
+            case TutorialStep.WaitForNPCSpawn:
+                // РџСЂРѕСЃС‚Рѕ Р¶РґС‘Рј РІС‹С…РѕРґР° РёР· РґРѕРјР°
                 break;
-            }
-        }
-    }
 
-    // Скрыть стрелку для шага
-    public void HideArrowForStep(string stepId)
-    {
-        foreach (var arrow in tutorialArrows)
-        {
-            if (arrow.stepId == stepId && arrow.arrowObject != null)
-            {
-                if (arrow.hideAfterComplete)
-                {
-                    arrow.arrowObject.SetActive(false);
-                }
+            case TutorialStep.WaitForNPCApproach:
+                SpawnAndApproach();
                 break;
-            }
+
+            case TutorialStep.WaitForInventoryOpen:
+                // NPC СѓР¶Рµ РіРѕРІРѕСЂРёР» вЂ” РїСЂРѕСЃС‚Рѕ СЃРїР°РІРЅРёРј СЂСЏРґРѕРј Рё РїРѕРєР°Р·С‹РІР°РµРј РїРѕРґСЃРєР°Р·РєСѓ
+                SpawnAtPositionIfNeeded();
+                hintUI?.ShowInventoryHint();
+                break;
+
+            case TutorialStep.WaitForLetterRead:
+                SpawnAtPositionIfNeeded();
+                hintUI?.ShowLetterHint();
+                break;
+
+            case TutorialStep.WaitForDelivery:
+                // NPC СѓР¶Рµ РіРѕРІРѕСЂРёР» вЂ” РїСЂРѕСЃС‚Рѕ СЃРїР°РІРЅРёРј СЂСЏРґРѕРј Рё РїРѕРєР°Р·С‹РІР°РµРј РїРѕРґСЃРєР°Р·РєСѓ
+                SpawnAtPositionIfNeeded();
+                hintUI?.ShowDeliveryHint(tutorialRecipientNpcId);
+                break;
         }
     }
 
-    // Скрыть все стрелки
-    public void HideAllArrows()
+    private void SpawnAndApproach()
     {
-        foreach (var arrow in tutorialArrows)
-        {
-            if (arrow.arrowObject != null)
-            {
-                arrow.arrowObject.SetActive(false);
-            }
-        }
+        TutorialNPC npc = SpawnNPC();
+        npc?.ApproachPlayer();
     }
 
-    // Применить состояние туториала к стрелкам
-    private void ApplyTutorialState()
+    private void SpawnAtPositionIfNeeded()
     {
-        foreach (var arrow in tutorialArrows)
-        {
-            if (arrow.arrowObject != null)
-            {
-                // Если шаг завершен - скрываем стрелку
-                if (IsStepCompleted(arrow.stepId) && arrow.hideAfterComplete)
-                {
-                    arrow.arrowObject.SetActive(false);
-                }
-            }
-        }
+        if (spawnedNPC != null) return;
+        SpawnNPC();
     }
 
-    // Получить данные для сохранения
+    private TutorialNPC SpawnNPC()
+    {
+        if (tutorialNPCPrefab == null)
+        {
+            Debug.LogError("[Tutorial] tutorialNPCPrefab РЅРµ РЅР°Р·РЅР°С‡РµРЅ РІ TutorialManager!");
+            return null;
+        }
+
+        Vector3 pos = npcSpawnPoint != null
+            ? npcSpawnPoint.position
+            : GameManager.Instance.GetPlayer().transform.position + Vector3.forward * 4f;
+
+        GameObject obj = Instantiate(tutorialNPCPrefab, pos, Quaternion.identity);
+        obj.SetActive(true);
+        spawnedNPC = obj.GetComponent<TutorialNPC>();
+
+        if (spawnedNPC == null)
+            Debug.LogError("[Tutorial] РќР° РїСЂРµС„Р°Р±Рµ NPC РЅРµС‚ РєРѕРјРїРѕРЅРµРЅС‚Р° TutorialNPC!");
+
+        return spawnedNPC;
+    }   
+
+    private void SetStep(TutorialStep step)
+    {
+        Debug.Log($"[Tutorial] {CurrentStep} в†’ {step}");
+        CurrentStep = step;
+    }
+
+    private void SaveProgress()
+    {
+        SaveGameManager.Instance?.SaveAuto(false);
+    }
+
+    public bool IsTutorialCompleted() => tutorialCompleted;
+    public bool IsTutorialActive() => !tutorialCompleted
+                                      && CurrentStep != TutorialStep.None
+                                      && CurrentStep != TutorialStep.Completed;
+
     public TutorialSaveData GetSaveData()
     {
-        TutorialSaveData data = new TutorialSaveData();
-        data.completedTutorialSteps = new List<string>(completedSteps);
+        var data = new TutorialSaveData();
+        data.currentStep = (int)CurrentStep;
+        if (tutorialCompleted)
+            data.completedTutorialSteps.Add("COMPLETED");
         return data;
-    }
-
-    // Загрузить данные туториала
-    public void LoadSaveData(TutorialSaveData data)
-    {
-        if (data == null || data.completedTutorialSteps == null)
-        {
-            completedSteps = new HashSet<string>();
-        }
-        else
-        {
-            completedSteps = new HashSet<string>(data.completedTutorialSteps);
-        }
-
-        // Применяем состояние после загрузки
-        if (isInitialized)
-        {
-            ApplyTutorialState();
-        }
-    }
-
-    // Сохранить данные туториала
-    private void SaveTutorialData()
-    {
-        // Сохраняем через SaveGameManager
-        SaveGameManager.Instance.SaveAuto(false);
-    }
-
-    // Загрузить данные туториала
-    private void LoadTutorialData()
-    {
-        // Данные будут загружены через SaveGameManager при загрузке сохранения
-        // Если это новое сохранение, список будет пустым
-    }
-
-    // Очистить все данные туториала (для тестирования)
-    public void ClearTutorialData()
-    {
-        completedSteps.Clear();
-        ApplyTutorialState();
-        SaveTutorialData();
     }
 }

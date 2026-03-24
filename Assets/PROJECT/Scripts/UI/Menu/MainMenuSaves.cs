@@ -135,6 +135,13 @@ public class MainMenuSaves : MonoBehaviour
         {
             Debug.Log("Save not found, creating a new empty save: " + saveName);
             SaveGameManager.Instance.SaveManual(saveName, false);
+            AutoSaveSlot auto = new AutoSaveSlot { slotName = saveName };
+            string autosavePath = Path.Combine(
+                Application.persistentDataPath,
+                "Saves",
+                "autosave.json"
+            );
+            File.WriteAllText(autosavePath, JsonUtility.ToJson(auto, true));
         }
 
         // ��������� GameManager ����� ���� ���������
