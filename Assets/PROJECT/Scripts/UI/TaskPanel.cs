@@ -83,7 +83,6 @@ public class TaskPanel : MonoBehaviour
             }
         }
     }
-
     private void UpdatePlayerDot()
     {
         if (playerDot == null || mapRect == null) return;

@@ -85,7 +85,7 @@ public class PlayerInteraction : MonoBehaviour
                 .Select(c => (c.transform, c.GetComponent<IInteractObject>()))
                 .Where(pair => pair.Item2 != null)
                 .ToArray();
-
+            
             if (CheckInteract(interactables, out var interactObject))
             {
                 StartCoroutine(HoldInteract(interactObject));
