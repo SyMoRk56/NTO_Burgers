@@ -33,7 +33,7 @@ public class PlayerMailInventory : MonoBehaviour
         {
             carriedMails.Add(task);
             UpdateTaskUI();
-            Debug.Log($"✓ Письмо добавлено в инвентарь: {task.recieverName} (ID: {task.id})");
+            Debug.Log($"✓ Письмо добавлено в инвентарь: {task.recieverName} (ID: {task.id}) + {task.isStory}");
             Debug.Log($"  Всего писем в инвентаре: {carriedMails.Count}");
         }
         else

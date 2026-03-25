@@ -15,7 +15,7 @@ public class DeskLetterUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEnd
     public string recipient;
     public string address;
     public string id;
-
+    public bool isStory;
     [Header("Flip Animation")]
     public float flipDuration = 0.2f;
 

@@ -26,7 +26,7 @@ public class TaskManager : MonoBehaviour
         var m = mailCatalog.mails;
         foreach (var n in m)
         {
-            tasks.Add(new Task(n.reciever, n.adress, n.id));
+            tasks.Add(new Task(n.reciever, n.adress, n.id, n.isStory));
         }
     }
 

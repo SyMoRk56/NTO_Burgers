@@ -247,7 +247,7 @@ public class DeskUI : MonoBehaviour, IInteractObject
         {
             PlayerMailInventory.Instance.AddMailToInventory(task);
             RemoveMailFromUI(task.id);
-            Debug.Log($"Письмо добавлено в инвентарь: {task.recieverName}");
+            Debug.Log($"Письмо добавлено в инвентарь: {task.recieverName} {task.isStory} ");
         }
     }
 

@@ -29,9 +29,17 @@ public class AdressListMenu : MonoBehaviour
         for (int i = tasksParent.childCount - 1; i >= 0; i--)
             Destroy(tasksParent.GetChild(i).gameObject);
 
-        // Сортируем: сюжетные первыми, затем обычные
-        var mails = PlayerMailInventory.Instance.carriedMails
-            .OrderByDescending(t => t.isStory)
+        var allMails = PlayerMailInventory.Instance.carriedMails;
+
+        // Сначала сюжетные
+        var storyMails = allMails.Where(t => t.isStory);
+
+        // Потом обычные
+        var regularMails = allMails.Where(t => !t.isStory);
+
+        // Объединяем и только потом ограничиваем
+        var mails = storyMails
+            .Concat(regularMails)
             .Take(MAX_TASKS)
             .ToList();
 
@@ -40,12 +48,10 @@ public class AdressListMenu : MonoBehaviour
             var go = Instantiate(tabTaskUIPrefab, tasksParent);
             go.SetActive(true);
 
-            // Текст адреса
             var text = go.GetComponentInChildren<TMP_Text>();
             if (text != null)
                 text.text = LocalizationManager.Instance.Get(task.adress);
 
-            // Звезда — активна только для сюжетных
             var star = go.transform.Find("star");
             if (star != null)
                 star.gameObject.SetActive(task.isStory);
