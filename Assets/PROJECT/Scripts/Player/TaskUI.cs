@@ -40,13 +40,15 @@ public class TaskUI : MonoBehaviour
 
     private System.Collections.IEnumerator RestoreAfterLoad()
     {
+        print("RestoreAfterLoad 1");
         // Ждём пока PlayerManager полностью инициализируется
         yield return new WaitForSeconds(2f);
-
+        print("RestoreAfterLoad 2");
         var player = GameManager.Instance?.GetPlayer();
         if (player != null)
         {
-            foreach (Transform child in player.transform)
+            print("RestoreAfterLoad 3");
+            foreach (Transform child in player.transform.GetChild(1))
             {
                 if (child.CompareTag("Bag"))
                 {
@@ -91,6 +93,7 @@ public class TaskUI : MonoBehaviour
 
     public void SetHasBag(bool value)
     {
+        Debug.LogError("SetHasBag " + value);
         hasBag = value;
         if (bagButton != null)
             bagButton.gameObject.SetActive(value);

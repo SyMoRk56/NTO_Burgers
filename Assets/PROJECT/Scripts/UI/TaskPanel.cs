@@ -48,6 +48,15 @@ public class TaskPanel : MonoBehaviour
     {
         UpdatePlayerDot();
         UpdateAdressDot();
+        FindFirstObjectByType<AdressListMenu>().transform.GetChild(0).gameObject.SetActive(false);
+        TaskUI.Instance.bagButton.gameObject.SetActive(false);
+    }
+    private void OnDisable()
+    {
+       FindFirstObjectByType<AdressListMenu>().transform.GetChild(0).gameObject.SetActive(true);
+        TaskUI.Instance.bagButton.gameObject.SetActive(true);
+
+
     }
     private void SpawnLetters()
     {
