@@ -27229,7 +27229,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1838990670039587565, guid: 8293270b5ea29ad4297b13e338822511, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 147
+      value: -186.8
       objectReference: {fileID: 0}
     - target: {fileID: 1838990670039587565, guid: 8293270b5ea29ad4297b13e338822511, type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -27321,7 +27321,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3588492789925430458, guid: 8293270b5ea29ad4297b13e338822511, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7546150615651255231, guid: 8293270b5ea29ad4297b13e338822511, type: 3}
+      propertyPath: fadeDuration
+      value: 0.221
+      objectReference: {fileID: 0}
+    - target: {fileID: 7546150615651255231, guid: 8293270b5ea29ad4297b13e338822511, type: 3}
+      propertyPath: videoResourcePath
+      value: 0310
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

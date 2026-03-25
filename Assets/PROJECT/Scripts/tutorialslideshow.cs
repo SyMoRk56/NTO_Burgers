@@ -62,12 +62,17 @@ public class TutorialSlideshowUI : MonoBehaviour
 
     void Start()
     {
-        skipButton?.onClick.AddListener(OnSkipClicked);
+        //skipButton?.onClick.AddListener(OnSkipClicked);
     }
 
     void Update()
     {
         if (!isShowing) return;
+
+        if (Input.anyKeyDown)
+        {
+            OnSkipClicked();
+        }
         if (Cursor.lockState != CursorLockMode.None)
         {
             Cursor.lockState = CursorLockMode.None;
@@ -118,7 +123,7 @@ public class TutorialSlideshowUI : MonoBehaviour
         Debug.Log($"[Video] Загружено: {clip.name} ({clip.width}x{clip.height}, {clip.length:F1}s)");
         StartCoroutine(FadeInThenPlay());
     }
-
+    
     private IEnumerator FadeInThenPlay()
     {
         yield return StartCoroutine(Fade(0f, 1f));
