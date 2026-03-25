@@ -229,6 +229,7 @@ public class DeskUI : MonoBehaviour, IInteractObject
             drag.recipient = task.recieverName;
             drag.id = task.id;
             drag.address = task.adress;
+            drag.isStory = task.isStory;
         }
 
         var button = letter.GetComponent<Button>();
