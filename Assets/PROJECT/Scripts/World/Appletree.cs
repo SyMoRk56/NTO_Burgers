@@ -1,9 +1,19 @@
 using UnityEngine;
 
-public class Appletree : MonoBehaviour
+public class Appletree : MonoBehaviour, IInteractObject
 {
+    public bool CheckDistance()
+    {
+        return GetComponentInChildren<InteractionUI>().CheckDistance();
+    }
     public GameObject[] apple;
     public AudioSource audioSource;
+
+    public bool CheckInteract()
+    {
+        return !apple[0].activeSelf;
+    }
+
     public void Interact()
     {
         if (!apple[0].activeSelf) return;
@@ -13,5 +23,18 @@ public class Appletree : MonoBehaviour
             anim.SetActive(false);
         }
         audioSource.Play();
+    }
+
+    public int InteractPriority()
+    {
+        return 0;
+    }
+
+    public void OnBeginInteract()
+    {
+    }
+
+    public void OnEndInteract(bool success)
+    {
     }
 }

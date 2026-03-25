@@ -71,6 +71,7 @@ public class MainMenuSaves : MonoBehaviour
         }
         if (p)
             warningPanel.SetActive(true);
+        autosaveButton.GetComponent<Button>().interactable = SaveGameManager.Instance.HasAutosave();
     }
 
     private void Awake()
@@ -111,6 +112,7 @@ public class MainMenuSaves : MonoBehaviour
         if (!File.Exists(panel.screenshotPath))
         {
             panel.screenshot.texture = null;
+            panel.screenshot.CrossFadeAlpha(0, 0, false);
             return;
         }
 
@@ -120,6 +122,8 @@ public class MainMenuSaves : MonoBehaviour
         tex.LoadImage(bytes);
 
         panel.screenshot.texture = tex;
+        panel.screenshot.CrossFadeAlpha(1, 0, false);
+
     }
 
     public void LoadSave(int num)
@@ -131,6 +135,13 @@ public class MainMenuSaves : MonoBehaviour
         {
             Debug.Log("Save not found, creating a new empty save: " + saveName);
             SaveGameManager.Instance.SaveManual(saveName, false);
+            AutoSaveSlot auto = new AutoSaveSlot { slotName = saveName };
+            string autosavePath = Path.Combine(
+                Application.persistentDataPath,
+                "Saves",
+                "autosave.json"
+            );
+            File.WriteAllText(autosavePath, JsonUtility.ToJson(auto, true));
         }
 
         // ��������� GameManager ����� ���� ���������
@@ -154,6 +165,9 @@ public class MainMenuSaves : MonoBehaviour
         int i = int.Parse(saveName)-1;
         print(i);
         saves[i].screenshot.texture = null;
+        saves[i].screenshot.CrossFadeAlpha(0, 0, false);
+
         saves[i].dateText.text = "";
+        RefreshPanels();
     }
 }

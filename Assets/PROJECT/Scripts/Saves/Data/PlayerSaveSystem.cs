@@ -25,16 +25,21 @@ public class PlayerSaveSystem : MonoBehaviour
             return null;
         }
         print("PlayerSaveSystem:  get data" + player.transform.position);
-
+        var p = new Vector3(0, 0, 0);
+        
+          p = PlayerManager.instance.transform.position;
         return new PlayerData
         {
+            
             position = new float[]
             {
-                player.position.x,
-                player.position.y,
-                player.position.z,
+                p.x,
+                p.y,
+                p.z,
             },
-            hasBag = HasBag() // Сохраняем состояние сумки
+            hasBag = HasBag(), // Сохраняем состояние сумки
+            collectedAdditionalLetters = !FindFirstObjectByType<AdditionalLetters>().hasMails,
+            complitedMainIslandMainTasks = PlayerMailInventory.Instance.complitedMainLine,
         };
     }
 
@@ -50,15 +55,14 @@ public class PlayerSaveSystem : MonoBehaviour
             Debug.LogError("Player cannot be assigned during load!");
             return;
         }
+
         print("Set player position " + data.position.Length);
         if (data.position.Length == 3) StartCoroutine(SetPlayerPosDelay(data.position));
-
         else
         {
             player.GetComponent<PlayerMovement>().enabled = true;
         }
 
-        // Восстанавливаем состояние сумки
         if (data.hasBag && !HasBag())
         {
             CreateBagForPlayer();
@@ -67,8 +71,14 @@ public class PlayerSaveSystem : MonoBehaviour
             {
                 g.enabled = true;
             }
+            FindFirstObjectByType<AdditionalLetters>().hasMails = !data.collectedAdditionalLetters;
+            PlayerMailInventory.Instance.complitedMainLine = data.complitedMainIslandMainTasks;
+            PlayerManager.instance.SetThunder(!data.complitedMainIslandMainTasks);
         }
 
+        // Пробрасываем hasBag в TaskUI
+        if (TaskUI.Instance != null)
+            TaskUI.Instance.hasBag = data.hasBag;
     }
     IEnumerator SetPlayerPosDelay(float[] pos)
     {

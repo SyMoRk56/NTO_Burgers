@@ -1,42 +1,66 @@
-using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class AdressListMenu : MonoBehaviour
 {
+    public static AdressListMenu Instance;
     public GameObject tabTaskUIPrefab;
-    public GameObject tasksParent;
+    public Transform tasksParent;
     public GameObject label;
-    private void Update()
+    private const int MAX_TASKS = 3;
+
+    private void Awake()
     {
-        if (Input.GetKeyDown(KeyCode.Tab))
-        {
-            label.SetActive(true);
-            UpdateTasks();
-        }
-        if (Input.GetKeyUp(KeyCode.Tab))
-        {
-            label.SetActive(false);
-        }
+        Instance = this;
     }
+
     private void Start()
     {
-        label.GetComponent<RectTransform>().offsetMin = new Vector2(240, 1000 - 229.6246f * tasksParent.transform.childCount);
+        if (label != null) label.SetActive(true);
+        UpdateTasks();
     }
-    void UpdateTasks()
+
+    public void UpdateTasks()
     {
-        for(int i = 0; i < tasksParent.transform.childCount; i++)
+        if (tasksParent == null || tabTaskUIPrefab == null) return;
+
+        for (int i = tasksParent.childCount - 1; i >= 0; i--)
+            Destroy(tasksParent.GetChild(i).gameObject);
+
+        // Сортируем: сюжетные первыми, затем обычные
+        var mails = PlayerMailInventory.Instance.carriedMails
+            .OrderByDescending(t => t.isStory)
+            .Take(MAX_TASKS)
+            .ToList();
+
+        foreach (var task in mails)
         {
-            Destroy(tasksParent.transform.GetChild(i).gameObject);
+            var go = Instantiate(tabTaskUIPrefab, tasksParent);
+            go.SetActive(true);
+
+            // Текст адреса
+            var text = go.GetComponentInChildren<TMP_Text>();
+            if (text != null)
+                text.text = LocalizationManager.Instance.Get(task.adress);
+
+            // Звезда — активна только для сюжетных
+            var star = go.transform.Find("star");
+            if (star != null)
+                star.gameObject.SetActive(task.isStory);
         }
-        var l = PlayerMailInventory.Instance.carriedMails.ToList();
-        
-        foreach (var task in l)
+
+        if (label != null)
         {
-            var go = Instantiate(tabTaskUIPrefab, tasksParent.transform);
-            go.GetComponentInChildren<TMP_Text>().text = LocalizationManager.Instance.Get(task.adress);
+            var rect = label.GetComponent<RectTransform>();
+            rect.offsetMin = new Vector2(0, 1000 - 229.6246f * tasksParent.childCount);
         }
-        label.GetComponent<RectTransform>().offsetMin = new Vector2(0, 1000 - 229.6246f * tasksParent.transform.childCount);
+    }
+
+    public void SetVisible(bool visible)
+    {
+        if (tasksParent != null)
+            tasksParent.gameObject.SetActive(visible);
     }
 }

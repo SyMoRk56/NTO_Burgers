@@ -1,4 +1,4 @@
-using UnityEngine;
+п»їusing UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 using System.Collections;
@@ -16,6 +16,11 @@ public class DialogueUI : MonoBehaviour
 
     public bool hideOnAwake = true;
 
+    bool isTyping = false;
+    string currentFullText = "";
+
+    public bool IsTyping => isTyping;
+
     void Awake()
     {
         runner = GetComponentInParent<DialogueRunner>();
@@ -25,7 +30,6 @@ public class DialogueUI : MonoBehaviour
 
     public void ShowPhrase(string name, string text)
     {
-        // ОЧИЩАЕМ всё перед показом новой фразы
         if (typeCoroutine != null)
         {
             StopCoroutine(typeCoroutine);
@@ -35,24 +39,42 @@ public class DialogueUI : MonoBehaviour
         ClearChoices();
         gameObject.SetActive(true);
 
-        // Очищаем текст
         phraseText.text = "";
         nameText.text = LocalizationManager.Instance.Get(name);
 
-        // Запускаем печать текста
-        typeCoroutine = StartCoroutine(TypeText(LocalizationManager.Instance.Get(text)));
+        currentFullText = LocalizationManager.Instance.Get(text);
+        typeCoroutine = StartCoroutine(TypeText(currentFullText));
     }
 
     IEnumerator TypeText(string text)
     {
+        isTyping = true;
         phraseText.text = "";
-        print("TYPE TEXT" + text);
+
         yield return new WaitForSeconds(typeSpeed * 2);
+
         foreach (char c in text)
         {
             phraseText.text += c;
             yield return new WaitForSeconds(typeSpeed);
         }
+
+        isTyping = false;
+        typeCoroutine = null;
+    }
+
+    public void CompleteTypingInstantly()
+    {
+        if (!isTyping) return;
+
+        if (typeCoroutine != null)
+        {
+            StopCoroutine(typeCoroutine);
+            typeCoroutine = null;
+        }
+
+        phraseText.text = currentFullText;
+        isTyping = false;
     }
 
     public void ShowChoices(DialogueChoice[] choices)
@@ -60,7 +82,6 @@ public class DialogueUI : MonoBehaviour
         ClearChoices();
         phraseText.text = "";
 
-        print("ShowChoices: " + choices.Length);
         for (int i = 0; i < choices.Length; i++)
         {
             var obj = Instantiate(choiceButtonPrefab, choicesParent);
@@ -71,14 +92,12 @@ public class DialogueUI : MonoBehaviour
             int index = i;
             btn.onClick.AddListener(() => runner.Choose(index));
         }
+
         phraseText.text = "...";
     }
 
     public void Hide()
     {
-        print("Hide dialogue");
-
-        // Останавливаем печать текста
         if (typeCoroutine != null)
         {
             StopCoroutine(typeCoroutine);
@@ -94,11 +113,8 @@ public class DialogueUI : MonoBehaviour
         GameManager.Instance.GetPlayer().GetComponent<PlayerManager>().ShowCursor(false);
     }
 
-    // ДОБАВЛЕНО: метод для принудительного скрытия
     public void ForceHide()
     {
-        print("ForceHide dialogue");
-
         if (typeCoroutine != null)
         {
             StopCoroutine(typeCoroutine);

@@ -4,6 +4,7 @@ using System.Collections;
 
 public class RespawnPlayer : MonoBehaviour
 {
+    public static RespawnPlayer instance;
     public float respawnDelay = 2f;
     private List<PositionRecord> positionHistory = new List<PositionRecord>();
 
@@ -12,6 +13,10 @@ public class RespawnPlayer : MonoBehaviour
 
     public LayerMask groundLayer;
 
+    private void Start()
+    {
+        instance = this;
+    }
     public bool IsGrounded()
     {
         float rayDistance = 1.1f;
@@ -55,7 +60,7 @@ public class RespawnPlayer : MonoBehaviour
 
     }
 
-    private Vector3 GetPositionBeforeFall()
+    public Vector3 GetPositionBeforeFall()
     {
         if (positionHistory.Count == 0)
             return transform.position;

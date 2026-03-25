@@ -3,129 +3,159 @@ using UnityEngine.UI;
 
 public class InteractionUI : MonoBehaviour
 {
-    public GameObject popup;
+    [Header("References")]
+    public GameObject outerPopup;   // первый объект
+    public GameObject innerPopup;   // второй объект
     public SphereCollider trigger;
-    public DeskInteraction deskInteraction; // Опционально, только для объектов с UI
+    public DeskUI deskInteraction; // опционально
 
-    private Image popupImage;
+    [Header("Radii")]
+    public float innerRadius = 3, outerRadius = 7;
+    public float innerRadiusMultiplier = 1, outerRadiusMultiplier = 1;
     private bool playerInRange = false;
-
+    private Transform player;
+    IInteractObject io;
+    public bool needToLockRotation;
     private void Start()
     {
-        trigger.radius = GameConfig.interactionRange;
-
-        // Получаем компонент Image из popup
-        popupImage = popup.GetComponent<Image>();
-        if (popupImage == null)
+        io = GetComponentInParent<IInteractObject>();
+        innerRadius = GameConfig.innerInteractionRange * innerRadiusMultiplier;
+        outerRadius = GameConfig.outerInteractionRange * outerRadiusMultiplier;
+        trigger.isTrigger = true;
+        trigger.radius = outerRadius;
+        player = GameObject.FindGameObjectWithTag("Player")?.transform;
+        if (transform.parent == null)
         {
-            Debug.LogWarning("Popup doesn't have an Image component!");
+            transform.localScale = Vector3.one;
             return;
         }
 
-        // Скрываем popup полностью при старте
-        SetPopupAlpha(0f);
-        popup.SetActive(false);
-    }
+        Vector3 parentScale = transform.parent.lossyScale;
 
+        transform.localScale = new Vector3(
+            Vector3.one.x / parentScale.x,
+            Vector3.one.y / parentScale.y,
+            Vector3.one.z / parentScale.z
+        );
+
+        print(transform.lossyScale);
+        HideAllPopups();
+    }
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Player"))
-        {
-            playerInRange = true;
-            Debug.Log($"Player entered {gameObject.name} trigger");
+        if (!other.CompareTag("Player"))
+            return;
 
-            // Для объектов со столом: показываем popup только если UI закрыт
-            // Для объектов без стола (NPC и др.): всегда показываем popup
-            if (deskInteraction != null)
-            {
-                if (!deskInteraction.IsCanvasOpen)
-                {
-                    ShowPopup();
-                }
-            }
-            else
-            {
-                // NPC и другие объекты без DeskInteraction
-                ShowPopup();
-            }
+        playerInRange = true;
+        Debug.Log($"Player entered {gameObject.name}");
 
-            // Уведомляем скрипт стола о том, что игрок вошел в зону
-            if (deskInteraction != null)
-            {
-                deskInteraction.PlayerEntered();
-            }
-        }
+        if (deskInteraction != null)
+            deskInteraction.PlayerEntered();
     }
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.CompareTag("Player"))
-        {
-            playerInRange = false;
-            Debug.Log($"Player exited {gameObject.name} trigger");
-            HidePopup();
+        if (!other.CompareTag("Player"))
+            return;
 
-            // Уведомляем скрипт стола о том, что игрок вышел из зоны
-            if (deskInteraction != null)
-            {
-                deskInteraction.PlayerExited();
-            }
+        playerInRange = false;
+        Debug.Log($"Player exited {gameObject.name}");
+
+        HideAllPopups();
+
+        if (deskInteraction != null)
+            deskInteraction.PlayerExited();
+    }
+
+    private void Update()
+    {
+        if(needToLockRotation)transform.rotation = Quaternion.identity;
+        if (!playerInRange || player == null)
+        {
+            HideAllPopups();
+            return;
+        }
+
+        // если стол и UI открыт — ничего не показываем
+        if (deskInteraction != null && deskInteraction.IsCanvasOpen)
+        {
+            HideAllPopups();
+            return;
+        }
+
+        // если сейчас нельзя взаимодействовать
+        if (!GetComponentInParent<IInteractObject>().CheckInteract())
+        {
+            HideAllPopups();
+            return;
+        }
+
+        float distance = Vector3.Distance(transform.position, player.position);
+
+        if (distance <= innerRadius && io.CheckInteract())
+        {
+            print("Inner" + innerRadius);
+            ShowInnerPopup();
+        }
+        else if(distance <= outerRadius || (distance <= innerRadius && !io.CheckInteract()))
+        {
+            print("Outer " + outerRadius);
+            ShowOuterPopup();
         }
     }
 
-    // Метод для установки прозрачности popup
-    private void SetPopupAlpha(float alpha)
-    {
-        if (popupImage != null)
-        {
-            Color color = popupImage.color;
-            color.a = alpha;
-            popupImage.color = color;
-        }
-    }
-
-    // Метод для скрытия popup
-    public void HidePopup()
-    {
-        SetPopupAlpha(0f);
-        popup.SetActive(false);
-        Debug.Log($"HidePopup called for {gameObject.name}");
-    }
-
-    // Метод для показа popup
-    public void ShowPopup()
-    {
-        SetPopupAlpha(1f);
-        popup.SetActive(true);
-        Debug.Log($"ShowPopup called for {gameObject.name}");
-    }
-
-    // Метод для обновления видимости popup (вызывается из DeskInteraction при закрытии UI)
-    public void UpdatePopupVisibility()
+    // ===== УПРАВЛЕНИЕ POPUP =====
+    public bool CheckDistance()
     {
         if (playerInRange)
         {
-            if (deskInteraction != null)
-            {
-                // Для стола: показываем только если UI закрыт
-                if (!deskInteraction.IsCanvasOpen)
-                {
-                    ShowPopup();
-                }
-                else
-                {
-                    HidePopup();
-                }
-            }
-            else
-            {
-                // Для NPC: всегда показываем если игрок в зоне
-                ShowPopup();
-            }
+            float distance = Vector3.Distance(transform.position, player.position);
+            if (distance < innerRadius) return true;
         }
-        else
+        return false;
+    }
+    private void ShowOuterPopup()
+    {
+        if (!outerPopup.activeSelf)
+            Debug.Log("Outer popup active");
+
+        outerPopup.SetActive(true);
+        innerPopup.SetActive(false);
+    }
+
+    private void ShowInnerPopup()
+    {
+        if (!innerPopup.activeSelf)
+            Debug.Log("Inner popup active");
+
+        innerPopup.SetActive(true);
+        outerPopup.SetActive(false);
+    }
+
+    private void HideAllPopups()
+    {
+        outerPopup.SetActive(false);
+        innerPopup.SetActive(false);
+    }
+
+    // ===== ТВОИ МЕТОДЫ (СОХРАНЕНЫ) =====
+
+    public void HidePopup()
+    {
+        HideAllPopups();
+    }
+
+    public void ShowPopup()
+    {
+        // не используется напрямую, логика теперь через радиус
+    }
+
+    public void UpdatePopupVisibility()
+    {
+        if (!playerInRange)
         {
-            HidePopup();
+            HideAllPopups();
+            return;
         }
     }
 }

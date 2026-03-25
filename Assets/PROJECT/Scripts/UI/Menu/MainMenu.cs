@@ -4,13 +4,17 @@ using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using System.IO;
+using UnityEngine.Rendering.Universal;
 public class MainMenu : MonoBehaviour
 {
+    public FullScreenPassRendererFeature data;
+    
     public GameObject savesPanel;
 
     public GameObject autosaveButton;
     void Start()
     {
+        data.SetActive(false);
         Time.timeScale = 1;
         if (!SaveGameManager.Instance.CheckAutoSave())
         {
@@ -23,8 +27,15 @@ public class MainMenu : MonoBehaviour
     }
     public void PlayGame()
     {
-        savesPanel.SetActive(true);
-        gameObject.SetActive(false);
+        if (SaveGameManager.Instance.HasSaves())
+        {
+            savesPanel.SetActive(true);
+            gameObject.SetActive(false);
+        }
+        else
+        {
+            FindFirstObjectByType<MainMenuSaves>(FindObjectsInactive.Include).LoadSave(1);
+        }
     }
     public void ExitGame()
     {

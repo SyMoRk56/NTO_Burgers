@@ -11,7 +11,7 @@ public class Settings : MonoBehaviour
 
     Resolution[] resolution;
     public TMP_Dropdown langDropdown;
-    public Slider masterVolumeSlider, musicVolumeSlider, dialoguesVolumeSlider;
+    public Slider masterVolumeSlider, musicVolumeSlider, dialoguesVolumeSlider, sensitivitySlider, shakeScaleSlider;
     void Start()
     {
         langDropdown.SetValueWithoutNotify(LocalizationManager.Instance.CurrentLanguage == "RU" ? 0 : 1);
@@ -46,6 +46,8 @@ public class Settings : MonoBehaviour
         data.masterVolume = masterVolumeSlider.value;
         data.dialoguesVolume = dialoguesVolumeSlider.value;
         data.musicVolume = musicVolumeSlider.value;
+        data.sensitivity = sensitivitySlider.value;
+        data.shakeScale = shakeScaleSlider.value;
         SettingsSaveSystem.Instance.LoadData(data);
         SettingsSaveManager.Instance.SaveSettings();
     }
@@ -56,11 +58,22 @@ public class Settings : MonoBehaviour
         masterVolumeSlider.SetValueWithoutNotify(data.masterVolume);
         dialoguesVolumeSlider.SetValueWithoutNotify(data.dialoguesVolume);
         musicVolumeSlider.SetValueWithoutNotify(data.musicVolume);
-
+        sensitivitySlider.SetValueWithoutNotify(data.sensitivity);
+        shakeScaleSlider.SetValueWithoutNotify(data.shakeScale);
     }
     public void SetLang()
     {
         LocalizationManager.Instance.SetLanguage(langDropdown.value == 0 ? "RU" : "EN");
+    }
+    public void OnEnable()
+    {
+        FindFirstObjectByType<MenuCamera>().enabled = false;
+        FindFirstObjectByType<FishWater>().enabled = false;
+    }
+    void OnDisable()
+    {
+        FindFirstObjectByType<MenuCamera>().enabled = true;
+        FindFirstObjectByType<FishWater>().enabled = true;
     }
 }
 

@@ -15,7 +15,7 @@ public class PauseMenu : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (Input.GetKeyDown(KeyCode.Escape) && PlayerManager.instance.CanMove)
         {
             // ������� ��������� �������� �������
             if (IsAnyDialogueActive())
@@ -48,8 +48,8 @@ public class PauseMenu : MonoBehaviour
     // ����� ��� ��������, ��������� �� ����� � UI �����
     private bool IsInTableUI()
     {
-        DeskInteraction[] desks = FindObjectsOfType<DeskInteraction>();
-        foreach (DeskInteraction desk in desks)
+        DeskUI[] desks = FindObjectsOfType<DeskUI>();
+        foreach (DeskUI desk in desks)
         {
             if (desk.isInTable)
             {
@@ -159,6 +159,8 @@ public class PauseMenu : MonoBehaviour
         if (!File.Exists(panel.screenshotPath))
         {
             panel.screenshot.texture = null;
+            panel.screenshot.CrossFadeAlpha(0, 0, false);
+
             return;
         }
 
@@ -166,6 +168,7 @@ public class PauseMenu : MonoBehaviour
 
         Texture2D tex = new Texture2D(2, 2);
         tex.LoadImage(bytes);
+        panel.screenshot.CrossFadeAlpha(1, 0, false);
 
         panel.screenshot.texture = tex;
     }

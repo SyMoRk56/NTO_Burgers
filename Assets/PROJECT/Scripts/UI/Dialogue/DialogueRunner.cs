@@ -2,7 +2,7 @@
 using UnityEngine.UI;
 using System.Collections;
 
-public class DialogueRunner : MonoBehaviour
+public class DialogueRunner : MonoBehaviour, IInteractObject
 {
     [Header("Настройки диалога")]
     public string ownerName;
@@ -10,7 +10,6 @@ public class DialogueRunner : MonoBehaviour
     public DialogueScriptableObject[] letterDialogues;
     public bool random;
 
-    // Публичные свойства для доступа из других скриптов
     public int CurrentDialogueIndex => currentDialogueIndex;
     public bool CurrentIsLetter => isLetter;
 
@@ -21,7 +20,6 @@ public class DialogueRunner : MonoBehaviour
     [Header("Аудио")]
     public AudioSource audioSource;
 
-    // Приватные поля
     private int currentDialogueIndex;
     private int currentPhraseIndex;
     private bool isLetter;
@@ -30,54 +28,50 @@ public class DialogueRunner : MonoBehaviour
     public AudioClip clip;
     public bool IsDialogueActive => isRunning;
 
-    // Ссылки на сцены
-    private treecastscene treeScene;
-    private skamia benchScene;
+    private TreeCutscene treeScene;
+    private Bench benchScene;
     private FlowerTriggerHandler flowerHandler;
-
-    // Для запуска дерева после фразы про яблоню
     private bool wasApplePhraseSpoken = false;
+
 
     void Start()
     {
-        // Инициализация benchScene
-        benchScene = GetComponent<skamia>();
+        benchScene = GetComponent<Bench>();
         if (benchScene == null)
-        {
-            benchScene = GetComponentInChildren<skamia>();
-        }
+            benchScene = GetComponentInChildren<Bench>();
 
-        // Инициализация flowerHandler
         flowerHandler = GetComponent<FlowerTriggerHandler>();
         if (flowerHandler == null)
-        {
             flowerHandler = GetComponentInChildren<FlowerTriggerHandler>();
-        }
 
-        dialogueUI = GetComponentInChildren<DialogueUI>(true);
-        dialogueUI.transform.GetChild(0).GetComponent<Button>().onClick.AddListener(() => NextPhrase());
-        if (audioSource == null)
+        // ── ИСПРАВЛЕНИЕ: не перезаписываем dialogueUI если уже назначен в инспекторе ──
+        if (dialogueUI == null)
         {
-            audioSource = gameObject.AddComponent<AudioSource>();
+            dialogueUI = GetComponentInChildren<DialogueUI>(true);
+            if (dialogueUI == null)
+                Debug.LogWarning($"[DialogueRunner] DialogueUI не найден на {gameObject.name}");
         }
 
-        // Находим treecastscene на этом же объекте
-        treeScene = GetComponent<treecastscene>();
+        if (dialogueUI != null)
+        {
+            dialogueUI.transform.GetChild(0).GetComponent<Button>().onClick.AddListener(() => CheckSkip());
+        }
+
+        if (audioSource == null)
+            audioSource = gameObject.AddComponent<AudioSource>();
+
+        treeScene = GetComponent<TreeCutscene>();
         if (treeScene != null)
         {
             Debug.Log("Найден treecastscene");
         }
         else
         {
-            treeScene = GetComponentInChildren<treecastscene>();
+            treeScene = GetComponentInChildren<TreeCutscene>();
             if (treeScene != null)
-            {
                 Debug.Log("Найден treecastscene в дочерних объектах");
-            }
             else
-            {
                 Debug.LogWarning("treecastscene не найден");
-            }
         }
     }
 
@@ -85,13 +79,34 @@ public class DialogueRunner : MonoBehaviour
     {
         if (!isRunning) return;
 
+        // ── ИСПРАВЛЕНИЕ: обнуляем velocity только если диалог активен И игрок на земле ──
+        // Не трогаем Rigidbody.linearVelocity — это ломает физику
+        var pm = PlayerManager.instance;
+        if (pm != null && pm.playerMovement != null)
+        {
+            pm.playerMovement.targetVelocity = Vector3.zero;
+            pm.playerMovement.currentVelocity = Vector3.zero;
+        }
+
         var block = isLetter ? letterDialogues[currentDialogueIndex] : defaultDialogues[currentDialogueIndex];
         bool isAtChoicePoint = currentPhraseIndex >= block.phrases.Length;
 
-        if (!isChoosing && !isAtChoicePoint &&
-           (Input.GetKeyDown(KeyCode.Space) ||
-            Input.GetKeyDown(KeyCode.E) ||
-            Input.GetMouseButtonDown(0)))
+        if (!isChoosing &&
+   (Input.GetKeyDown(KeyCode.Space) ||
+    Input.GetKeyDown(KeyCode.E)))
+        {
+            CheckSkip();
+        }
+
+    }
+
+    private void CheckSkip()
+    {
+        if (dialogueUI.IsTyping)
+        {
+            dialogueUI.CompleteTypingInstantly();
+        }
+        else
         {
             NextPhrase();
         }
@@ -104,10 +119,8 @@ public class DialogueRunner : MonoBehaviour
 
         if (!isRunning)
         {
-            // Сбрасываем все анимации при начале нового диалога
-            StopAllAnimations(true); // true = полный сброс
+            StopAllAnimations(true);
 
-            // Останавливаем NPC
             var npc = GetComponent<NPCBehaviour>();
             if (npc != null)
             {
@@ -119,12 +132,18 @@ public class DialogueRunner : MonoBehaviour
             currentDialogueIndex = 0;
             currentPhraseIndex = 0;
             isChoosing = false;
-            wasApplePhraseSpoken = false; // Сбрасываем флаг
+            wasApplePhraseSpoken = false;
 
             var dialogues = letter ? letterDialogues : defaultDialogues;
             if (dialogues.Length == 0)
             {
                 Debug.LogError($"No dialogues found for type: letter={letter}");
+                return;
+            }
+
+            if (dialogueUI == null)
+            {
+                Debug.LogError($"[DialogueRunner] dialogueUI == null на {gameObject.name}! Назначь в инспекторе.");
                 return;
             }
 
@@ -142,6 +161,7 @@ public class DialogueRunner : MonoBehaviour
                 {
                     playerManager.ShowCursor(true);
                     playerManager.CanMove = false;
+                    PlayerManager.instance.playerMovement.moveInput = Vector2.zero;
                 }
             }
         }
@@ -158,21 +178,15 @@ public class DialogueRunner : MonoBehaviour
             string phrase = block.phrases[currentPhraseIndex];
             dialogueUI.ShowPhrase(ownerName, phrase);
 
-            //AudioClip clip = block.voiceOver[currentPhraseIndex];
             if (clip != null && audioSource != null)
-            {
                 audioSource.PlayOneShot(clip);
-            }
 
             if (face != null)
             {
                 if (block.emotions.Count != 0 && currentPhraseIndex < block.emotions.Count)
-                {
                     face.SetFace(block.emotions[currentPhraseIndex]);
-                }
             }
 
-            // Проверяем фразу для запуска дерева
             CheckForTreeSequence(phrase);
         }
         else
@@ -182,45 +196,32 @@ public class DialogueRunner : MonoBehaviour
         }
     }
 
-    // Метод для проверки триггерных фраз
     void CheckForTreeSequence(string phrase)
     {
         phrase = LocalizationManager.Instance.Get(phrase);
         print("Check for phrase " + phrase);
 
-        // Проверяем фразу про яблоню
         if (phrase.Contains("Яблоня") || phrase.Contains("яблоня") || phrase.Contains("Apple tree"))
         {
             Debug.Log($"DialogueRunner: Найдена фраза про яблоню: '{phrase}'");
             wasApplePhraseSpoken = true;
-
             if (treeScene != null)
-            {
                 StartCoroutine(DelayedTreeSequence());
-            }
         }
 
-        // Проверяем фразу про скамейку
         if (phrase.Contains("Скамейка") || phrase.Contains("скамейка") || phrase.Contains("bench"))
         {
             Debug.Log($"DialogueRunner: Найдена фраза про скамейку: '{phrase}'");
-
             if (benchScene != null)
-            {
                 benchScene.TriggerCameraSequence();
-            }
             else
-            {
                 Debug.LogWarning("DialogueRunner: benchScene не найден!");
-            }
         }
     }
 
     IEnumerator DelayedTreeSequence()
     {
-        // Ждем 2 секунды, чтобы фраза полностью отобразилась
         yield return new WaitForSeconds(2f);
-
         if (treeScene != null && wasApplePhraseSpoken)
         {
             Debug.Log("DialogueRunner: Запускаем кинопоследовательность с деревом...");
@@ -231,7 +232,6 @@ public class DialogueRunner : MonoBehaviour
     public void NextPhrase()
     {
         var block = isLetter ? letterDialogues[currentDialogueIndex] : defaultDialogues[currentDialogueIndex];
-
         currentPhraseIndex++;
 
         if (currentPhraseIndex < block.phrases.Length)
@@ -248,7 +248,6 @@ public class DialogueRunner : MonoBehaviour
         isChoosing = false;
 
         var block = isLetter ? letterDialogues[currentDialogueIndex] : defaultDialogues[currentDialogueIndex];
-
         if (index < 0 || index >= block.choices.Length) return;
 
         int next = block.choices[index].nextDialogueIndex;
@@ -274,8 +273,7 @@ public class DialogueRunner : MonoBehaviour
         isLetter = false;
         wasApplePhraseSpoken = false;
 
-        // Только останавливаем анимации, но НЕ сбрасываем объекты
-        StopAllAnimations(false); // false = только остановка, без сброса
+        StopAllAnimations(false);
 
         var npc = GetComponent<NPCBehaviour>();
         if (npc != null)
@@ -284,7 +282,6 @@ public class DialogueRunner : MonoBehaviour
             npc.Resume();
         }
 
-        // Разблокируем игрока
         var player = GameManager.Instance.GetPlayer();
         if (player != null)
         {
@@ -308,8 +305,7 @@ public class DialogueRunner : MonoBehaviour
         currentPhraseIndex = 0;
         wasApplePhraseSpoken = false;
 
-        // Принудительное закрытие - сбрасываем всё
-        StopAllAnimations(true); // true = полный сброс
+        StopAllAnimations(true);
 
         if (dialogueUI != null)
             dialogueUI.ForceHide();
@@ -321,7 +317,6 @@ public class DialogueRunner : MonoBehaviour
             npc.Resume();
         }
 
-        // Разблокируем игрока
         var player = GameManager.Instance.GetPlayer();
         if (player != null)
         {
@@ -334,57 +329,88 @@ public class DialogueRunner : MonoBehaviour
         }
     }
 
-    // Исправленный метод для остановки всех анимаций
     private void StopAllAnimations(bool fullReset)
     {
-        // Останавливаем treecastscene
         if (treeScene != null)
         {
             treeScene.StopAllCoroutines();
-            if (fullReset)
-                treeScene.ResetScene();
-            else
-                treeScene.StopScene();
+            if (fullReset) treeScene.ResetScene();
+            else treeScene.StopScene();
         }
 
-        // Останавливаем skamia
         if (benchScene != null)
         {
             benchScene.StopAllCoroutines();
-            if (fullReset)
-                benchScene.ResetScene();
-            else
-                benchScene.StopScene();
+            if (fullReset) benchScene.ResetScene();
+            else benchScene.StopScene();
         }
 
-        // Останавливаем flowerHandler
         if (flowerHandler != null)
         {
             flowerHandler.StopAllCoroutines();
             if (fullReset)
             {
-                // Используем рефлексию для доступа к приватным полям
                 var flowerField = flowerHandler.GetType().GetField("currentFlower",
                     System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
                 if (flowerField != null)
                 {
                     GameObject currentFlower = (GameObject)flowerField.GetValue(flowerHandler);
-                    if (currentFlower != null)
-                        Destroy(currentFlower);
+                    if (currentFlower != null) Destroy(currentFlower);
                 }
 
-                // Останавливаем VFX
                 var sneezeVFXField = flowerHandler.GetType().GetField("sneezeVFX",
                     System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
                 if (sneezeVFXField != null)
                 {
                     ParticleSystem sneezeVFX = (ParticleSystem)sneezeVFXField.GetValue(flowerHandler);
                     if (sneezeVFX != null && sneezeVFX.isPlaying)
-                    {
                         sneezeVFX.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
-                    }
                 }
             }
         }
+    }
+
+    public int InteractPriority() => -1;
+
+    public bool CheckInteract()
+    {
+        if (TryGetComponent(out MailBox box))
+            return box.CheckInteract();
+        else
+            return true;
+    }
+
+    public void Interact()
+    {
+        if (TryGetComponent(out MailBox box))
+            box.Interact();
+        else
+            StartDialogue(false);
+    }
+
+    public void OnBeginInteract()
+    {
+        var npc = GetComponent<NPCBehaviour>();
+        if (npc != null)
+        {
+            npc.dialogueActive = true;
+            npc.Stop();
+        }
+    }
+
+    public void OnEndInteract(bool succes)
+    {
+        if (succes) return;
+        var npc = GetComponent<NPCBehaviour>();
+        if (npc != null)
+        {
+            npc.dialogueActive = false;
+            npc.Resume();
+        }
+    }
+
+    public bool CheckDistance()
+    {
+        return GetComponentInChildren<InteractionUI>().CheckDistance();
     }
 }

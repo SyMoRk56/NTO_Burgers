@@ -13,7 +13,7 @@ public enum States
     sneezy          // 8 ← ДОБАВИЛ НОВУЮ АНИМАЦИЮ
 }
 
-public class playerAnimations : MonoBehaviour
+public class PlayerAnimations : MonoBehaviour
 {
     public Animator anim;
 

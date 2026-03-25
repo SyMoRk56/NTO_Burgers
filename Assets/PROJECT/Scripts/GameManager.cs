@@ -29,10 +29,12 @@ public class GameManager : MonoBehaviour
 
         SceneManager.sceneLoaded += OnSceneLoaded;
     }
+
     private void Start()
     {
         SettingsSaveManager.Instance.LoadSettings();
     }
+
     private void OnDestroy()
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;
@@ -60,8 +62,8 @@ public class GameManager : MonoBehaviour
         print("GAME MANGER 1");
 
         yield return new WaitForEndOfFrame();
+        yield return null;
 
-        // Теперь мы точно можем загружать сейв
         OnStartGame();
     }
 
@@ -92,16 +94,33 @@ public class GameManager : MonoBehaviour
         FindFirstObjectByType<CheckForInHouse>().OnStartGame();
         Time.timeScale = 1;
 
+        Invoke(nameof(AddTutorial), 1f);
+    }
+
+    void AddTutorial()
+    {
+        if (PlayerMailInventory.Instance.GetSaveData().carriedMails.Count == 0)
+        {
+            var len = TaskManager.Instance.tasks.Count - 1;
+            for (int i = 0; i <= 2; i++)
+            {
+                var task = TaskManager.Instance.tasks[len - i];
+                var mailItem = MailManager.Instance.GetMailById(task.id);
+                var enriched = new Task(
+                    task.recieverName,
+                    task.adress,
+                    task.id,
+                    mailItem != null && mailItem.isStory
+                );
+                PlayerMailInventory.Instance.AddMailToInventory(enriched);
+            }
+        }
     }
 
     public GameObject GetPlayer()
     {
         if (player != null) return player;
-
         player = GameObject.FindWithTag("Player");
-
-       
-
         return player;
     }
 
@@ -118,6 +137,7 @@ public class GameManager : MonoBehaviour
     {
         SaveAndGoToMenu();
     }
+
     public void SaveAndGoToMenu()
     {
         string slot = currentManualSlot;
@@ -128,10 +148,8 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        // 1. Сохраняем данные в слот
         SaveGameManager.Instance.SaveManual(slot, false);
 
-        // 2. Обновляем autosave.json (записываем только имя слота)
         AutoSaveSlot auto = new AutoSaveSlot { slotName = slot };
         string autosavePath = Path.Combine(
             Application.persistentDataPath,
@@ -142,7 +160,6 @@ public class GameManager : MonoBehaviour
 
         Debug.Log("Saved slot + autosave. Returning to menu...");
 
-        // 3. Останавливаем игру и корутины
         isGameGoing = false;
         if (autosaveRoutine != null)
         {
@@ -150,12 +167,9 @@ public class GameManager : MonoBehaviour
             autosaveRoutine = null;
         }
 
-        // 4. Сбрасываем параметры загрузки
         pendingManualLoad = null;
         loadAutoOnStart = true;
 
-        // 5. Загружаем главное меню
         SceneManager.LoadScene(0);
     }
-
 }
