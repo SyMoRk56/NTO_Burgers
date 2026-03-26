@@ -46,7 +46,7 @@ public class FishingMinigame : MonoBehaviour
         {
             if (IsFishInZone())
             {
-                fishChild.DOShakePosition(.3f, 5f);
+                fishChild.DOShakePosition(.3f, 12f);
             }
             yield return new WaitForSeconds(.3f);
         }
@@ -81,7 +81,20 @@ public class FishingMinigame : MonoBehaviour
 
         // Таймер игры
         timer -= delta;
-        progressBar.fillAmount = (inZoneTimer/currentFish.fishingTime);
+        float t = inZoneTimer / currentFish.fishingTime;
+        t = Mathf.Clamp01(t);
+
+        float smooth;
+        if (t < 0.5f)
+        {
+            smooth = 2f * t * t; // квадратичная (первая половина)
+        }
+        else
+        {
+            smooth = 1f - Mathf.Pow(-2f * t + 2f, 2f) / 2f; // обратная квадратичная (вторая)
+        }
+
+        progressBar.fillAmount = smooth;
         if (timer <= 0f)
             Finish(false); // Промах
     }
@@ -199,11 +212,11 @@ public class FishingMinigame : MonoBehaviour
 
     bool IsFishInZone()
     {
-        float fishTop = fish.anchoredPosition.y + fish.rect.height / 2f;
-        float fishBottom = fish.anchoredPosition.y - fish.rect.height / 2f;
+        float fishTop = fish.anchoredPosition.y + fish.rect.height / 3f;
+        float fishBottom = fish.anchoredPosition.y - fish.rect.height / 3f;
 
-        float zoneTop = playerZone.anchoredPosition.y + playerZone.rect.height / 2f;
-        float zoneBottom = playerZone.anchoredPosition.y - playerZone.rect.height / 2f;
+        float zoneTop = playerZone.anchoredPosition.y + playerZone.rect.height / 4f;
+        float zoneBottom = playerZone.anchoredPosition.y - playerZone.rect.height / 4f;
 
         return fishBottom < zoneTop && fishTop > zoneBottom;
     }
