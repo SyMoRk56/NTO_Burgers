@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8b4b4649ba159794b8aa4331fc029403, type: 3}
-  m_Name: Salmon
+  m_Name: Default 3
   m_EditorClassIdentifier: 
-  minSpeed: 40
-  maxSpeed: 120
-  directionChangeIntervalMin: 0.2
-  directionChangeIntervalMax: 0.8
-  fishingTime: 5
-  weight: 8
-  prefab: {fileID: 9170475284647827352, guid: 9666e09ed6486b7469c920a15961f222, type: 3}
+  minSpeed: 60.3
+  maxSpeed: 164.8
+  directionChangeIntervalMin: 0.15
+  directionChangeIntervalMax: 0.5
+  fishingTime: 10
+  weight: 2
+  prefab: {fileID: 9170475284647827352, guid: 3ef5fe00596928849baf4be75faccd8d, type: 3}
