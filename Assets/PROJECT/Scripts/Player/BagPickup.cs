@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class BagPickup : MonoBehaviour, IInteractObject
 {
@@ -6,6 +6,7 @@ public class BagPickup : MonoBehaviour, IInteractObject
     {
         return GetComponentInChildren<InteractionUI>().CheckDistance();
     }
+
     [Header("Bag Settings")]
     public GameObject bagPrefab;
     public KeyCode pickupKey = KeyCode.E;
@@ -21,6 +22,9 @@ public class BagPickup : MonoBehaviour, IInteractObject
     private bool playerInRange = false;
     private GameObject player;
 
+    // ✅ ИСПРАВЛЕНО: Находим в Start вместо инспектора
+    private EnterToHouse[] allHouseDoors;
+
     void Start()
     {
         player = GameObject.FindGameObjectWithTag("Player");
@@ -31,15 +35,40 @@ public class BagPickup : MonoBehaviour, IInteractObject
 
         if (pickupPrompt != null)
             pickupPrompt.SetActive(false);
-        h.enabled = false;
+
+        // ✅ ИСПРАВЛЕНО: Находим все двери вместо одной ссылки
+        allHouseDoors = FindObjectsByType<EnterToHouse>(FindObjectsSortMode.None);
+        DisableAllDoors();
     }
-    public EnterToHouse h;
+
+    void DisableAllDoors()
+    {
+        if (allHouseDoors != null)
+        {
+            foreach (var door in allHouseDoors)
+            {
+                if (door != null) door.enabled = false;
+            }
+        }
+    }
+
+    void EnableAllDoors()
+    {
+        if (allHouseDoors != null)
+        {
+            foreach (var door in allHouseDoors)
+            {
+                if (door != null) door.enabled = true;
+            }
+        }
+    }
+
     void Update()
     {
-        //if (playerInRange && Input.GetKeyDown(pickupKey))
-        //{
-        //    PickUpBag();
-        //}
+        if (playerInRange && Input.GetKeyDown(pickupKey))
+        {
+            PickUpBag();
+        }
     }
 
     void OnTriggerEnter(Collider other)
@@ -47,7 +76,6 @@ public class BagPickup : MonoBehaviour, IInteractObject
         if (other.CompareTag("Player"))
         {
             playerInRange = true;
-
             if (pickupPrompt != null)
                 pickupPrompt.SetActive(true);
         }
@@ -58,7 +86,6 @@ public class BagPickup : MonoBehaviour, IInteractObject
         if (other.CompareTag("Player"))
         {
             playerInRange = false;
-
             if (pickupPrompt != null)
                 pickupPrompt.SetActive(false);
         }
@@ -92,20 +119,28 @@ public class BagPickup : MonoBehaviour, IInteractObject
             bagInstance.transform.localEulerAngles = localRotation;
 
             Debug.Log("Bag picked up!");
-            print("SetH Enabled " + PlayerMailInventory.Instance.carriedMails[0].id);
-            if (PlayerMailInventory.Instance.carriedMails[0].id == "Tutorial_1")
+
+            // ✅ ИСПРАВЛЕНО: Безопасная проверка с Count
+            if (PlayerMailInventory.Instance != null &&
+                PlayerMailInventory.Instance.carriedMails.Count > 0)
             {
-                PlayerMailInventory.Instance.RemoveFirstMail();
+                Debug.Log("First mail ID: " + PlayerMailInventory.Instance.carriedMails[0].id);
+
+                if (PlayerMailInventory.Instance.carriedMails[0].id == "Tutorial_1")
+                {
+                    PlayerMailInventory.Instance.RemoveFirstMail();
+                }
             }
 
-            // ������������ Tab
+            // Разблокируем Tab
             if (TaskUI.Instance != null)
                 TaskUI.Instance.SetHasBag(true);
 
             if (SaveGameManager.Instance != null)
                 SaveGameManager.Instance.SaveAuto(true);
 
-            h.enabled = true;
+            // ✅ ИСПРАВЛЕНО: Включаем все двери
+            EnableAllDoors();
         }
 
         Destroy(gameObject);
@@ -139,28 +174,9 @@ public class BagPickup : MonoBehaviour, IInteractObject
         return false;
     }
 
-    public int InteractPriority()
-    {
-        return 0;
-    }
-
-    public bool CheckInteract()
-    {
-        return !HasBagAlready();
-    }
-
-    public void Interact()
-    {
-        PickUpBag();
-    }
-
-    public void OnBeginInteract()
-    {
-
-    }
-
-    public void OnEndInteract(bool success)
-    {
-
-    }
+    public int InteractPriority() => 0;
+    public bool CheckInteract() => !HasBagAlready();
+    public void Interact() => PickUpBag();
+    public void OnBeginInteract() { }
+    public void OnEndInteract(bool success) { }
 }

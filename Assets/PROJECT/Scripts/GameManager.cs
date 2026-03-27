@@ -48,18 +48,19 @@ public class GameManager : MonoBehaviour
 
     IEnumerator DelayedGameStart()
     {
-        print("GAME MANGER 1");
+        print("GAME MANAGER 1");
         yield return null;
         while (GetPlayer() == null)
             yield return null;
-        print("GAME MANGER 1");
+        print("GAME MANAGER 2");
 
         while (PlayerSaveSystem.Instance == null)
             yield return null;
-        print("GAME MANGER 1");
+        print("GAME MANAGER 3");
 
-        while (PlayerSaveSystem.Instance.GetData().position[1] == 0) yield return null;
-        print("GAME MANGER 1");
+        while (PlayerSaveSystem.Instance.GetData().position[1] == 0)
+            yield return null;
+        print("GAME MANAGER 4");
 
         yield return new WaitForEndOfFrame();
         yield return null;
@@ -69,8 +70,17 @@ public class GameManager : MonoBehaviour
 
     public void OnStartGame()
     {
-        print("ON start game");
-        FindFirstObjectByType<EnterToHouse>().DipFromBlack();
+        print("ON START GAME");
+
+        // Вызываем метод появления из черного экрана
+        FindFirstObjectByType<EnterToHouse>()?.DipFromBlack();
+
+        // Выдаём письма туториала, если это первый запуск
+        PlayerMailInventory.Instance?.GiveTutorialMailsAtStart();
+
+        // Далее, если день изменился, выдаём ежедневные письма
+        int day = DayNightCycle.Instance.CurrentDay;
+        PlayerMailInventory.Instance?.GiveDailyMails(day);
 
         isGameGoing = true;
         player = GetPlayer();

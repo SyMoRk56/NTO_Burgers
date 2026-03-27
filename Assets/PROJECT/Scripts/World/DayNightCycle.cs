@@ -1,136 +1,55 @@
 ﻿using UnityEngine;
 using System;
-using System.Collections;
 
 [DefaultExecutionOrder(1000)]
 public class DayNightCycle : MonoBehaviour
 {
-    private IEnumerator Start()
-    {
-        yield return new WaitForEndOfFrame();
-        RenderSettings.skybox = daySkybox;
-        RenderSettings.ambientIntensity = 2.0f;
-        RenderSettings.reflectionIntensity = 1.0f;
-        yield return new WaitForEndOfFrame();
-        RenderSettings.ambientIntensity = 1.0f;
+    public static DayNightCycle Instance { get; private set; }
 
-    }
-    public static event Action<int> OnTimeOfDayChanged;
+    public static event Action<int> OnDayChanged;
 
-    [Header("Time")]
-    [Range(0, 3)]
-    [SerializeField] private int timeIndex = 1; // по умолчанию день
+    [Header("День")]
+    [SerializeField] private int currentDay = 1;
 
-    [Header("Skyboxes")]
-    [SerializeField] private Material sunriseSkybox;
-    [SerializeField] private Material daySkybox;
-    [SerializeField] private Material sunsetSkybox;
-    [SerializeField] private Material nightSkybox;
+    private const string SAVE_KEY_DAY = "CurrentDay";
 
-    [Header("Sun")]
-    [SerializeField] private Light sunLight; // назначается вручную через тег Sun
-
-    private const string SAVE_KEY = "TimeOfDayIndex";
+    public int CurrentDay => currentDay;
 
     private void Awake()
     {
+        if (Instance == null) Instance = this;
+        else { Destroy(gameObject); return; }
 
-        //return;
-        // Ищем солнце по тегу Sun
-        if (sunLight == null)
-        {
-            GameObject sunObj = GameObject.FindGameObjectWithTag("Sun");
-            if (sunObj != null) sunLight = sunObj.GetComponent<Light>();
-
-            if (sunLight == null || sunLight.type != LightType.Directional)
-                Debug.LogError("DayNightCycle: Объект с тегом 'Sun' не найден или не Directional Light!");
-        }
-        //return;
-        // Загружаем время из сохранения или ставим день по умолчанию
-        timeIndex = PlayerPrefs.GetInt(SAVE_KEY, 1);
-
-        ApplyTime();
-        OnTimeOfDayChanged?.Invoke(timeIndex);
+        currentDay = PlayerPrefs.GetInt(SAVE_KEY_DAY, 1);
+        Debug.Log($"[DayNightCycle] Текущий день: {currentDay}");
     }
 
     private void Update()
     {
-        //return;
-        // Для теста переключаем время на ` (backquote)
         if (Input.GetKeyDown(KeyCode.BackQuote))
-        {
-            timeIndex = (timeIndex + 1) % 4;
-            ApplyTime();
-            SaveTime();
-            OnTimeOfDayChanged?.Invoke(timeIndex);
-        }
+            AdvanceDay();
     }
 
-    // ================= CORE =================
-    private void ApplyTime()
+    public void AdvanceDay()
     {
-        //return;
-        switch (timeIndex)
-        {
-            case 0: // рассвет
-                SetSun(-5f, new Color(1f, 0.5f, 0.3f), 0.2f); // солнце чуть ниже горизонта
-                RenderSettings.skybox = sunriseSkybox;          // рассветный skybox
-                RenderSettings.ambientLight = new Color(0.6f, 0.4f, 0.3f);
-                break;
+        currentDay++;
+        SaveDay();
 
-            case 1: // день
-                SetSun(60f, new Color(1f, 0.95f, 0.8f), 1f);   // солнце высоко
-                RenderSettings.skybox = daySkybox;             // дневной skybox
-                RenderSettings.ambientLight = new Color(0.6f, 0.6f, 0.6f);
-                break;
-
-            case 2: // закат
-                SetSun(-5f, new Color(1f, 0.4f, 0.2f), 0.3f); // солнце чуть ниже горизонта
-                RenderSettings.skybox = sunsetSkybox;          // закатный skybox
-                RenderSettings.ambientLight = new Color(0.5f, 0.35f, 0.25f);
-                break;
-
-            case 3: // ночь
-                SetSun(-45f, new Color(0.05f, 0.05f, 0.15f), 0f); // солнце глубоко под горизонтом
-                RenderSettings.skybox = nightSkybox;                // ночной skybox
-                RenderSettings.ambientLight = new Color(0.02f, 0.02f, 0.08f); // очень тёмный
-                break;
-        }
-
-
-
-
-
-
-
-
-        DynamicGI.UpdateEnvironment();
+        Debug.Log($"[DayNightCycle] --------------- смена дня ({currentDay}) ---------------");
+        OnDayChanged?.Invoke(currentDay);
     }
 
-    private void SetSun(float angleX, Color color, float intensity)
+    private void SaveDay()
     {
-        if (sunLight == null) return;
-
-        sunLight.transform.rotation = Quaternion.Euler(angleX, 170f, 0f);
-        sunLight.color = color;
-        sunLight.intensity = intensity;
-        RenderSettings.sun = sunLight;
-    }
-
-    // ================= SAVE / LOAD =================
-    private void SaveTime()
-    {
-        PlayerPrefs.SetInt(SAVE_KEY, timeIndex);
+        PlayerPrefs.SetInt(SAVE_KEY_DAY, currentDay);
         PlayerPrefs.Save();
     }
 
-    public int GetTimeIndex() => timeIndex;
-
-    public void SetTimeIndex(int index)
+    public void SetDay(int day)
     {
-        timeIndex = Mathf.Clamp(index, 0, 3);
-        ApplyTime();
-        SaveTime();
-        OnTimeOfDayChanged?.Invoke(timeIndex);
+        currentDay = Mathf.Max(1, day);
+        SaveDay();
+        Debug.Log($"[DayNightCycle] День установлен: {currentDay}");
+        OnDayChanged?.Invoke(currentDay);
     }
 }

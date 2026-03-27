@@ -114,4 +114,56 @@ public class MailManager : MonoBehaviour
                 state[s.id] = s.delivered;
         }
     }
+
+    public Task GetMailByID(string id)
+    {
+        var mailData = catalog?.mails?.Find(m => m.id == id);
+        if (mailData == null)
+        {
+            Debug.LogError($"[MailManager] Письмо с ID {id} не найдено!");
+            return default(Task);
+        }
+
+        // Преобразуем MailItem в Task (или в твою внутреннюю структуру)
+        Task task = new Task
+        {
+            id = mailData.id,
+            recieverName = mailData.reciever,
+            adress = mailData.adress,
+            isStory = mailData.isStory
+        };
+        return task;
+    }
+
+    public Task GetStoryMailForDay(int day)
+    {
+        // Берём первое письмо с isStory = true, которое ещё не выдано
+        var mailItem = catalog.mails.Find(m => m.isStory);
+        if (mailItem == null) return default(Task);
+
+        return new Task
+        {
+            id = mailItem.id,
+            recieverName = mailItem.reciever,
+            adress = mailItem.adress,
+            isStory = mailItem.isStory
+        };
+    }
+
+    public List<Task> GetNonStoryMailsForDay(int day)
+    {
+        List<Task> tasks = new List<Task>();
+        var mails = catalog.mails.FindAll(m => !m.isStory);
+        foreach (var m in mails)
+        {
+            tasks.Add(new Task
+            {
+                id = m.id,
+                recieverName = m.reciever,
+                adress = m.adress,
+                isStory = m.isStory
+            });
+        }
+        return tasks;
+    }
 }

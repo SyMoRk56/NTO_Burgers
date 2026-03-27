@@ -24,8 +24,6 @@ public class EnterToHouse : MonoBehaviour, IInteractObject
     public AudioSource audioSource;
     public AudioClip doorOpenSound;
 
-    private void Start() { }
-
     public void Interact()
     {
         var tran = false;
@@ -35,8 +33,23 @@ public class EnterToHouse : MonoBehaviour, IInteractObject
         if (!tran)
             t = StartCoroutine(TeleportCoroutine());
 
-        if (PlayerMailInventory.Instance.carriedMails[0].id == "Tutorial_3")
+        // ✅ Безопасная проверка
+        if (PlayerMailInventory.Instance != null &&
+            PlayerMailInventory.Instance.carriedMails.Count > 0 &&
+            PlayerMailInventory.Instance.carriedMails[0].id == "Tutorial_3")
+        {
             PlayerMailInventory.Instance.RemoveFirstMail();
+        }
+    }
+
+    // ✅ ДОБАВЛЕНО: Метод для появления из черного экрана (вызывается из GameManager)
+    public void DipFromBlack()
+    {
+        if (blackScreen != null)
+        {
+            blackScreen.color = new Color(blackScreen.color.r, blackScreen.color.g, blackScreen.color.b, 1f);
+            blackScreen.DOFade(0f, 1f);
+        }
     }
 
     private void PlayDoorSound()
@@ -64,20 +77,11 @@ public class EnterToHouse : MonoBehaviour, IInteractObject
         blackScreen.DOFade(0, 1);
         GameManager.Instance.GetPlayer().GetComponent<PlayerManager>().CanMove = true;
 
-        // ── Туториал: сообщаем что игрок вышел из дома ──────────
-        // Срабатывает только если эта дверь помечена как выход наружу
         if (isExitFromHouse)
             TutorialManager.Instance?.OnPlayerExitedHouse();
-        // ────────────────────────────────────────────────────────
 
         yield return new WaitForSeconds(2);
         isInTransition = false;
-    }
-
-    public void DipFromBlack()
-    {
-        print("Dip from black");
-        blackScreen.DOFade(0, 4);
     }
 
     public int InteractPriority() => 0;
@@ -87,6 +91,9 @@ public class EnterToHouse : MonoBehaviour, IInteractObject
         var tran = false;
         foreach (var e in FindObjectsByType<EnterToHouse>(FindObjectsSortMode.None))
             tran |= e.isInTransition;
+
+        // ✅ Безопасная проверка сумки
+        if (PlayerManager.instance == null) return false;
         return !tran && FindChildWithTag(PlayerManager.instance.transform, "Bag") != null;
     }
 

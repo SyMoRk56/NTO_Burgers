@@ -1623,12 +1623,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 26cb1b9acca4c404c9714aa8278f37cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DayNightCycle
-  timeIndex: 1
-  sunriseSkybox: {fileID: 2100000, guid: 538b23b2b6f17fe43b9203e0e9bd9d0f, type: 2}
-  daySkybox: {fileID: 2100000, guid: 9a29616e33093784abb6eba9919b70b3, type: 2}
-  sunsetSkybox: {fileID: 2100000, guid: 9c5bde8b4f1761441952359766ca81ee, type: 2}
-  nightSkybox: {fileID: 2100000, guid: 052adecbb0795cc46a4656d367a81238, type: 2}
-  sunLight: {fileID: 171159016}
+  currentDay: 1
 --- !u!1001 &267133746
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -12867,7 +12862,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5336771360101140992, guid: e93f0847cd46ef74f8224d7740f98656, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7003951673025439272, guid: e93f0847cd46ef74f8224d7740f98656, type: 3}
       propertyPath: m_AnchorMax.x
@@ -27321,7 +27316,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3588492789925430458, guid: 8293270b5ea29ad4297b13e338822511, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

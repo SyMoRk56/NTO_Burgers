@@ -4,13 +4,15 @@ using UnityEngine;
 public class TaskManager : MonoBehaviour
 {
     public static TaskManager Instance;
+
+    // Активные задания (письма которые игрок УЖЕ взял со стола или получил через туториал)
     public List<Task> tasks = new();
+
+    // mailCatalog оставляем для обратной совместимости, но НЕ заполняем tasks из него
     public MailCatalog mailCatalog;
 
     private void Awake()
     {
-        if (Instance == this)
-            Destroy(gameObject);
         if (Instance == null)
         {
             Instance = this;
@@ -18,25 +20,20 @@ public class TaskManager : MonoBehaviour
         }
         else
         {
-            Destroy(Instance.gameObject);
-            Instance = this;
+            Destroy(gameObject);
+            return;
         }
 
-        tasks = new();
-        var m = mailCatalog.mails;
-        foreach (var n in m)
-        {
-            tasks.Add(new Task(n.reciever, n.adress, n.id));
-        }
+        // Не заполняем tasks из каталога — этим занимается DailyMailScheduler
+        tasks = new List<Task>();
     }
 
     public void AddTask(string recieverName, string adress, string id)
     {
-        if (!tasks.Exists(task => task.id == id))
+        if (!tasks.Exists(t => t.id == id))
         {
             tasks.Add(new Task(recieverName, adress, id));
             Debug.Log($"✓ Добавлено задание: {recieverName} -> {adress} (ID: {id})");
-            Debug.Log($"  Всего заданий: {tasks.Count}");
         }
         else
         {
@@ -46,25 +43,17 @@ public class TaskManager : MonoBehaviour
 
     public void RemoveTask(string taskId)
     {
-        int removed = tasks.RemoveAll(task => task.id == taskId);
+        int removed = tasks.RemoveAll(t => t.id == taskId);
         if (removed > 0)
-        {
-            Debug.Log($"✓ Задание с ID {taskId} удалено");
-            Debug.Log($"  Осталось заданий: {tasks.Count}");
-        }
+            Debug.Log($"✓ Задание с ID {taskId} удалено. Осталось: {tasks.Count}");
         else
-        {
-            Debug.LogWarning($"Задание с ID {taskId} не найдено для удаления!");
-        }
+            Debug.LogWarning($"Задание с ID {taskId} не найдено!");
     }
 
     public void DebugState()
     {
-        Debug.Log($"=== СОСТОЯНИЕ TASKMANAGER ===");
-        Debug.Log($"Всего заданий: {tasks.Count}");
-        foreach (var task in tasks)
-        {
-            Debug.Log($" - {task.recieverName} -> {task.adress} (ID: {task.id})");
-        }
+        Debug.Log($"=== TaskManager: {tasks.Count} заданий ===");
+        foreach (var t in tasks)
+            Debug.Log($" - {t.recieverName} -> {t.adress} (ID: {t.id})");
     }
 }

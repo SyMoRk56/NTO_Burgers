@@ -8,6 +8,7 @@ public class PlayerMailInventory : MonoBehaviour
     public List<Task> carriedMails = new List<Task>();
 
     public bool complitedMainLine;
+
     private void Awake()
     {
         if (Instance == null)
@@ -24,6 +25,7 @@ public class PlayerMailInventory : MonoBehaviour
 
     public bool LastMail(string id)
     {
+        if (carriedMails.Count == 0) return false;
         return carriedMails[0].id == id;
     }
 
@@ -71,7 +73,8 @@ public class PlayerMailInventory : MonoBehaviour
         var mail = carriedMails.Find(task =>
             NormalizeAddress(task.adress) == NormalizeAddress(address));
 
-        if (mail.adress != null)
+        // ✅ ИСПРАВЛЕНО: Проверка через IsNullOrEmpty вместо сравнения с null
+        if (!string.IsNullOrEmpty(mail.id))
         {
             Debug.Log($"✓ Найдено письмо для адреса '{address}': {mail.recieverName}");
         }
@@ -88,6 +91,29 @@ public class PlayerMailInventory : MonoBehaviour
     public bool ContainsTask(string taskId)
     {
         return carriedMails.Exists(task => task.id == taskId);
+    }
+
+    public void GiveTutorialMailsAtStart()
+    {
+        // ✅ Очищаем инвентарь перед выдачей
+        ClearInventory();
+
+        string[] tutorialIds = { "Tutorial_0", "Tutorial_1", "Tutorial_2", "Tutorial_3" };
+
+        foreach (var id in tutorialIds)
+        {
+            Task mail = MailManager.Instance.GetMailByID(id);
+            if (!string.IsNullOrEmpty(mail.id))
+            {
+                AddMailToInventory(mail);
+            }
+            else
+            {
+                Debug.LogError($"[GiveTutorialMailsAtStart] Письмо с ID {id} не найдено в MailManager.catalog!");
+            }
+        }
+
+        Debug.Log("[GiveTutorialMailsAtStart] Первые 4 письма туториала добавлены в инвентарь.");
     }
 
     private void UpdateTaskUI()
@@ -161,7 +187,6 @@ public class PlayerMailInventory : MonoBehaviour
             }
             carriedMails.RemoveAt(0);
             UpdateTaskUI();
-            
         }
     }
 
@@ -183,7 +208,7 @@ public class PlayerMailInventory : MonoBehaviour
         }
     }
 
-    // ДОБАВЛЕНО: Метод для очистки инвентаря
+    // Метод для очистки инвентаря
     public void ClearInventory()
     {
         carriedMails.Clear();
@@ -205,5 +230,25 @@ public class PlayerMailInventory : MonoBehaviour
         {
             Debug.Log($" - {mail.recieverName} -> {mail.adress} (ID: {mail.id})");
         }
+    }
+
+    public void GiveDailyMails(int day)
+    {
+        // Находим 1 сюжетное письмо
+        Task storyMail = MailManager.Instance.GetStoryMailForDay(day);
+        if (!string.IsNullOrEmpty(storyMail.id))
+        {
+            AddMailToInventory(storyMail);
+        }
+
+        // Находим 3 обычных письма
+        List<Task> nonStoryMails = MailManager.Instance.GetNonStoryMailsForDay(day);
+        for (int i = 0; i < Mathf.Min(3, nonStoryMails.Count); i++)
+        {
+            if (!string.IsNullOrEmpty(nonStoryMails[i].id))
+                AddMailToInventory(nonStoryMails[i]);
+        }
+
+        Debug.Log($"[GiveDailyMails] День {day}: выдано {1 + Mathf.Min(3, nonStoryMails.Count)} писем");
     }
 }

@@ -9,7 +9,9 @@ public class DeskUI : MonoBehaviour, IInteractObject
     {
         return GetComponentInChildren<InteractionUI>().CheckDistance();
     }
+
     public GameObject letterPrefab;
+
     [Header("Canvas Settings")]
     public Canvas deskCanvas;
     public List<GameObject> randomImages = new();
@@ -46,20 +48,8 @@ public class DeskUI : MonoBehaviour, IInteractObject
 
     void Update()
     {
-        //if (playerInRange && Input.GetKeyDown(KeyCode.E))
-        //{
-        //    if (!isCanvasOpen && HasBag())
-        //        OpenDeskCanvas();
-        //    else if (!HasBag())
-        //    {
-        //        Debug.Log("You need a bag to interact with the desk!");
-        //    }
-        //}
-
         if (isCanvasOpen && Input.GetKeyDown(KeyCode.Escape))
-        {
             CloseDeskCanvas();
-        }
     }
 
     private bool HasBag()
@@ -72,12 +62,9 @@ public class DeskUI : MonoBehaviour, IInteractObject
     {
         foreach (Transform child in parent)
         {
-            if (child.CompareTag(tag))
-                return child;
-
+            if (child.CompareTag(tag)) return child;
             Transform result = FindChildWithTag(child, tag);
-            if (result != null)
-                return result;
+            if (result != null) return result;
         }
         return null;
     }
@@ -109,13 +96,15 @@ public class DeskUI : MonoBehaviour, IInteractObject
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
 
-        if (PlayerMailInventory.Instance.carriedMails[0].id == "Tutorial_2")
+        // Туториальная проверка — убираем Tutorial_2 если он есть
+        if (PlayerMailInventory.Instance != null &&
+            PlayerMailInventory.Instance.carriedMails.Count > 0 &&
+            PlayerMailInventory.Instance.carriedMails[0].id == "Tutorial_2")
         {
             PlayerMailInventory.Instance.RemoveFirstMail();
         }
     }
 
-    // Оставляем основной метод как private
     private void CloseDeskCanvas()
     {
         isCanvasOpen = false;
@@ -141,16 +130,12 @@ public class DeskUI : MonoBehaviour, IInteractObject
             interactionUI.ShowPopup();
     }
 
-    // Добавляем публичный метод для внешнего закрытия
     public void ForceCloseDesk()
     {
-        if (isCanvasOpen)
-        {
-            CloseDeskCanvas();
-        }
+        if (isCanvasOpen) CloseDeskCanvas();
     }
 
-    System.Collections.IEnumerator LockCursorNextFrame()
+    IEnumerator LockCursorNextFrame()
     {
         yield return null;
         Cursor.visible = false;
@@ -160,63 +145,51 @@ public class DeskUI : MonoBehaviour, IInteractObject
     private void DisableMainCameraSystems()
     {
         CameraSwitcher switcher = FindObjectOfType<CameraSwitcher>();
-        if (switcher != null)
-            switcher.enabled = false;
-
-        // Удаляем или закомментируем эти строки:
-        // CameraManagement cameraManagement = FindObjectOfType<CameraManagement>();
-        // if (cameraManagement != null)
-        //     cameraManagement.enabled = false;
+        if (switcher != null) switcher.enabled = false;
 
         CameraController cameraController = FindObjectOfType<CameraController>();
-        if (cameraController != null)
-            cameraController.enabled = false;
+        if (cameraController != null) cameraController.enabled = false;
 
-        if (playerCameraScript != null)
-            playerCameraScript.enabled = false;
+        if (playerCameraScript != null) playerCameraScript.enabled = false;
     }
 
     private void EnableMainCameraSystems()
     {
         CameraSwitcher switcher = FindObjectOfType<CameraSwitcher>();
-        if (switcher != null)
-            switcher.enabled = true;
-
-        // Удаляем или закомментируем эти строки:
-        // CameraManagement cameraManagement = FindObjectOfType<CameraManagement>();
-        // if (cameraManagement != null)
-        //     cameraManagement.enabled = true;
+        if (switcher != null) switcher.enabled = true;
 
         CameraController cameraController = FindObjectOfType<CameraController>();
-        if (cameraController != null)
-            cameraController.enabled = true;
+        if (cameraController != null) cameraController.enabled = true;
 
-        if (playerCameraScript != null)
-            playerCameraScript.enabled = true;
+        if (playerCameraScript != null) playerCameraScript.enabled = true;
     }
 
+    // ── Показываем только письма которые лежат на столе сегодня ──────────
     private void ShowAvailableMails()
     {
         ClearAllLetters();
-        print("SHOW AVIA");
-        if (TaskManager.Instance != null && TaskManager.Instance.tasks.Count > 0)
-        {
-            print(1);
-            var availableTasks = new List<Task>(TaskManager.Instance.tasks);
 
-            foreach (var task in availableTasks)
-            {
-                print(task.adress);
-                if (!PlayerMailInventory.Instance.ContainsTask(task.id) && !task.id.Contains("Tutorial"))
-                {
-                    print("1123;");
-                    CreateMailUI(task);
-                }
-            }
+        if (DailyMailScheduler.Instance == null)
+        {
+            Debug.LogError("[DeskUI] DailyMailScheduler не найден!");
+            return;
+        }
+
+        var available = DailyMailScheduler.Instance.GetAvailableForDesk();
+        Debug.Log($"[DeskUI] Писем на столе: {available.Count}");
+
+        foreach (var mail in available)
+        {
+            // Не показываем то что уже в инвентаре игрока
+            if (PlayerMailInventory.Instance != null &&
+                PlayerMailInventory.Instance.ContainsTask(mail.id))
+                continue;
+
+            CreateMailUI(mail);
         }
     }
 
-    private void CreateMailUI(Task task)
+    private void CreateMailUI(MailItem mail)
     {
         if (letterPrefab == null) return;
 
@@ -226,29 +199,37 @@ public class DeskUI : MonoBehaviour, IInteractObject
         var drag = letter.GetComponent<DeskLetterUI>();
         if (drag != null)
         {
-            drag.recipient = task.recieverName;
-            drag.id = task.id;
-            drag.address = task.adress;
+            drag.recipient = mail.reciever;
+            drag.id = mail.id;
+            drag.address = mail.adress;
         }
 
         var button = letter.GetComponent<Button>();
-        if (button == null)
-            button = letter.AddComponent<Button>();
+        if (button == null) button = letter.AddComponent<Button>();
 
         button.onClick.RemoveAllListeners();
-        button.onClick.AddListener(() => TakeMailToInventory(task));
+        button.onClick.AddListener(() => TakeMailFromDesk(mail));
 
         randomImages.Add(letter);
     }
 
-    private void TakeMailToInventory(Task task)
+    // Игрок берёт письмо со стола — уведомляем DailyMailScheduler
+    private void TakeMailFromDesk(MailItem mail)
     {
+        if (DailyMailScheduler.Instance == null) return;
+
+        // DailyMailScheduler сам добавит в TaskManager
+        DailyMailScheduler.Instance.TakeMailFromDesk(mail.id);
+
+        // Добавляем в инвентарь игрока
         if (PlayerMailInventory.Instance != null)
         {
+            var task = new Task(mail.reciever, mail.adress, mail.id);
             PlayerMailInventory.Instance.AddMailToInventory(task);
-            RemoveMailFromUI(task.id);
-            Debug.Log($"Письмо добавлено в инвентарь: {task.recieverName}");
         }
+
+        RemoveMailFromUI(mail.id);
+        Debug.Log($"[DeskUI] Письмо взято: {mail.id}");
     }
 
     private void RemoveMailFromUI(string taskId)
@@ -256,15 +237,13 @@ public class DeskUI : MonoBehaviour, IInteractObject
         for (int i = randomImages.Count - 1; i >= 0; i--)
         {
             var img = randomImages[i];
-            if (img != null)
+            if (img == null) continue;
+            var drag = img.GetComponent<DeskLetterUI>();
+            if (drag != null && drag.id == taskId)
             {
-                var draggable = img.GetComponent<DeskLetterUI>();
-                if (draggable != null && draggable.id == taskId)
-                {
-                    Destroy(img.gameObject);
-                    randomImages.RemoveAt(i);
-                    break;
-                }
+                Destroy(img.gameObject);
+                randomImages.RemoveAt(i);
+                break;
             }
         }
     }
@@ -272,47 +251,21 @@ public class DeskUI : MonoBehaviour, IInteractObject
     private void ClearAllLetters()
     {
         foreach (var img in randomImages)
-        {
-            if (img != null)
-                Destroy(img.gameObject);
-        }
+            if (img != null) Destroy(img.gameObject);
         randomImages.Clear();
     }
 
-    public void PlayerEntered()
-    {
-        playerInRange = true;
-    }
+    public void PlayerEntered() { playerInRange = true; }
 
     public void PlayerExited()
     {
         playerInRange = false;
-        if (isCanvasOpen)
-            CloseDeskCanvas();
+        if (isCanvasOpen) CloseDeskCanvas();
     }
 
-    public int InteractPriority()
-    {
-        return 0;
-    }
-
-    public bool CheckInteract()
-    {
-        return HasBag();
-    }
-
-    public void Interact()
-    {
-        OpenDeskCanvas();
-    }
-
-    public void OnBeginInteract()
-    {
-
-    }
-
-    public void OnEndInteract(bool success)
-    {
-
-    }
+    public int InteractPriority() => 0;
+    public bool CheckInteract() => HasBag();
+    public void Interact() => OpenDeskCanvas();
+    public void OnBeginInteract() { }
+    public void OnEndInteract(bool success) { }
 }
