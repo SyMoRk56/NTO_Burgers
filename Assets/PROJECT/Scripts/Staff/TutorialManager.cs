@@ -34,6 +34,7 @@ public class TutorialManager : MonoBehaviour
 
     void Awake()
     {
+        DontDestroyOnLoad(npcSpawnPoint.gameObject);
         if (Instance == null) Instance = this;
         else { Destroy(gameObject); return; }
     }
@@ -169,6 +170,7 @@ public class TutorialManager : MonoBehaviour
 
     private void SpawnAndApproach()
     {
+        Debug.LogError("Spawn and approach");
         TutorialNPC npc = SpawnNPC();
         npc?.ApproachPlayer();
     }
@@ -187,9 +189,7 @@ public class TutorialManager : MonoBehaviour
             return null;
         }
 
-        Vector3 pos = npcSpawnPoint != null
-            ? npcSpawnPoint.position
-            : GameManager.Instance.GetPlayer().transform.position + Vector3.forward * 4f;
+        Vector3 pos = npcSpawnPoint.position;
 
         GameObject obj = Instantiate(tutorialNPCPrefab, pos, Quaternion.identity);
         obj.SetActive(true);

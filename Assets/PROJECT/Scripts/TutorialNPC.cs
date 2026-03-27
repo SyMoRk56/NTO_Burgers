@@ -36,7 +36,7 @@ public class TutorialNPC : MonoBehaviour
     {
         if (exitPoint == null)
         {
-            GameObject obj = GameObject.FindGameObjectWithTag("TutorialExit");
+            GameObject obj = GameObject.FindGameObjectWithTag("TutorialNPCExit");
 
             if (obj != null)
             {
