@@ -97,7 +97,7 @@ public class BagPickup : MonoBehaviour, IInteractObject
             {
                 PlayerMailInventory.Instance.RemoveFirstMail();
             }
-
+            GameObject.Find("Table").transform.parent.GetChild(2).gameObject.SetActive(true);
             // Разблокируем Tab
             if (TaskUI.Instance != null)
                 TaskUI.Instance.SetHasBag(true);

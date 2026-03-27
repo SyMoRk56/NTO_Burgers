@@ -33,8 +33,9 @@ public class DeskUI : MonoBehaviour, IInteractObject
     public bool isInTable => isCanvasOpen;
     public bool IsCanvasOpen => isCanvasOpen;
 
-    void Start()
+    IEnumerator Start()
     {
+        
         if (deskCanvas != null)
             deskCanvas.gameObject.SetActive(false);
 
@@ -42,6 +43,20 @@ public class DeskUI : MonoBehaviour, IInteractObject
             deskCamera.gameObject.SetActive(false);
 
         player = GameObject.FindGameObjectWithTag("Player");
+
+        yield return new WaitForSeconds(.2f);
+        var ou = GameObject.Find("Table (1)");
+        bool b = false;
+
+        if ((ou != null))
+        {
+            ou.SetActive(false);
+        }
+        print(PlayerMailInventory.Instance.carriedMails[0]);
+        if (PlayerMailInventory.Instance.carriedMails.Contains(new Task("Tutorial_2", "Tutorial_2", "Tutorial_2", true)))
+        {
+            ou.SetActive(true);
+        }
     }
 
     void Update()
@@ -84,6 +99,13 @@ public class DeskUI : MonoBehaviour, IInteractObject
 
     void OpenDeskCanvas()
     {
+        var ou = GameObject.Find("Table (1)");
+        bool b = false;
+        
+        if(ou != null && !b)
+        {
+            ou.SetActive(false);
+        }
         isCanvasOpen = true;
 
         if (interactionUI != null)
