@@ -171,19 +171,38 @@ public class DeskUI : MonoBehaviour, IInteractObject
 
         if (DailyMailScheduler.Instance == null)
         {
-            Debug.LogError("[DeskUI] DailyMailScheduler не найден!");
-            return;
+            DailyMailScheduler.Instance = FindObjectOfType<DailyMailScheduler>();
+            if (DailyMailScheduler.Instance == null)
+            {
+                Debug.LogError("[DeskUI] DailyMailScheduler не найден!");
+                return;
+            }
         }
 
         var available = DailyMailScheduler.Instance.GetAvailableForDesk();
         Debug.Log($"[DeskUI] Писем на столе: {available.Count}");
 
+        // ✅ ПРОВЕРКА: Нет писем на столе И в инвентаре пусто
+        bool inventoryEmpty = PlayerMailInventory.Instance == null ||
+                              PlayerMailInventory.Instance.carriedMails.Count == 0;
+
+        if (available.Count == 0 && inventoryEmpty)
+        {
+            Debug.Log("--------------------------------------------------");
+            Debug.Log("----------------на сегодня письма закончились----------------");
+            Debug.Log("--------------------------------------------------");
+            Debug.Log("Вернитесь домой и вздремните на кровати чтобы наступил новый день!");
+            return;
+        }
+
         foreach (var mail in available)
         {
-            // Не показываем то что уже в инвентаре игрока
             if (PlayerMailInventory.Instance != null &&
                 PlayerMailInventory.Instance.ContainsTask(mail.id))
+            {
+                Debug.Log($"[DeskUI] Пропущено (уже в инвентаре): {mail.id}");
                 continue;
+            }
 
             CreateMailUI(mail);
         }
@@ -218,13 +237,12 @@ public class DeskUI : MonoBehaviour, IInteractObject
     {
         if (DailyMailScheduler.Instance == null) return;
 
-        // DailyMailScheduler сам добавит в TaskManager
         DailyMailScheduler.Instance.TakeMailFromDesk(mail.id);
 
-        // Добавляем в инвентарь игрока
         if (PlayerMailInventory.Instance != null)
         {
-            var task = new Task(mail.reciever, mail.adress, mail.id);
+            // ✅ Конвертируем MailItem в Task для инвентаря
+            var task = new Task(mail.reciever, mail.adress, mail.id, mail.isStory);
             PlayerMailInventory.Instance.AddMailToInventory(task);
         }
 

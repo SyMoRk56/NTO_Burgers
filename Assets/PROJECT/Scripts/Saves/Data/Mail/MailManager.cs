@@ -56,7 +56,6 @@ public class MailManager : MonoBehaviour
         return l.Take(count).ToList();
     }
 
-    // НОВЫЙ МЕТОД: Получить все недоставленные письма
     public List<MailItem> GetAllUndeliveredMails()
     {
         List<MailItem> undelivered = new List<MailItem>();
@@ -68,7 +67,6 @@ public class MailManager : MonoBehaviour
         return undelivered;
     }
 
-    // НОВЫЙ МЕТОД: Получить письмо по ID
     public MailItem GetMailById(string id)
     {
         foreach (var mail in catalog.mails)
@@ -115,6 +113,7 @@ public class MailManager : MonoBehaviour
         }
     }
 
+    // ✅ ДЛЯ AddTutorial() — возвращает Task
     public Task GetMailByID(string id)
     {
         var mailData = catalog?.mails?.Find(m => m.id == id);
@@ -124,7 +123,6 @@ public class MailManager : MonoBehaviour
             return default(Task);
         }
 
-        // Преобразуем MailItem в Task (или в твою внутреннюю структуру)
         Task task = new Task
         {
             id = mailData.id,
@@ -135,35 +133,26 @@ public class MailManager : MonoBehaviour
         return task;
     }
 
-    public Task GetStoryMailForDay(int day)
+    // ✅ ДЛЯ СТОЛА — возвращает MailItem (не Task!)
+    public MailItem GetStoryMailForDay(int day)
     {
-        // Берём первое письмо с isStory = true, которое ещё не выдано
+        // Берём первое сюжетное письмо из каталога
         var mailItem = catalog.mails.Find(m => m.isStory);
-        if (mailItem == null) return default(Task);
+        if (mailItem == null) return null; // ✅ null, не default(Task)
 
-        return new Task
-        {
-            id = mailItem.id,
-            recieverName = mailItem.reciever,
-            adress = mailItem.adress,
-            isStory = mailItem.isStory
-        };
+        return mailItem;
     }
 
-    public List<Task> GetNonStoryMailsForDay(int day)
+    // ✅ ДЛЯ СТОЛА — возвращает List<MailItem> (не List<Task>!)
+    public List<MailItem> GetNonStoryMailsForDay(int day)
     {
-        List<Task> tasks = new List<Task>();
-        var mails = catalog.mails.FindAll(m => !m.isStory);
-        foreach (var m in mails)
+        List<MailItem> mails = new List<MailItem>();
+        var nonStory = catalog.mails.FindAll(m => !m.isStory);
+
+        foreach (var m in nonStory)
         {
-            tasks.Add(new Task
-            {
-                id = m.id,
-                recieverName = m.reciever,
-                adress = m.adress,
-                isStory = m.isStory
-            });
+            mails.Add(m);
         }
-        return tasks;
+        return mails;
     }
 }

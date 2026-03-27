@@ -40,6 +40,8 @@ public class DictionaryData
     }
 }
 
+// ❌ УДАЛИТЬ отсюда! GameSaveData уже в отдельном файле!
+
 public class SaveGameManager : MonoBehaviour
 {
     public static SaveGameManager Instance;
@@ -51,11 +53,7 @@ public class SaveGameManager : MonoBehaviour
     private bool isFirstSaveInGame = true;
     private string currentSceneName;
 
-    // ── Туториал: флаг отложенного запуска ──────────────────
-    // Выставляется в true когда создаётся новый слот на сцене Menu.
-    // TutorialManager читает его когда Game сцена загрузится.
     private bool pendingTutorialStart = false;
-    // ────────────────────────────────────────────────────────
 
     void Awake()
     {
@@ -84,17 +82,17 @@ public class SaveGameManager : MonoBehaviour
         if (autosaveIndicator != null)
             autosaveIndicator.SetActive(false);
     }
+
     public bool HasSaves()
     {
         string manualFolder = Path.Combine(saveFolder, "manual");
-
         if (!Directory.Exists(manualFolder))
             return false;
 
         string[] saveFiles = Directory.GetFiles(manualFolder, "*.json");
-
         return saveFiles.Length > 0;
     }
+
     void Start()
     {
         if (autosaveIndicator != null)
@@ -122,15 +120,12 @@ public class SaveGameManager : MonoBehaviour
             isFirstSaveInGame = true;
             Debug.Log("First save in Game scene will be hidden");
 
-            // ── Туториал: Game загрузилась — запускаем если нужно ──
             if (pendingTutorialStart)
             {
                 pendingTutorialStart = false;
                 Debug.Log("[SaveGame] Game сцена загружена — запускаем туториал");
-                // Откладываем ещё на кадр чтобы все Start() на сцене отработали
                 StartCoroutine(StartTutorialNextFrame());
             }
-            // ────────────────────────────────────────────────────────
         }
 
         if (autosaveIndicator != null)
@@ -139,7 +134,6 @@ public class SaveGameManager : MonoBehaviour
 
     private System.Collections.IEnumerator StartTutorialNextFrame()
     {
-        // Ждём два кадра — GameManager и TutorialManager должны инициализироваться
         yield return null;
         yield return null;
 
@@ -150,11 +144,10 @@ public class SaveGameManager : MonoBehaviour
         }
         else
         {
-            Debug.LogError("[SaveGame] TutorialManager.Instance == NULL после загрузки Game! Убедись что объект TutorialManager есть на сцене Game.");
+            Debug.LogError("[SaveGame] TutorialManager.Instance == NULL после загрузки Game!");
         }
     }
 
-    // ======================= CHECK =======================
     public bool CheckSave(string saveName)
     {
         string folder = Path.Combine(saveFolder, "manual");
@@ -207,7 +200,6 @@ public class SaveGameManager : MonoBehaviour
         }
     }
 
-    // ======================= AUTOSAVE =======================
     public void SaveAuto(bool showIndicator)
     {
         string slot = GameManager.Instance.currentManualSlot;
@@ -241,13 +233,10 @@ public class SaveGameManager : MonoBehaviour
         Debug.Log("Autosave saved slot name: " + slot);
     }
 
-    // ======================= MANUAL SAVE =======================
     public void SaveManual(string saveName, bool showIndicator = true)
     {
-        // ── Туториал: проверяем новый слот ДО записи ────────
         bool isNewSlot = !HasManual(saveName);
         Debug.Log($"[SaveGame] SaveManual '{saveName}', isNewSlot={isNewSlot}, scene={currentSceneName}");
-        // ────────────────────────────────────────────────────
 
         string folder = Path.Combine(saveFolder, "manual");
         Directory.CreateDirectory(folder);
@@ -263,16 +252,11 @@ public class SaveGameManager : MonoBehaviour
 
         ScreenCapture.CaptureScreenshot(Path.Combine(folder, saveName + ".png"));
 
-        // ── Туториал: если новый слот — запомнить флаг ──────
-        // Не вызываем StartTutorialForNewSlot() здесь напрямую —
-        // TutorialManager ещё не существует (мы на сцене Menu).
-        // Флаг сработает в OnSceneLoaded когда загрузится Game.
         if (isNewSlot)
         {
             pendingTutorialStart = true;
             Debug.Log("[SaveGame] Новый слот — выставлен pendingTutorialStart=true");
         }
-        // ────────────────────────────────────────────────────
 
         if (currentSceneName == "Menu") { Debug.Log("Manual save on Menu scene - indicator hidden"); return; }
 
@@ -292,7 +276,6 @@ public class SaveGameManager : MonoBehaviour
         Debug.Log("Manual save created -> " + jsonPath);
     }
 
-    // ======================= LOAD =======================
     public void LoadAuto()
     {
         if (!File.Exists(autosavePath)) { Debug.LogWarning("No autosave found."); return; }
@@ -335,7 +318,6 @@ public class SaveGameManager : MonoBehaviour
         LoadFromJson(json);
     }
 
-    // ======================= INTERNAL =======================
     private string CreateSaveJson()
     {
         GameSaveData data = new GameSaveData();
@@ -359,21 +341,30 @@ public class SaveGameManager : MonoBehaviour
         }
         catch { data.objectStates = new DictionaryData(); }
 
+        // ✅ Сохраняем день и время
         try
         {
             DayNightCycle cycle = FindObjectOfType<DayNightCycle>();
-            if (cycle != null) { /* data.timeOfDayIndex = cycle.GetTimeIndex(); */ }
+            if (cycle != null)
+            {
+                data.timeOfDayIndex = cycle.CurrentDay;
+                data.timeOfDayValue = cycle.currentTimeOfDay;
+            }
         }
-        catch { data.timeOfDayIndex = 0; }
+        catch { data.timeOfDayIndex = 1; data.timeOfDayValue = 0; }
 
-        // ── Туториал ─────────────────────────────────────────
         try
         {
             if (TutorialManager.Instance != null)
                 data.tutorialData = TutorialManager.Instance.GetSaveData();
         }
         catch { data.tutorialData = new TutorialSaveData(); }
-        // ────────────────────────────────────────────────────
+        try
+        {
+            if (DailyMailScheduler.Instance != null)
+                DailyMailScheduler.Instance.SaveTakenMails();
+        }
+        catch { }
 
         data.saveDate = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
         data.timestamp = System.DateTimeOffset.Now.ToUnixTimeSeconds();
@@ -396,7 +387,10 @@ public class SaveGameManager : MonoBehaviour
             ObjectStateManager.Instance.DebugStates();
         }
 
-        if (data.playerData != null && !data.playerData.hasBag)
+        // ✅ Не очищаем инвентарь если это туториал
+        bool isTutorialSlot = pendingTutorialStart || (data.tutorialData != null && !data.tutorialData.completed);
+
+        if (data.playerData != null && !data.playerData.hasBag && !isTutorialSlot)
         {
             Debug.LogWarning("У игрока нет сумки - очищаем все задания и письма!");
 
@@ -415,7 +409,7 @@ public class SaveGameManager : MonoBehaviour
         }
         else
         {
-            Debug.Log("У игрока есть сумка - загружаем задания");
+            Debug.Log("У игрока есть сумка ИЛИ это туториал - загружаем задания");
 
             if (data.mailData != null) MailManager.Instance.LoadSaveData(data.mailData);
             if (data.npcData != null) NPCSaveSystem.RestoreNPCData(data.npcData);
@@ -430,19 +424,31 @@ public class SaveGameManager : MonoBehaviour
         if (player != null && floatArray != null && floatArray.Length == 3)
             player.GetComponent<Rigidbody>().MovePosition(new Vector3(floatArray[0], floatArray[1], floatArray[2]));
 
+        // ✅ Загружаем день и время
         DayNightCycle cycle = FindObjectOfType<DayNightCycle>();
-        if (cycle != null) { Debug.Log($"Загружено время суток: {data.timeOfDayIndex}"); }
-        else Debug.LogWarning("DayNightCycle не найден при загрузке!");
+        if (cycle != null)
+        {
+            Debug.Log($"Загружено время суток: {data.timeOfDayIndex}");
+            cycle.SetDay(data.timeOfDayIndex);
+            cycle.currentTimeOfDay = data.timeOfDayValue;
+        }
+        else
+        {
+            Debug.LogWarning("DayNightCycle не найден при загрузке!");
+        }
+        try
+        {
+            if (DailyMailScheduler.Instance != null)
+                DailyMailScheduler.Instance.LoadTakenMails();
+        }
+        catch { }
 
-        // ── Туториал: восстанавливаем стадию ────────────────
         if (TutorialManager.Instance != null)
             TutorialManager.Instance.LoadTutorialState(data.tutorialData);
         else
             Debug.LogWarning("[SaveGame] LoadFromJson: TutorialManager.Instance == NULL");
-        // ────────────────────────────────────────────────────
     }
 
-    // ======================= UI =======================
     private void ShowSaveIndicator()
     {
         if (autosaveIndicator == null) { Debug.LogWarning("Autosave indicator is not assigned!"); return; }
@@ -456,7 +462,6 @@ public class SaveGameManager : MonoBehaviour
         if (autosaveIndicator != null) { autosaveIndicator.SetActive(false); Debug.Log("Save indicator hidden"); }
     }
 
-    // ======================= DELETE SAVE =======================
     public void DeleteSave(string saveName)
     {
         string folder = Path.Combine(saveFolder, "manual");

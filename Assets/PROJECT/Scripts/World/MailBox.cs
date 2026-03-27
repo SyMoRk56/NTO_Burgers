@@ -8,14 +8,16 @@ public class MailBox : MonoBehaviour, IInteractObject
     {
         return GetComponentInChildren<InteractionUI>().CheckDistance();
     }
+
     [Header("Mailbox Settings")]
     public string mailboxAddress;
 
     [Header("Dialogue Settings")]
     public DialogueRunner dialogueRunner;
     public bool triggerDialogueAfterDelivery = true;
-    public float dialogueDelay = 0.3f; // Задержка перед запуском диалога
+    public float dialogueDelay = 0.3f;
     public AudioSource mailSource;
+
     public void Interact()
     {
         if (PlayerMailInventory.Instance == null)
@@ -33,20 +35,18 @@ public class MailBox : MonoBehaviour, IInteractObject
             Debug.Log($"✓ Найдено подходящее письмо: {mail.recieverName}");
             DeliverMail(mail);
             FindFirstObjectByType<LetterPanel>().ShowPanel();
-            // Запускаем диалог после доставки С ЗАДЕРЖКОЙ
+
             if (triggerDialogueAfterDelivery && dialogueRunner != null)
             {
-                StartCoroutine(StartDialogueWithDelay(true)); // true для диалога с письмом
-                if(GetComponent<NPCBehaviour>() == null)
-                mailSource.Play();
-
+                StartCoroutine(StartDialogueWithDelay(true));
+                if (GetComponent<NPCBehaviour>() == null)
+                    mailSource.Play();
             }
         }
         else
         {
             Debug.Log($"✗ Нет писем для адреса: '{mailboxAddress}'");
 
-            // Можно запустить обычный диалог, если нет письма
             if (dialogueRunner != null)
             {
                 dialogueRunner.StartDialogue(false);
@@ -55,10 +55,8 @@ public class MailBox : MonoBehaviour, IInteractObject
         SaveGameManager.Instance.SaveAuto(true);
     }
 
-    // Новый метод для запуска диалога с задержкой
     private IEnumerator StartDialogueWithDelay(bool isLetterDialogue)
     {
-        // Даем время закрыться предыдущему диалогу, если он был
         yield return new WaitForSeconds(dialogueDelay);
 
         if (dialogueRunner != null)
@@ -81,6 +79,13 @@ public class MailBox : MonoBehaviour, IInteractObject
             Debug.Log($"✓ Письмо удалено из TaskManager");
         }
 
+        // ✅ КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: Отметить письмо как доставленное!
+        if (DailyMailScheduler.Instance != null)
+        {
+            DailyMailScheduler.Instance.MarkMailAsDelivered(mail.id);
+            Debug.Log($"[MailBox] Письмо {mail.id} отмечено как доставленное в DailyMailScheduler");
+        }
+
         if (SaveGameManager.Instance != null)
         {
             SaveGameManager.Instance.SaveAuto(false);
@@ -90,21 +95,13 @@ public class MailBox : MonoBehaviour, IInteractObject
         Debug.Log($"✓ Письмо успешно доставлено!");
     }
 
-    public int InteractPriority()
-    {
-        return 10;
-    }
+    public int InteractPriority() => 10;
 
     public bool CheckInteract()
     {
         return PlayerMailInventory.Instance.HasMailForAddress(mailboxAddress) || dialogueRunner != null;
     }
 
-    public void OnBeginInteract()
-    {
-    }
-
-    public void OnEndInteract(bool success)
-    {
-    }
+    public void OnBeginInteract() { }
+    public void OnEndInteract(bool success) { }
 }

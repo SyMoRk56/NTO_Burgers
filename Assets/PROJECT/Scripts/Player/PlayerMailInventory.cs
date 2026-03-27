@@ -180,13 +180,48 @@ public class PlayerMailInventory : MonoBehaviour
     {
         if (carriedMails.Count > 0)
         {
+            string mailId = carriedMails[0].id;
+
             if (carriedMails[0].recieverName == "NPC_koala")
             {
                 complitedMainLine = true;
                 PlayerManager.instance.SetThunder(false);
             }
+
+            // ✅ Отмечаем письмо как доставленное
+            if (DailyMailScheduler.Instance != null)
+            {
+                DailyMailScheduler.Instance.MarkMailAsDelivered(mailId);
+            }
+
             carriedMails.RemoveAt(0);
             UpdateTaskUI();
+
+            // ✅ Проверка: все ли доставлено?
+            if (carriedMails.Count == 0)
+            {
+                CheckNoMailsAvailable();
+            }
+        }
+    }
+
+    // ✅ Новый метод для проверки
+    private void CheckNoMailsAvailable()
+    {
+        if (DailyMailScheduler.Instance == null)
+        {
+            DailyMailScheduler.Instance = FindObjectOfType<DailyMailScheduler>();
+            if (DailyMailScheduler.Instance == null) return;
+        }
+
+        var availableOnDesk = DailyMailScheduler.Instance.GetAvailableForDesk();
+
+        if (availableOnDesk.Count == 0)
+        {
+            Debug.Log("--------------------------------------------------");
+            Debug.Log("----------------на сегодня письма закончились----------------");
+            Debug.Log("--------------------------------------------------");
+            Debug.Log("Вернитесь домой и вздремните на кровати чтобы наступил новый день!");
         }
     }
 
@@ -232,23 +267,5 @@ public class PlayerMailInventory : MonoBehaviour
         }
     }
 
-    public void GiveDailyMails(int day)
-    {
-        // Находим 1 сюжетное письмо
-        Task storyMail = MailManager.Instance.GetStoryMailForDay(day);
-        if (!string.IsNullOrEmpty(storyMail.id))
-        {
-            AddMailToInventory(storyMail);
-        }
-
-        // Находим 3 обычных письма
-        List<Task> nonStoryMails = MailManager.Instance.GetNonStoryMailsForDay(day);
-        for (int i = 0; i < Mathf.Min(3, nonStoryMails.Count); i++)
-        {
-            if (!string.IsNullOrEmpty(nonStoryMails[i].id))
-                AddMailToInventory(nonStoryMails[i]);
-        }
-
-        Debug.Log($"[GiveDailyMails] День {day}: выдано {1 + Mathf.Min(3, nonStoryMails.Count)} писем");
-    }
+   
 }

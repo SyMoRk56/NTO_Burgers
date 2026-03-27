@@ -4,12 +4,15 @@ using System;
 [DefaultExecutionOrder(1000)]
 public class DayNightCycle : MonoBehaviour
 {
-    public static DayNightCycle Instance { get; private set; }
+    public static DayNightCycle Instance;
 
     public static event Action<int> OnDayChanged;
 
     [Header("День")]
     [SerializeField] private int currentDay = 1;
+
+    [Header("Время суток")]
+    [SerializeField] public float currentTimeOfDay = 0;
 
     private const string SAVE_KEY_DAY = "CurrentDay";
 
@@ -20,14 +23,17 @@ public class DayNightCycle : MonoBehaviour
         if (Instance == null) Instance = this;
         else { Destroy(gameObject); return; }
 
-        currentDay = PlayerPrefs.GetInt(SAVE_KEY_DAY, 1);
+        currentDay = 1; // Загрузится из сохранения
         Debug.Log($"[DayNightCycle] Текущий день: {currentDay}");
     }
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.BackQuote))
-            AdvanceDay();
+        // ❌ УБРАТЬ: Автоматическая смена дня
+        // if (Input.GetKeyDown(KeyCode.BackQuote))
+        //     AdvanceDay();
+
+        // ✅ День меняется ТОЛЬКО через кровать!
     }
 
     public void AdvanceDay()
