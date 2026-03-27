@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b4b4649ba159794b8aa4331fc029403, type: 3}
   m_Name: Default 3
   m_EditorClassIdentifier: 
-  minSpeed: 60.3
-  maxSpeed: 164.8
-  directionChangeIntervalMin: 0.15
-  directionChangeIntervalMax: 0.5
-  fishingTime: 10
+  minSpeed: 300
+  maxSpeed: 400
+  directionChangeIntervalMin: 1
+  directionChangeIntervalMax: 1.2
+  fishingTime: 4
   weight: 2
   prefab: {fileID: 9170475284647827352, guid: 3ef5fe00596928849baf4be75faccd8d, type: 3}

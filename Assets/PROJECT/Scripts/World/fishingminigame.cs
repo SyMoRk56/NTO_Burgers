@@ -94,7 +94,7 @@ public class FishingMinigame : MonoBehaviour
             smooth = 1f - Mathf.Pow(-2f * t + 2f, 2f) / 2f; // обратная квадратичная (вторая)
         }
 
-        progressBar.fillAmount = smooth;
+        progressBar.fillAmount = t;
         if (timer <= 0f)
             Finish(false); // Промах
     }
@@ -212,8 +212,8 @@ public class FishingMinigame : MonoBehaviour
 
     bool IsFishInZone()
     {
-        float fishTop = fish.anchoredPosition.y + fish.rect.height / 3f;
-        float fishBottom = fish.anchoredPosition.y - fish.rect.height / 3f;
+        float fishTop = fish.anchoredPosition.y + fish.rect.height / 4f;
+        float fishBottom = fish.anchoredPosition.y - fish.rect.height / 4f;
 
         float zoneTop = playerZone.anchoredPosition.y + playerZone.rect.height / 4f;
         float zoneBottom = playerZone.anchoredPosition.y - playerZone.rect.height / 4f;
