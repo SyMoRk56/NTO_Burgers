@@ -337,6 +337,9 @@ public class SaveGameManager : MonoBehaviour
 
         Debug.Log("Save integrity OK.");
         GameManager.Instance.currentManualSlot = name;
+
+        AutoSaveSlot data = new AutoSaveSlot() { slotName = name };
+        File.WriteAllText(autosavePath, JsonUtility.ToJson(data, true));
         LoadFromJson(json);
     }
 
