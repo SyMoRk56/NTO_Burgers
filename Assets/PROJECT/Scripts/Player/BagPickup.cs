@@ -142,6 +142,19 @@ public class BagPickup : MonoBehaviour, IInteractObject
             // ✅ ИСПРАВЛЕНО: Включаем все двери
             EnableAllDoors();
         }
+        while (PlayerMailInventory.Instance.carriedMails.Count > 0)
+        {
+            string mailId = PlayerMailInventory.Instance.carriedMails[0].id;
+
+            // ✅ Отметка в DailyMailScheduler
+            if (DailyMailScheduler.Instance != null)
+            {
+                DailyMailScheduler.Instance.MarkMailAsDelivered(mailId);
+                Debug.Log($"[BagPickup] Туториальное письмо {mailId} отмечено как доставленное");
+            }
+
+            PlayerMailInventory.Instance.RemoveFirstMail();
+        }
 
         Destroy(gameObject);
     }

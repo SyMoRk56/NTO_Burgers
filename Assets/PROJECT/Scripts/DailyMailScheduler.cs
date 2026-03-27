@@ -9,13 +9,14 @@ public class DailyMailScheduler : MonoBehaviour
     [Header("Mail References")]
     public MailManager mailManager;
 
-    // ✅ Хранит письма ТЕКУЩЕГО дня (сбрасывается каждый день)
-    private HashSet<string> currentDayTakenMails = new HashSet<string>();
-
     // ✅ Хранит ВСЕ доставленные письма (навсегда)
     private HashSet<string> deliveredMails = new HashSet<string>();
 
-    private int lastDay = -1;
+    // ✅ Хранит письма ТЕКУЩЕГО дня
+    private List<string> currentDayMailPool = new List<string>();
+    private HashSet<string> takenToday = new HashSet<string>();
+
+    private int lastDay = 0;
 
     private void Awake()
     {
@@ -32,7 +33,6 @@ public class DailyMailScheduler : MonoBehaviour
         }
     }
 
-    // ✅ Вызывается когда игрок доставляет письмо
     public void MarkMailAsDelivered(string mailId)
     {
         if (!deliveredMails.Contains(mailId))
@@ -42,26 +42,60 @@ public class DailyMailScheduler : MonoBehaviour
         }
     }
 
-    // ✅ Проверка: все ли письма текущего дня доставлены?
-    public bool AllMailsDelivered()
+    // ✅ ГЕНЕРАЦИЯ ПУЛА ПИСЕМ НА ДЕНЬ
+    private void GenerateDailyMailPool(int day)
     {
-        // ✅ Проверяем только письма ТЕКУЩЕГО дня
-        foreach (var mailId in currentDayTakenMails)
+        // ✅ КРИТИЧЕСКИ ВАЖНО: Очищаем пул перед генерацией!
+        currentDayMailPool.Clear();
+        takenToday.Clear();
+
+        // 1 сюжетное письмо
+        var storyMail = mailManager.GetStoryMailForDay(day);
+        if (storyMail != null && !string.IsNullOrEmpty(storyMail.id))
         {
-            if (!deliveredMails.Contains(mailId))
-            {
-                Debug.Log($"[DailyMailScheduler] Не доставлено: {mailId}");
-                return false;
-            }
+            currentDayMailPool.Add(storyMail.id);
+            Debug.Log($"[DailyMailScheduler] Добавлено сюжетное: {storyMail.id}");
         }
-        return true;
+
+        // 3 обычных письма
+        var nonStoryMails = mailManager.GetNonStoryMailsForDay(day);
+        int count = 0;
+        foreach (var mail in nonStoryMails)
+        {
+            if (count >= 3) break;
+            currentDayMailPool.Add(mail.id);
+            Debug.Log($"[DailyMailScheduler] Добавлено обычное: {mail.id}");
+            count++;
+        }
+
+        Debug.Log($"[DailyMailScheduler] Сгенерировано {currentDayMailPool.Count} писем на день {day}");
     }
 
     // ✅ Проверка: можно ли брать новые письма?
     public bool CanTakeNewMails()
     {
-        // ✅ Можно брать если все письма текущего дня доставлены
-        return AllMailsDelivered();
+        // ✅ Проверяем только письма текущего дня
+        foreach (var mailId in currentDayMailPool)
+        {
+            if (!takenToday.Contains(mailId) && !deliveredMails.Contains(mailId))
+            {
+                return true; // Есть недоставленные
+            }
+        }
+        return false;
+    }
+
+    // ✅ Проверка: все ли доставлено?
+    public bool AllMailsDelivered()
+    {
+        foreach (var mailId in currentDayMailPool)
+        {
+            if (!deliveredMails.Contains(mailId))
+            {
+                return false;
+            }
+        }
+        return true;
     }
 
     public List<MailItem> GetAvailableForDesk()
@@ -69,82 +103,70 @@ public class DailyMailScheduler : MonoBehaviour
         List<MailItem> available = new List<MailItem>();
         int currentDay = DayNightCycle.Instance.CurrentDay;
 
-        // ✅ Если день изменился — сбрасываем taken и генерируем новые
+        // ✅ Если день изменился — генерируем НОВЫЙ пул писем
         if (currentDay != lastDay)
         {
             lastDay = currentDay;
-            currentDayTakenMails.Clear(); // ✅ Сброс взятых писем нового дня!
-            GenerateDailyMails(currentDay);
-            Debug.Log($"[DailyMailScheduler] Новый день {currentDay}, взятые письма сброшены");
+            GenerateDailyMailPool(currentDay);
+            Debug.Log($"[DailyMailScheduler] Новый день {currentDay}, пул писем обновлён");
         }
 
-        // ✅ ПРОВЕРКА: Нельзя брать новые пока не доставил текущие
+        // ✅ Проверяем можно ли брать новые
         if (!CanTakeNewMails())
         {
             Debug.Log("[DailyMailScheduler] Нельзя брать новые письма! Сначала доставь текущие!");
-            return available; // Пустой список
+            return available;
         }
 
-        Debug.Log($"[DailyMailScheduler] Проверка дня {currentDay}, взято: {currentDayTakenMails.Count}, доставлено: {deliveredMails.Count}");
-
-        // 1 сюжетное письмо
-        MailItem storyMail = mailManager.GetStoryMailForDay(currentDay);
-        if (storyMail != null && !string.IsNullOrEmpty(storyMail.id) && !currentDayTakenMails.Contains(storyMail.id))
+        // ✅ Возвращаем только НЕ взятые письма из пула
+        foreach (var mailId in currentDayMailPool)
         {
-            available.Add(storyMail);
-        }
-
-        // 3 обычных письма
-        List<MailItem> nonStoryMails = mailManager.GetNonStoryMailsForDay(currentDay);
-        int count = 0;
-        foreach (MailItem mail in nonStoryMails)
-        {
-            if (count >= 3) break;
-            if (!currentDayTakenMails.Contains(mail.id))
+            if (!takenToday.Contains(mailId))
             {
-                available.Add(mail);
-                count++;
+                var mail = mailManager.GetMailById(mailId);
+                if (mail != null)
+                {
+                    available.Add(mail);
+                }
             }
         }
 
-        Debug.Log($"[DailyMailScheduler] На столе писем: {available.Count} (день {currentDay})");
+        Debug.Log($"[DailyMailScheduler] На столе писем: {available.Count} (день {currentDay}, взято: {takenToday.Count})");
         return available;
-    }
-
-    private void GenerateDailyMails(int day)
-    {
-        Debug.Log($"[DailyMailScheduler] Сгенерировано 4 писем на день {day}");
     }
 
     public void TakeMailFromDesk(string mailId)
     {
-        if (!currentDayTakenMails.Contains(mailId))
-            currentDayTakenMails.Add(mailId);
-
-        Debug.Log($"[DailyMailScheduler] Письмо взято: {mailId} (взято сегодня: {currentDayTakenMails.Count}, всего доставлено: {deliveredMails.Count})");
+        if (!takenToday.Contains(mailId))
+        {
+            takenToday.Add(mailId);
+            Debug.Log($"[DailyMailScheduler] Письмо взято: {mailId} (взято сегодня: {takenToday.Count}, всего доставлено: {deliveredMails.Count})");
+        }
     }
 
     // ✅ ПРОВЕРКА: Можно ли спать?
     public bool CanSleep()
     {
-        // ✅ Проверяем ВСЕ взятые письма текущего дня
-        if (currentDayTakenMails.Count == 0)
+        // ✅ Проверка 1: Есть ли письма в инвентаре?
+        if (PlayerMailInventory.Instance != null &&
+            PlayerMailInventory.Instance.carriedMails.Count > 0)
         {
-            Debug.Log("[DailyMailScheduler] Можно спать - писем не взято");
-            return true;
+            Debug.Log("--------------------------------------------------");
+            Debug.Log("----------------нельзя спать!----------------");
+            Debug.Log("Сначала доставь все письма из инвентаря!");
+            Debug.Log($"В инвентаре писем: {PlayerMailInventory.Instance.carriedMails.Count}");
+            Debug.Log("--------------------------------------------------");
+            return false;
         }
 
-        foreach (var mailId in currentDayTakenMails)
+        // ✅ Проверка 2: Все ли письма дня доставлены?
+        if (!AllMailsDelivered())
         {
-            if (!deliveredMails.Contains(mailId))
-            {
-                Debug.Log($"[DailyMailScheduler] Нельзя спать! Не доставлено: {mailId}");
-                Debug.Log("--------------------------------------------------");
-                Debug.Log("----------------нельзя спать!----------------");
-                Debug.Log("Сначала доставь все письма которые взял!");
-                Debug.Log("--------------------------------------------------");
-                return false;
-            }
+            Debug.Log("--------------------------------------------------");
+            Debug.Log("----------------нельзя спать!----------------");
+            Debug.Log("Сначала доставь все письма которые взял!");
+            Debug.Log("--------------------------------------------------");
+            return false;
         }
 
         Debug.Log("[DailyMailScheduler] Можно спать - все письма доставлены");
@@ -153,15 +175,11 @@ public class DailyMailScheduler : MonoBehaviour
 
     public void ResetForNewDay()
     {
-        // ✅ НЕ очищаем currentDayTakenMails — это сделает GetAvailableForDesk()
-        // ✅ НЕ очищаем deliveredMails — это история навсегда
         Debug.Log("[DailyMailScheduler] Новый день (доставленные письма сохранены)");
     }
 
-    // ✅ Сохранение/загрузка
     public void SaveTakenMails()
     {
-        // ✅ Сохраняем только deliveredMails (навсегда)
         PlayerPrefs.SetString("DeliveredMails", string.Join(",", deliveredMails));
         PlayerPrefs.SetInt("LastDay", lastDay);
         PlayerPrefs.Save();
@@ -169,7 +187,6 @@ public class DailyMailScheduler : MonoBehaviour
 
     public void LoadTakenMails()
     {
-        // ✅ Загружаем только deliveredMails
         if (PlayerPrefs.HasKey("DeliveredMails"))
         {
             string[] mails = PlayerPrefs.GetString("DeliveredMails").Split(',');
@@ -185,16 +202,16 @@ public class DailyMailScheduler : MonoBehaviour
             lastDay = PlayerPrefs.GetInt("LastDay");
         }
 
-        // ✅ currentDayTakenMails НЕ загружаем — он сбросится при смене дня!
         Debug.Log($"[DailyMailScheduler] Загружено доставленных: {deliveredMails.Count}");
     }
 
-    // ✅ Для отладки — полная очистка
+    // ✅ Для очистки при новом слоте
     public void ClearAllData()
     {
-        currentDayTakenMails.Clear();
         deliveredMails.Clear();
-        lastDay = -1;
+        currentDayMailPool.Clear();
+        takenToday.Clear();
+        lastDay = 0;
         PlayerPrefs.DeleteKey("DeliveredMails");
         PlayerPrefs.DeleteKey("LastDay");
         PlayerPrefs.Save();

@@ -26,12 +26,24 @@ public class Bed : MonoBehaviour, IInteractObject
         playerManager = FindObjectOfType<PlayerManager>();
         if (playerManager == null) return;
 
-        // ✅ ПРОВЕРКА 1: Все ли письма доставлены?
+        // ✅ ПРОВЕРКА 1: Есть ли письма в инвентаре?
+        if (PlayerMailInventory.Instance != null &&
+            PlayerMailInventory.Instance.carriedMails.Count > 0)
+        {
+            Debug.Log("--------------------------------------------------");
+            Debug.Log("----------------нельзя спать!----------------");
+            Debug.Log("Сначала доставь все письма из инвентаря!");
+            Debug.Log($"В инвентаре писем: {PlayerMailInventory.Instance.carriedMails.Count}");
+            Debug.Log("--------------------------------------------------");
+            return;
+        }
+
+        // ✅ ПРОВЕРКА 2: Все ли доставлено?
         if (DailyMailScheduler.Instance != null)
         {
             if (!DailyMailScheduler.Instance.CanSleep())
             {
-                return; // ❌ Не даём спать
+                return;
             }
         }
 
