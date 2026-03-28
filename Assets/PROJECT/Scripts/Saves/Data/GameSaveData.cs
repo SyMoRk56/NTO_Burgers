@@ -8,6 +8,7 @@ public class GameSaveData
     public MailSaveData mailData;
     public InventorySaveData inventoryData;
     public DictionaryData objectStates;
+    public FishSaveData fishSaveData;
     public string saveDate;
     public long timestamp;
     public float playtime;

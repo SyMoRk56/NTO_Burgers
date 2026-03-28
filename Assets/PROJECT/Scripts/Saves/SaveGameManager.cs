@@ -360,6 +360,8 @@ public class SaveGameManager : MonoBehaviour
         try { data.inventoryData = PlayerMailInventory.Instance.GetSaveData(); }
         catch { data.inventoryData = null; }
 
+        try { data.fishSaveData = FishInventory.instance.GetSaveData(); }
+        catch { data.fishSaveData = null; }
         try
         {
             if (ObjectStateManager.Instance != null)
@@ -428,6 +430,7 @@ public class SaveGameManager : MonoBehaviour
             if (data.mailData != null) MailManager.Instance.LoadSaveData(data.mailData);
             if (data.npcData != null) NPCSaveSystem.RestoreNPCData(data.npcData);
             if (data.inventoryData != null) PlayerMailInventory.Instance.LoadSaveData(data.inventoryData);
+            if (data.fishSaveData != null) FishInventory.instance.LoadSaveData(data.fishSaveData);
         }
 
         Debug.Log("Save loaded successfully");

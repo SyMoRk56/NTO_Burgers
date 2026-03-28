@@ -5,4 +5,5 @@ using UnityEngine;
 public class InventorySaveData
 {
     public List<Task> carriedMails = new List<Task>();
+    
 }
