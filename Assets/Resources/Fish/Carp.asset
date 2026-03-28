@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8b4b4649ba159794b8aa4331fc029403, type: 3}
-  m_Name: Default 2
+  m_Name: Carp
   m_EditorClassIdentifier: 
-  minSpeed: 200
+  minSpeed: 120.6
   maxSpeed: 329.6
   directionChangeIntervalMin: 0.15
-  directionChangeIntervalMax: 0.23
-  fishingTime: 7
-  weight: 3
-  prefab: {fileID: 9170475284647827352, guid: 0fa7c9db552c98c48af91baaf3d4c076, type: 3}
+  directionChangeIntervalMax: 0.5
+  fishingTime: 15
+  weight: 50
+  prefab: {fileID: 9170475284647827352, guid: 53e9c3289b1c2954dbdd682fb21c3109, type: 3}
