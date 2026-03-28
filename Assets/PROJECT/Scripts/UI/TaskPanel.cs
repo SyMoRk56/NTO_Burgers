@@ -73,7 +73,7 @@ public class TaskPanel : MonoBehaviour
 
         foreach (var task in mails)
         {
-            if (task.adress.Contains("Tutorial")) continue;
+            if (task.adress.Contains("Tutorial") || task.isStory) continue;
 
             var go = Instantiate(letterPrefab, lettersContainer);
             var rect = go.GetComponent<RectTransform>();
@@ -89,6 +89,7 @@ public class TaskPanel : MonoBehaviour
                 letterUI.recipient = task.recieverName;
                 letterUI.address = task.adress;
                 letterUI.id = task.id;
+                letterUI.isStory = task.isStory;
             }
         }
     }
