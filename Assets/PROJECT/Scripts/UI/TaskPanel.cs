@@ -73,7 +73,7 @@ public class TaskPanel : MonoBehaviour
 
         foreach (var task in mails)
         {
-            if (task.adress.Contains("Tutorial") || task.isStory) continue;
+            if (task.adress.Contains("Tutorial")) continue;
 
             var go = Instantiate(letterPrefab, lettersContainer);
             var rect = go.GetComponent<RectTransform>();
@@ -91,6 +91,7 @@ public class TaskPanel : MonoBehaviour
                 letterUI.id = task.id;
                 letterUI.isStory = task.isStory;
             }
+            break;
         }
     }
     private void UpdatePlayerDot()
@@ -111,8 +112,10 @@ public class TaskPanel : MonoBehaviour
     }
     public void UpdateAdressDot()
     {
+        bool broke = false;
         foreach(var task in PlayerMailInventory.Instance.carriedMails)
         {
+            if (!task.isStory) continue;
             foreach(var mailbox in FindObjectsByType<MailBox>(FindObjectsSortMode.None))
             {
                 if(mailbox.mailboxAddress == task.adress)
@@ -125,9 +128,15 @@ public class TaskPanel : MonoBehaviour
                         (normX - 0.5f) * mapSize.x /*+ adressDot.rect.width * .5f*/ - 10,
                         (normY - 0.5f) * mapSize.y + adressDot.rect.height * .5f - 10
                     );
+                    broke = true;
                     break;
                 }
             }
+            if (broke) break;
+        }
+        if (!broke)
+        {
+            adressDot.anchoredPosition = new Vector2(10000, 10000);
         }
     }
 }

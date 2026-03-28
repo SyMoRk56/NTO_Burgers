@@ -30,8 +30,29 @@ public class MailBox : MonoBehaviour, IInteractObject
         if (PlayerMailInventory.Instance.HasMailForAddress(mailboxAddress))
         {
             var mail = PlayerMailInventory.Instance.GetMailForAddress(mailboxAddress);
+            if (mail.recieverName.Contains("Fish_"))
+            {
+                string fishName = mail.recieverName.Replace("Fish_", "");
+                Transform child = PlayerManager.instance.hand.GetChild(0);
+                if (child != null)
+                {
+                    if (child.name == fishName)
+                    {
+                        Destroy(child.gameObject);
+                    }
+                    else return;
+                }
+                else
+                {
+                    return;
+                }
+            }
+            else
+            {
+                DeliverMail(mail);
+            }
             Debug.Log($"✓ Найдено подходящее письмо: {mail.recieverName}");
-            DeliverMail(mail);
+            
             FindFirstObjectByType<LetterPanel>().ShowPanel();
             // Запускаем диалог после доставки С ЗАДЕРЖКОЙ
             if (triggerDialogueAfterDelivery && dialogueRunner != null)
