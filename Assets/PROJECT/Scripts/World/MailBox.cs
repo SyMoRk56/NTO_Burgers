@@ -32,19 +32,24 @@ public class MailBox : MonoBehaviour, IInteractObject
             var mail = PlayerMailInventory.Instance.GetMailForAddress(mailboxAddress);
             if (mail.recieverName.Contains("Fish_"))
             {
-                string fishName = mail.recieverName.Replace("Fish_", "");
-                Transform child = PlayerManager.instance.hand.GetChild(0);
-                if (child != null)
+                string fishNameCount = mail.recieverName.Replace("Fish_", "");
+                string fishName = fishNameCount.Split(" ")[0];
+                int count = 1;
+                try { count = int.Parse(fishNameCount.Split(" ")[1]); }
+                catch { count = 1; }
+                FishScriptableObject[] fishesScr = Resources.LoadAll<FishScriptableObject>("");
+                FishScriptableObject fish = null;
+                foreach(var f in fishesScr)
                 {
-                    if (child.name == fishName)
+                    if(fishName == f.name)
                     {
-                        Destroy(child.gameObject);
+                        fish = f;   
                     }
-                    else return;
                 }
-                else
+                if (fish == null) return;
+                if (FishInventory.instance.carriedFishes[fish] >= count)
                 {
-                    return;
+                    FishInventory.instance.RemoveFishFromInventory(fish, count);
                 }
             }
             else

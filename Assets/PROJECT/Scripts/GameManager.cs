@@ -99,7 +99,7 @@ public class GameManager : MonoBehaviour
 
     void AddTutorial()
     {
-        if (PlayerMailInventory.Instance.GetSaveData().carriedMails.Count == 0)
+        if (PlayerMailInventory.Instance.GetSaveData().carriedMails.Count == 0&& !PlayerSaveSystem.Instance.GetData().hasBag)
         {
             var len = TaskManager.Instance.tasks.Count - 1;
             for (int i = 0; i <= 2; i++)
