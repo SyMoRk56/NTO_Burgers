@@ -32,6 +32,7 @@ public class MailBox : MonoBehaviour, IInteractObject
             var mail = PlayerMailInventory.Instance.GetMailForAddress(mailboxAddress);
             if (mail.recieverName.Contains("Fish_"))
             {
+                print("Fish task");
                 string fishNameCount = mail.recieverName.Replace("Fish_", "");
                 string fishName = fishNameCount.Split(" ")[0];
                 int count = 1;
@@ -49,16 +50,19 @@ public class MailBox : MonoBehaviour, IInteractObject
                 if (fish == null) return;
                 if (FishInventory.instance.carriedFishes[fish] >= count)
                 {
+                    print("Remove fish");
                     FishInventory.instance.RemoveFishFromInventory(fish, count);
                 }
+                else
+                {
+                    return;
+                }
             }
-            else
-            {
-                DeliverMail(mail);
-            }
-            Debug.Log($"✓ Найдено подходящее письмо: {mail.recieverName}");
+            DeliverMail(mail);
             
-            FindFirstObjectByType<LetterPanel>().ShowPanel();
+            Debug.Log($"✓ Найдено подходящее письмо: {mail.recieverName} {mail.recieverName.Contains("Fish_")}");
+            
+            FindFirstObjectByType<LetterPanel>().ShowPanel(mail.recieverName.Contains("Fish_"));
             // Запускаем диалог после доставки С ЗАДЕРЖКОЙ
             if (triggerDialogueAfterDelivery && dialogueRunner != null)
             {

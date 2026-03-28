@@ -132,7 +132,7 @@ public class TaskUI : MonoBehaviour
         if (string.IsNullOrEmpty(task.recieverName) && string.IsNullOrEmpty(task.adress))
             return;
         adressT = task.adress;
-        reciever.text = GetRecieverText(task.adress);
+        reciever.text = GetRecieverText(task);
         adress.text = LocalizationManager.Instance.Get(task.adress);
         countText.text = remainingCount > 0 ? remainingCount.ToString() : "";
     }
@@ -149,13 +149,14 @@ public class TaskUI : MonoBehaviour
     {
         if (string.IsNullOrEmpty(adressT)) return;
         adress.text = LocalizationManager.Instance.Get(adressT);
-        reciever.text = GetRecieverText(adressT);
+        reciever.text = GetRecieverText(new Task(reciever.text, adressT, ""));
     }
 
-    public string GetRecieverText(string adress)
+    public string GetRecieverText(Task task)
     {
-        if (adress.Contains("Tutorial"))
+        if (task.adress.Contains("Tutorial"))
             return "";
-        return LocalizationManager.Instance.Get(!adress.Contains("NPC") ? "Reciever" : "Reciever_npc");
+        print("TASK RECIEVER "+task.recieverName);
+        return LocalizationManager.Instance.Get(!task.adress.Contains("NPC") ? (task.recieverName.Contains("Fish_") ? "Reciever_fish" : "Reciever") : "Reciever_npc");
     }
 }

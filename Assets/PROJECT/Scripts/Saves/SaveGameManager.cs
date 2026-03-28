@@ -161,6 +161,11 @@ public class SaveGameManager : MonoBehaviour
     // ======================= CHECK =======================
     public bool CheckSave(string saveName)
     {
+#if UNITY_EDITOR
+if(true){
+return true; //ДЕБАГ DEBUG
+}
+#endif
         string folder = Path.Combine(saveFolder, "manual");
         string jsonPath = Path.Combine(folder, saveName + ".json");
         string hashPath = Path.Combine(folder, saveName + ".hash");
@@ -332,7 +337,9 @@ public class SaveGameManager : MonoBehaviour
         if (savedHash != actualHash)
         {
             Debug.LogError("SAVE INTEGRITY ERROR! External modification detected! Slot: " + name);
+#if !UNITY_EDITOR //DEBUG ДЕБАГ
             return;
+#endif
         }
 
         Debug.Log("Save integrity OK.");
