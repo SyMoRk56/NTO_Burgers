@@ -51,8 +51,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DialogueRunner
   ownerName: 
-  defaultDialogues: []
-  letterDialogues: []
+  defaultDialogues:
+  - {fileID: 11400000, guid: b432854fef835c54fba10c85a4e2f125, type: 2}
+  letterDialogues:
+  - {fileID: 11400000, guid: 2202a8a6300fd0347a3434e2150251d5, type: 2}
+  - {fileID: 11400000, guid: d9d2f9651775de741b8c6af18d2fb672, type: 2}
+  - {fileID: 11400000, guid: 9bf7b50ec294a4a4da094f870c800440, type: 2}
   random: 0
   dialogueUI: {fileID: 0}
   face: {fileID: 0}
