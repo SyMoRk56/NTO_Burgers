@@ -98,6 +98,11 @@ public class TaskUI : MonoBehaviour
         if (bagButton != null)
             bagButton.gameObject.SetActive(value);
     }
+    public void SetHasBagUI(bool value)
+    {
+        if (bagButton != null)
+            bagButton.gameObject.SetActive(value);
+    }
 
     public void OpenPanel()
     {

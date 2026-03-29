@@ -99,8 +99,8 @@ public class BagPickup : MonoBehaviour, IInteractObject
             }
             GameObject.Find("Table").transform.parent.GetChild(2).gameObject.SetActive(true);
             // Разблокируем Tab
-            if (TaskUI.Instance != null)
-                TaskUI.Instance.SetHasBag(true);
+            FindFirstObjectByType<WallMap>().canPickup = true;
+            TaskUI.Instance.SetHasBagUI(true);
 
             if (SaveGameManager.Instance != null)
                 SaveGameManager.Instance.SaveAuto(true);
