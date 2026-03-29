@@ -30,13 +30,14 @@ public class PlayerSaveSystem : MonoBehaviour
           p = PlayerManager.instance.transform.position;
         return new PlayerData
         {
-            
+
             position = new float[]
             {
                 p.x,
                 p.y,
                 p.z,
             },
+            money = PlayerManager.instance.money,
             hasBag = HasBag(), // Сохраняем состояние сумки
             collectedAdditionalLetters = !FindFirstObjectByType<AdditionalLetters>().hasMails,
             complitedMainIslandMainTasks = PlayerMailInventory.Instance.complitedMainLine,
@@ -62,7 +63,7 @@ public class PlayerSaveSystem : MonoBehaviour
         {
             player.GetComponent<PlayerMovement>().enabled = true;
         }
-
+        PlayerManager.instance.money = data.money;
         if (data.hasBag && !HasBag())
         {
             CreateBagForPlayer();
