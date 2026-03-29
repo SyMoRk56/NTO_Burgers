@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b411d6a3be994104b87bbb2cfb928c3c, type: 3}
+  m_Name: NewMeshTerrain_ArraySettings
+  m_EditorClassIdentifier: 
+  textureMode: 2
+  TextureArrayName: NewMeshTerrain
+  TextureFormat: 4
+  TextureSize: 512
+  Layers:
+  - Albedo: {fileID: 0}
+    Roughness: {fileID: 0}
+    Normal: {fileID: 0}
+    AO: {fileID: 0}
+    Height: {fileID: 0}
+    Metallic: {fileID: 0}
+  - Albedo: {fileID: 2800000, guid: 7bb1efd6f3812a441a1a4bf583958ccc, type: 3}
+    Roughness: {fileID: 0}
+    Normal: {fileID: 2800000, guid: 1d1a1f8742c4c2746bfd60e1067c4c00, type: 3}
+    AO: {fileID: 0}
+    Height: {fileID: 0}
+    Metallic: {fileID: 0}
+  - Albedo: {fileID: 2800000, guid: 52b952b8893888a4ab2306d659edc88c, type: 3}
+    Roughness: {fileID: 0}
+    Normal: {fileID: 2800000, guid: 8a2a78d4a200989498c0f74834f76128, type: 3}
+    AO: {fileID: 0}
+    Height: {fileID: 0}
+    Metallic: {fileID: 0}
+  - Albedo: {fileID: 2800000, guid: 20e486d71b4b05849a8431c0ad224293, type: 3}
+    Roughness: {fileID: 0}
+    Normal: {fileID: 2800000, guid: 20e486d71b4b05849a8431c0ad224293, type: 3}
+    AO: {fileID: 0}
+    Height: {fileID: 0}
+    Metallic: {fileID: 0}
