@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -17,8 +18,9 @@ public class TaskPanel : MonoBehaviour
 
     [Header("Map Bounds (мировые координаты)")]
     public Vector2 mapWorldMin; 
-    public Vector2 mapWorldMax; 
+    public Vector2 mapWorldMax;
 
+    public TMP_Text moneyText;
     private void Awake()
     {
         Instance = this;
@@ -28,6 +30,7 @@ public class TaskPanel : MonoBehaviour
     {
         if (gameObject.activeSelf)
         {
+            
             UpdatePlayerDot();
             UpdateAdressDot();
         }
@@ -48,6 +51,7 @@ public class TaskPanel : MonoBehaviour
     {
         UpdatePlayerDot();
         UpdateAdressDot();
+        UpdateMoney();
         FindFirstObjectByType<AdressListMenu>().transform.GetChild(0).gameObject.SetActive(false);
         TaskUI.Instance.bagButton.gameObject.SetActive(false);
     }
@@ -57,6 +61,10 @@ public class TaskPanel : MonoBehaviour
         TaskUI.Instance.bagButton.gameObject.SetActive(true);
 
 
+    }
+    void UpdateMoney()
+    {
+        moneyText.text = PlayerManager.instance.money.ToString()+ " " + LocalizationManager.Instance.Get("Money");
     }
     private void SpawnLetters()
     {
