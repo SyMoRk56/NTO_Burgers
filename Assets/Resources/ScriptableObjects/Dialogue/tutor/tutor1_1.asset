@@ -10,12 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 08cee0cc3bf3f5e46bc2c69cc308b86e, type: 3}
-  m_Name: tutor3
+  m_Name: tutor1_1
   m_EditorClassIdentifier: Assembly-CSharp::DialogueScriptableObject
   phrases:
-  - "\u043F\u043E\u043A\u0430"
+  - Tutorial_Dialogue_0
+  - Tutorial_Dialogue_1
+  - Tutorial_Dialogue_2
   voiceOver: []
   choices:
-  - text: "\u043F\u043E\u043A\u0430"
-    nextDialogueIndex: -1
+  - text: Tutorial_Dialogue_2_Answer
+    nextDialogueIndex: 1
+  - text: Tutorial_Dialogue_2_Answer2
+    nextDialogueIndex: 3
   emotions: 

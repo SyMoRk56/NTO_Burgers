@@ -2033,6 +2033,10 @@ PrefabInstance:
       propertyPath: m_LocalPosition.z
       value: 6256.31
       objectReference: {fileID: 0}
+    - target: {fileID: 5290787248484417407, guid: 5062a45a55f4b434b9255957c26a1a43, type: 3}
+      propertyPath: m_Name
+      value: Cube.004Window
+      objectReference: {fileID: 0}
     - target: {fileID: 5496334339245015994, guid: 5062a45a55f4b434b9255957c26a1a43, type: 3}
       propertyPath: m_Up
       value: 2
@@ -5538,11 +5542,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8ad9510ce7fb44f43bd0937497c2b59e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TutorialManager
-  tutorialNPCPrefab: {fileID: 6452568113698500922, guid: 5039103fe1f4fad4aa97e60e1dff7212, type: 3}
-  npcSpawnPoint: {fileID: 1746471239}
+  tutorialNPCPrefab: {fileID: 0}
+  npcSpawnPoint: {fileID: 0}
   hintUI: {fileID: 0}
-  tutorialMailId: tutorial_letter_01
-  tutorialRecipientNpcId: npc_grandma
+  tutorialMailId: 
+  tutorialRecipientNpcId: 
 --- !u!114 &8229386354144893367
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -34,7 +34,7 @@ public class TutorialManager : MonoBehaviour
 
     void Awake()
     {
-        DontDestroyOnLoad(npcSpawnPoint.gameObject);
+        //DontDestroyOnLoad(npcSpawnPoint.gameObject);
         if (Instance == null) Instance = this;
         else { Destroy(gameObject); return; }
     }
@@ -60,10 +60,10 @@ public class TutorialManager : MonoBehaviour
     public void OnPlayerExitedHouse()
     {
         if (CurrentStep != TutorialStep.WaitForNPCSpawn) return;
-
+        FindFirstObjectByType<TutorialNPC>().OnPlayerExitedHouse();
         Debug.Log("[Tutorial] Игрок вышел из дома — спавним NPC");
         SetStep(TutorialStep.WaitForNPCApproach);
-        SpawnAndApproach();
+        //SpawnAndApproach();
         SaveProgress();
     }
 
@@ -89,7 +89,7 @@ public class TutorialManager : MonoBehaviour
         if (CurrentStep != TutorialStep.WaitForLetterRead) return;
         Debug.Log("[Tutorial] Письмо прочитано");
         SetStep(TutorialStep.WaitForDelivery);
-        spawnedNPC?.ShowDialogue(TutorialDialogueType.DeliverLetter);
+        //spawnedNPC?.ShowDialogue(TutorialDialogueType.DeliverLetter);
         hintUI?.ShowDeliveryHint(tutorialRecipientNpcId);
         SaveProgress();
     }
@@ -106,7 +106,7 @@ public class TutorialManager : MonoBehaviour
         tutorialCompleted = true;
         SetStep(TutorialStep.Completed);
         hintUI?.HideAll();
-        spawnedNPC?.OnTutorialComplete();
+        //spawnedNPC?.OnTutorialComplete();
         SaveProgress();
     }
 
@@ -142,38 +142,38 @@ public class TutorialManager : MonoBehaviour
         switch (step)
         {
             case TutorialStep.WaitForNPCSpawn:
-                // Просто ждём выхода из дома
+                
                 break;
 
             case TutorialStep.WaitForNPCApproach:
-                SpawnAndApproach();
+                //FindFirstObjectByType<TutorialNPC>().OnPlayerExitedHouse();
                 break;
 
             case TutorialStep.WaitForInventoryOpen:
                 // NPC уже говорил — просто спавним рядом и показываем подсказку
-                SpawnAtPositionIfNeeded();
-                hintUI?.ShowInventoryHint();
+                //SpawnAtPositionIfNeeded();
+                //hintUI?.ShowInventoryHint();
                 break;
 
             case TutorialStep.WaitForLetterRead:
-                SpawnAtPositionIfNeeded();
-                hintUI?.ShowLetterHint();
+                //SpawnAtPositionIfNeeded();
+                //intUI?.ShowLetterHint();
                 break;
 
             case TutorialStep.WaitForDelivery:
                 // NPC уже говорил — просто спавним рядом и показываем подсказку
-                SpawnAtPositionIfNeeded();
-                hintUI?.ShowDeliveryHint(tutorialRecipientNpcId);
+                //SpawnAtPositionIfNeeded();
+                //hintUI?.ShowDeliveryHint(tutorialRecipientNpcId);
                 break;
         }
     }
 
-    private void SpawnAndApproach()
-    {
-        Debug.LogError("Spawn and approach");
-        TutorialNPC npc = SpawnNPC();
-        npc?.ApproachPlayer();
-    }
+    //private void SpawnAndApproach()
+    //{
+    //    Debug.LogError("Spawn and approach");
+    //    TutorialNPC npc = SpawnNPC();
+    //    npc?.ApproachPlayer();
+    //}
 
     private void SpawnAtPositionIfNeeded()
     {
@@ -199,7 +199,7 @@ public class TutorialManager : MonoBehaviour
             Debug.LogError("[Tutorial] На префабе NPC нет компонента TutorialNPC!");
 
         return spawnedNPC;
-    }   
+    }
 
     private void SetStep(TutorialStep step)
     {
