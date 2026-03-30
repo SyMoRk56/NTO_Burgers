@@ -81,16 +81,16 @@ public class TaskPanel : MonoBehaviour
 
         foreach (var task in mails)
         {
+            print("Create tab "+task.recieverName);
             if (task.adress.Contains("Tutorial")) continue;
 
-            var go = Instantiate(letterPrefab, lettersContainer);
+            var go = Instantiate(letterPrefab, lettersContainer, false);
             var rect = go.GetComponent<RectTransform>();
-
             rect.anchoredPosition = new Vector2(
                 Random.Range(minX, maxX),
                 Random.Range(minY, maxY)
             );
-
+            rect.localScale *= 2;
             var letterUI = go.GetComponent<DeskLetterUI>();
             if (letterUI != null)
             {
@@ -99,7 +99,6 @@ public class TaskPanel : MonoBehaviour
                 letterUI.id = task.id;
                 letterUI.isStory = task.isStory;
             }
-            break;
         }
     }
     private void UpdatePlayerDot()
@@ -108,7 +107,7 @@ public class TaskPanel : MonoBehaviour
 
         var player = PlayerManager.instance?.transform;
         if (player == null) return;
-        if (player.position.magnitude > 1000) player = GameObject.Find("Cube.004Window").transform;
+        if (player.position.magnitude > 1000) player = GameObject.Find("postmanhouse (1)").transform;
         float normX = Mathf.InverseLerp(mapWorldMin.x, mapWorldMax.x, player.position.x);
         float normY = 1f - Mathf.InverseLerp(mapWorldMin.y, mapWorldMax.y, player.position.z);
 

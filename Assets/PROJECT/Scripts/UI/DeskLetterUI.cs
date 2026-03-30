@@ -3,8 +3,9 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using DG.Tweening;
 
-public class DeskLetterUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerClickHandler
+public class DeskLetterUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
 {
     private RectTransform rectTransform;
     private Canvas canvas;
@@ -16,6 +17,7 @@ public class DeskLetterUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEnd
     public string address;
     public string id;
     public bool isStory;
+
     [Header("Flip Animation")]
     public float flipDuration = 0.2f;
 
@@ -27,9 +29,15 @@ public class DeskLetterUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEnd
     [Header("Button Reference")]
     public Button actionButton;
 
+    [Header("Hover Effect")]
+    public float hoverScale = 1.1f;
+    public float hoverDuration = 0.2f;
+
     private bool isFlipped = false;
     private bool isDragging = false;
     private bool isAnimating = false;
+
+    private Vector3 originalScale; // сохраняем исходный масштаб
 
     void OnEnable()
     {
@@ -50,30 +58,44 @@ public class DeskLetterUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEnd
             actionButton.onClick.AddListener(OnActionButtonClick);
         }
 
-        // Скрываем обратную сторону по умолчанию
         if (backSide != null)
             backSide.SetActive(false);
 
         CalculateDragBounds();
+        Invoke(nameof(DelayedSetScale), Time.deltaTime);
+    }
+    void DelayedSetScale()
+    {
+        originalScale = transform.localScale; // сохраняем исходный масштаб UI
+        if(Random.value > .6f)
+        {
+            InstaFlip();
+        }
     }
 
     void CalculateDragBounds()
     {
-        if (canvas == null) return;
+        RectTransform parentRect = transform.parent as RectTransform;
+        if (parentRect == null) return;
 
-        RectTransform canvasRect = canvas.GetComponent<RectTransform>();
-        Vector2 canvasSize = canvasRect.rect.size;
+        Vector2 parentSize = parentRect.rect.size;
         Vector2 size = rectTransform.rect.size;
 
-        minDragBound = new Vector2(
-            -canvasSize.x / 2 + size.x / 2,
-            -canvasSize.y / 2 + size.y / 2
-        );
+        minDragBound = new Vector2(-parentSize.x / 2 + size.x / 2, -parentSize.y / 2 + size.y / 2);
+        maxDragBound = new Vector2(parentSize.x / 2 - size.x / 2, parentSize.y / 2 - size.y / 2);
+    }
 
-        maxDragBound = new Vector2(
-            canvasSize.x / 2 - size.x / 2,
-            canvasSize.y / 2 - size.y / 2
-        );
+    public void OnDrag(PointerEventData eventData)
+    {
+        if (rectTransform == null) return;
+
+        Vector2 delta = eventData.delta / canvas.scaleFactor;
+        Vector2 newPos = rectTransform.anchoredPosition + delta;
+
+        newPos.x = Mathf.Clamp(newPos.x, minDragBound.x, maxDragBound.x);
+        newPos.y = Mathf.Clamp(newPos.y, minDragBound.y, maxDragBound.y);
+
+        rectTransform.anchoredPosition = newPos;
     }
 
     public void OnBeginDrag(PointerEventData eventData)
@@ -82,16 +104,10 @@ public class DeskLetterUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEnd
         transform.SetAsLastSibling();
         canvasGroup.alpha = 0.6f;
         canvasGroup.blocksRaycasts = false;
-    }
 
-    public void OnDrag(PointerEventData eventData)
-    {
-        if (rectTransform == null || canvas == null) return;
-
-        Vector2 pos = rectTransform.anchoredPosition + eventData.delta / canvas.scaleFactor;
-        pos.x = Mathf.Clamp(pos.x, minDragBound.x, maxDragBound.x);
-        pos.y = Mathf.Clamp(pos.y, minDragBound.y, maxDragBound.y);
-        rectTransform.anchoredPosition = pos;
+        // Вернуть масштаб к исходному при начале drag
+        rectTransform.DOKill();
+        rectTransform.DOScale(originalScale, hoverDuration);
     }
 
     public void OnEndDrag(PointerEventData eventData)
@@ -106,31 +122,38 @@ public class DeskLetterUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEnd
         if (isDragging || isAnimating) return;
         StartCoroutine(FlipAnimation());
     }
-
+    public void InstaFlip()
+    {
+        isFlipped = !isFlipped;
+        if (backSide != null)
+            backSide.SetActive(isFlipped);
+        var mail = MailManager.Instance.GetMailById(id);
+        if (receiverText != null)
+            receiverText.text = LocalizationManager.Instance.Get(mail.reciever);
+        if (addressText != null)
+            addressText.text = LocalizationManager.Instance.Get(mail.adress);
+    }
     private IEnumerator FlipAnimation()
     {
         isAnimating = true;
 
-        // Сплющиваем до нуля
         float t = 0f;
-        Vector3 originalScale = transform.localScale;
+        Vector3 scale = transform.localScale;
         while (t < flipDuration)
         {
             t += Time.deltaTime;
-            float scaleX = Mathf.Lerp(originalScale.x, 0f, t / flipDuration);
-            transform.localScale = new Vector3(scaleX, originalScale.y, originalScale.z);
+            float scaleX = Mathf.Lerp(scale.x, 0f, t / flipDuration);
+            transform.localScale = new Vector3(scaleX, scale.y, scale.z);
             yield return null;
         }
-        transform.localScale = new Vector3(0f, originalScale.y, originalScale.z);
+        transform.localScale = new Vector3(0f, scale.y, scale.z);
 
-        // Меняем содержимое в середине анимации
         isFlipped = !isFlipped;
         if (backSide != null)
             backSide.SetActive(isFlipped);
 
         if (isFlipped)
         {
-            // Заполняем данными
             var mail = MailManager.Instance.GetMailById(id);
             if (mail != null)
             {
@@ -139,21 +162,20 @@ public class DeskLetterUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEnd
                 if (addressText != null)
                     addressText.text = LocalizationManager.Instance.Get(mail.adress);
             }
-            // Скрываем кнопку на обратной стороне
+
             if (actionButton != null)
                 actionButton.gameObject.SetActive(false);
         }
 
-        // Растягиваем обратно
         t = 0f;
         while (t < flipDuration)
         {
             t += Time.deltaTime;
-            float scaleX = Mathf.Lerp(0f, originalScale.x, t / flipDuration);
-            transform.localScale = new Vector3(scaleX, originalScale.y, originalScale.z);
+            float scaleX = Mathf.Lerp(0f, scale.x, t / flipDuration);
+            transform.localScale = new Vector3(scaleX, scale.y, scale.z);
             yield return null;
         }
-        transform.localScale = originalScale;
+        transform.localScale = scale;
 
         isAnimating = false;
     }
@@ -166,5 +188,22 @@ public class DeskLetterUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEnd
             PlayerMailInventory.Instance.AddMailToInventory(newTask);
             Destroy(gameObject);
         }
+    }
+
+    // ---------------- Hover с DOTween ----------------
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        if (isDragging || isAnimating) return;
+
+        rectTransform.DOKill();
+        rectTransform.DOScale(originalScale * hoverScale, hoverDuration).SetEase(Ease.OutBack);
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        if (isDragging || isAnimating) return;
+
+        rectTransform.DOKill();
+        rectTransform.DOScale(originalScale, hoverDuration).SetEase(Ease.OutBack);
     }
 }
