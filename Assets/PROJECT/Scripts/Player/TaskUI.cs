@@ -1,6 +1,7 @@
 ﻿using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections.Generic;
 
 public class TaskUI : MonoBehaviour
 {
@@ -13,9 +14,13 @@ public class TaskUI : MonoBehaviour
     public TMP_Text countText;
     public Image bagButton;
 
+    [Header("Quest List")]
+    public QuestListMenu questListMenu;
+    public GameObject questListView;
+
     public bool hasBag = false;
     private bool isOpen = false;
-    private bool isReady = false; // блокируем ввод пока игра не загрузилась
+    private bool isReady = false;
     private string adressT;
 
     private float tabHoldTime = 0f;
@@ -26,7 +31,8 @@ public class TaskUI : MonoBehaviour
     {
         Instance = this;
         taskPanel.SetActive(false);
-        LocalizationManager.Instance.OnLanguageChanged += UpdateText;
+        if (LocalizationManager.Instance != null)
+            LocalizationManager.Instance.OnLanguageChanged += UpdateText;
         reciever.text = "";
 
         if (bagButton != null)
@@ -40,7 +46,6 @@ public class TaskUI : MonoBehaviour
 
     private System.Collections.IEnumerator RestoreAfterLoad()
     {
-        // Ждём пока PlayerManager полностью инициализируется
         yield return new WaitForSeconds(2f);
 
         var player = GameManager.Instance?.GetPlayer();
@@ -73,8 +78,8 @@ public class TaskUI : MonoBehaviour
             tabHoldTime += Time.deltaTime;
             tabWasHeld = true;
         }
-        
-        if (Input.GetKeyUp(KeyCode.Tab) )
+
+        if (Input.GetKeyUp(KeyCode.Tab))
         {
             if (tabWasHeld && tabHoldTime >= HOLD_THRESHOLD)
             {
@@ -100,6 +105,16 @@ public class TaskUI : MonoBehaviour
     {
         if (PlayerManager.instance == null) return;
         taskPanel.SetActive(true);
+
+        if (questListView != null)
+            questListView.SetActive(true);
+
+        if (questListMenu != null && PlayerMailInventory.Instance != null)
+        {
+            List<Task> allMails = PlayerMailInventory.Instance.GetAllMails();
+            questListMenu.PopulateList(allMails);
+        }
+
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
         PlayerManager.instance.CanMove = false;
@@ -113,6 +128,10 @@ public class TaskUI : MonoBehaviour
     public void ClosePanel()
     {
         if (PlayerManager.instance == null) return;
+
+        if (questListMenu != null)
+            questListMenu.ClearList();
+
         taskPanel.SetActive(false);
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
@@ -126,8 +145,11 @@ public class TaskUI : MonoBehaviour
 
     public void SetTask(Task task, int remainingCount)
     {
+        // ✅ Проверка валидности через id для struct
+        if (string.IsNullOrEmpty(task.id)) return;
         if (string.IsNullOrEmpty(task.recieverName) && string.IsNullOrEmpty(task.adress))
             return;
+
         adressT = task.adress;
         reciever.text = GetRecieverText(task.adress);
         adress.text = LocalizationManager.Instance.Get(task.adress);
@@ -149,10 +171,10 @@ public class TaskUI : MonoBehaviour
         reciever.text = GetRecieverText(adressT);
     }
 
-    public string GetRecieverText(string adress)
+    public string GetRecieverText(string address)
     {
-        if (adress.Contains("Tutorial"))
+        if (address.Contains("Tutorial"))
             return "";
-        return LocalizationManager.Instance.Get(!adress.Contains("NPC") ? "Reciever" : "Reciever_npc");
+        return LocalizationManager.Instance.Get(!address.Contains("NPC") ? "Reciever" : "Reciever_npc");
     }
 }

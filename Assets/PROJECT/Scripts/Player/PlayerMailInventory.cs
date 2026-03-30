@@ -73,17 +73,15 @@ public class PlayerMailInventory : MonoBehaviour
         var mail = carriedMails.Find(task =>
             NormalizeAddress(task.adress) == NormalizeAddress(address));
 
-        // ✅ ИСПРАВЛЕНО: Проверка через IsNullOrEmpty вместо сравнения с null
-        if (!string.IsNullOrEmpty(mail.id))
+        // ✅ Для struct: возвращаем default если не найдено
+        if (!string.IsNullOrEmpty(mail.id)) // или просто: if (!string.IsNullOrEmpty(mail.id))
         {
             Debug.Log($"✓ Найдено письмо для адреса '{address}': {mail.recieverName}");
-        }
-        else
-        {
-            Debug.Log($"✗ Письмо для адреса '{address}' не найдено");
+            return mail;
         }
 
-        return mail;
+        Debug.Log($"✗ Письмо для адреса '{address}' не найдено");
+        return default(Task); // ✅ Важно для struct!
     }
 
     public List<Task> GetAllMails() => new List<Task>(carriedMails);
@@ -118,6 +116,15 @@ public class PlayerMailInventory : MonoBehaviour
 
     private void UpdateTaskUI()
     {
+        Debug.Log($"[UpdateTaskUI] вызван, писем: {carriedMails.Count}");
+
+        // Обновляем список квестов если существует
+        QuestListMenu[] listMenus = FindObjectsOfType<QuestListMenu>();
+        foreach (var menu in listMenus)
+        {
+            menu.RefreshList();
+        }
+
         Debug.Log($"[UpdateTaskUI] вызван, писем: {carriedMails.Count}");
         Debug.Log($"[UpdateTaskUI] TaskUI.Instance: {TaskUI.Instance}");
         Debug.Log($"[UpdateTaskUI] AdressListMenu.Instance: {AdressListMenu.Instance}");
