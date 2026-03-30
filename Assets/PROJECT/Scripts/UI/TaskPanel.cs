@@ -64,7 +64,7 @@ public class TaskPanel : MonoBehaviour
     }
     void UpdateMoney()
     {
-        moneyText.text = PlayerManager.instance.money.ToString()+ " " + LocalizationManager.Instance.Get("Money");
+        moneyText.text = PlayerManager.instance.Money.ToString()+ " " + LocalizationManager.Instance.Get("Money");
     }
     private void SpawnLetters()
     {

@@ -63,6 +63,7 @@ public class MailBox : MonoBehaviour, IInteractObject
             Debug.Log($"✓ Найдено подходящее письмо: {mail.recieverName} {mail.recieverName.Contains("Fish_")}");
             
             FindFirstObjectByType<LetterPanel>().ShowPanel(mail.recieverName.Contains("Fish_"));
+            PlayerManager.instance.Money += 1;
             // Запускаем диалог после доставки С ЗАДЕРЖКОЙ
             if (triggerDialogueAfterDelivery && dialogueRunner != null)
             {

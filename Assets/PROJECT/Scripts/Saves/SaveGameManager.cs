@@ -447,7 +447,7 @@ return true; //ДЕБАГ DEBUG
 
         if (player != null && floatArray != null && floatArray.Length == 3)
             player.GetComponent<Rigidbody>().MovePosition(new Vector3(floatArray[0], floatArray[1], floatArray[2]));
-        PlayerManager.instance.money = data.playerData.money;
+        PlayerManager.instance.Money = data.playerData.money;
         DayNightCycle cycle = FindObjectOfType<DayNightCycle>();
         if (cycle != null) { Debug.Log($"Загружено время суток: {data.timeOfDayIndex}"); }
         else Debug.LogWarning("DayNightCycle не найден при загрузке!");
