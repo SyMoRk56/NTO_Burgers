@@ -79,7 +79,11 @@ public class PlayerSaveSystem : MonoBehaviour
 
         // Пробрасываем hasBag в TaskUI
         if (TaskUI.Instance != null)
+        {
             TaskUI.Instance.hasBag = data.hasBag;
+            FindFirstObjectByType<WallMap>().Interact();
+        }
+            
     }
     IEnumerator SetPlayerPosDelay(float[] pos)
     {

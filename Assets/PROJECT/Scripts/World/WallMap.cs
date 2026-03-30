@@ -25,10 +25,11 @@ public class WallMap : MonoBehaviour, IInteractObject
 
     public void Interact()
     {
+        transform.position += new Vector3(0, 1000, 0);
+
         print("WAll map interact");
         if (TaskUI.Instance != null)
             TaskUI.Instance.SetHasBag(true);
-        transform.position += new Vector3(0, 1000, 0);
     }
 
     public int InteractPriority()
