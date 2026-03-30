@@ -36,7 +36,7 @@ public class DeskLetterUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEnd
     private bool isFlipped = false;
     private bool isDragging = false;
     private bool isAnimating = false;
-
+    public Sprite baseImage, backImage;
     private Vector3 originalScale; // сохраняем исходный масштаб
 
     void OnEnable()
@@ -127,6 +127,7 @@ public class DeskLetterUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEnd
         isFlipped = !isFlipped;
         if (backSide != null)
             backSide.SetActive(isFlipped);
+        GetComponent<Image>().sprite = isFlipped ? backImage : baseImage;
         var mail = MailManager.Instance.GetMailById(id);
         if (receiverText != null)
             receiverText.text = LocalizationManager.Instance.Get(mail.reciever);
@@ -166,6 +167,7 @@ public class DeskLetterUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEnd
             if (actionButton != null)
                 actionButton.gameObject.SetActive(false);
         }
+        GetComponent<Image>().sprite = isFlipped ? backImage : baseImage;
 
         t = 0f;
         while (t < flipDuration)

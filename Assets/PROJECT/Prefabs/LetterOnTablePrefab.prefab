@@ -188,7 +188,7 @@ MonoBehaviour:
   m_text: New Text
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 5835d9e13f96986479bbb6ccc776bb40, type: 2}
-  m_sharedMaterial: {fileID: -9034598324187301426, guid: 5835d9e13f96986479bbb6ccc776bb40, type: 2}
+  m_sharedMaterial: {fileID: 3835519015574581668, guid: 5835d9e13f96986479bbb6ccc776bb40, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -361,7 +361,7 @@ MonoBehaviour:
   m_text: New Text
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 5835d9e13f96986479bbb6ccc776bb40, type: 2}
-  m_sharedMaterial: {fileID: -9034598324187301426, guid: 5835d9e13f96986479bbb6ccc776bb40, type: 2}
+  m_sharedMaterial: {fileID: 3835519015574581668, guid: 5835d9e13f96986479bbb6ccc776bb40, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -467,7 +467,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: -466, y: 0.00013733}
-  m_SizeDelta: {x: 100, y: 100}
+  m_SizeDelta: {x: 100.43334, y: 65.55}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &690869235672452157
 CanvasRenderer:
@@ -497,7 +497,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 01b78d7978c08af48906dc8145b1f755, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 11fc522a58f2aaf42822ad2ccc6cc6ce, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -522,8 +522,13 @@ MonoBehaviour:
   recipient: 
   address: 
   id: 
+  isStory: 0
   flipDuration: 0.2
   backSide: {fileID: 7701003704300369207}
   receiverText: {fileID: 9212243409977919203}
   addressText: {fileID: 8671851378219072982}
   actionButton: {fileID: 2189985508055665394}
+  hoverScale: 1.1
+  hoverDuration: 0.2
+  baseImage: {fileID: 21300000, guid: 11fc522a58f2aaf42822ad2ccc6cc6ce, type: 3}
+  backImage: {fileID: 21300000, guid: 809ae5d86a3ebfd4682589605c8aea3d, type: 3}

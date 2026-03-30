@@ -90,7 +90,7 @@ public class TaskPanel : MonoBehaviour
                 Random.Range(minX, maxX),
                 Random.Range(minY, maxY)
             );
-            rect.localScale *= 2;
+            rect.localScale *= .8f;
             var letterUI = go.GetComponent<DeskLetterUI>();
             if (letterUI != null)
             {
