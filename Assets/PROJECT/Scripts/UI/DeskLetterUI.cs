@@ -64,6 +64,14 @@ public class DeskLetterUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEnd
         CalculateDragBounds();
         Invoke(nameof(DelayedSetScale), Time.deltaTime);
     }
+    public void SetCustomSprites(Sprite frontSide, Sprite backSide, string recieverText, string addressText)
+    {
+        baseImage = frontSide;
+        backImage = backSide;
+        this.receiverText.text = recieverText;
+        this.addressText.text = addressText;
+        GetComponent<Image>().sprite = isFlipped ? backImage : baseImage;
+    }
     void DelayedSetScale()
     {
         originalScale = transform.localScale; // сохраняем исходный масштаб UI
@@ -129,10 +137,14 @@ public class DeskLetterUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEnd
             backSide.SetActive(isFlipped);
         GetComponent<Image>().sprite = isFlipped ? backImage : baseImage;
         var mail = MailManager.Instance.GetMailById(id);
-        if (receiverText != null)
-            receiverText.text = LocalizationManager.Instance.Get(mail.reciever);
-        if (addressText != null)
-            addressText.text = LocalizationManager.Instance.Get(mail.adress);
+        if (mail != null)
+        {
+            if (receiverText != null)
+                receiverText.text = LocalizationManager.Instance.Get(mail.reciever);
+            if (addressText != null)
+                addressText.text = LocalizationManager.Instance.Get(mail.adress);
+        }
+        
     }
     private IEnumerator FlipAnimation()
     {

@@ -40,6 +40,7 @@ public class TaskPanel : MonoBehaviour
     public void Populate()
     {
         SpawnLetters();
+        SpawnFish();
     }
 
     public void Clear()
@@ -100,6 +101,34 @@ public class TaskPanel : MonoBehaviour
                 letterUI.isStory = task.isStory;
             }
         }
+    }
+    public void SpawnFish()
+    {
+        var mails = FishInventory.instance.carriedFishes;
+
+        Rect containerRect = ((RectTransform)lettersContainer).rect;
+        float padding = 50f;
+        float minX = containerRect.xMin + padding;
+        float maxX = containerRect.xMax - padding;
+        float minY = containerRect.yMin + padding;
+        float maxY = containerRect.yMax - padding;
+
+        foreach (var fishCountPair in mails)
+        {
+            for (int i = 0; i < fishCountPair.Value; i++)
+            {
+                var go = Instantiate(letterPrefab, lettersContainer, false);
+                var rect = go.GetComponent<RectTransform>();
+                rect.anchoredPosition = new Vector2(
+                    Random.Range(minX, maxX),
+                    Random.Range(minY, maxY)
+                );
+                var letterUI = go.GetComponent<DeskLetterUI>();
+                letterUI.SetCustomSprites(fishCountPair.Key.sprite, fishCountPair.Key.sprite, "", "");
+            }
+            
+        }
+    
     }
     private void UpdatePlayerDot()
     {

@@ -22,4 +22,5 @@ public class FishScriptableObject : ScriptableObject
     public int Weight => Mathf.Max(0, weight);
 
     public GameObject prefab;
+    public Sprite sprite;
 }
