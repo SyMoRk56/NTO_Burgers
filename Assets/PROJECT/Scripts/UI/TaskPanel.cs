@@ -29,8 +29,7 @@ public class TaskPanel : MonoBehaviour
     private void Update()
     {
         if (gameObject.activeSelf)
-        {
-            
+        {            
             UpdatePlayerDot();
             UpdateAdressDot();
         }
@@ -163,8 +162,8 @@ public class TaskPanel : MonoBehaviour
 
                     Vector2 mapSize = mapRect.rect.size;
                     adressDot.anchoredPosition = new Vector2(
-                        (normX - 0.5f) * mapSize.x /*+ adressDot.rect.width * .5f*/ - 10,
-                        (normY - 0.5f) * mapSize.y + adressDot.rect.height * .5f - 10
+                        (normX - 0.5f) * mapSize.x,
+                        (normY - 0.5f) * mapSize.y
                     );
                     broke = true;
                     break;
