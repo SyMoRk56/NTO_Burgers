@@ -37,6 +37,10 @@ public class FishingMinigame : MonoBehaviour
 
     void OnEnable()
     {
+        float halfZoneHeight = playerZone.rect.height / 2f;
+
+        barMinY = bar.rect.yMin + halfZoneHeight-50;
+        barMaxY = bar.rect.yMax - halfZoneHeight+50;
         StartGame();
         StartCoroutine(Shake());
     }

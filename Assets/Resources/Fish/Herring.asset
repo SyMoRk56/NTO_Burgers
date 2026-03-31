@@ -12,10 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b4b4649ba159794b8aa4331fc029403, type: 3}
   m_Name: Herring
   m_EditorClassIdentifier: 
-  minSpeed: 200
-  maxSpeed: 240
+  minSpeed: 100
+  maxSpeed: 120
   directionChangeIntervalMin: 0.15
   directionChangeIntervalMax: 0.2
-  fishingTime: 3
+  fishingTime: 5
   weight: 25
   prefab: {fileID: 9170475284647827352, guid: b4d2fde5eed3e8442b0b094b7cf3fd5c, type: 3}
+  sprite: {fileID: 0}

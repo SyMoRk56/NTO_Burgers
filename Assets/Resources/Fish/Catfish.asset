@@ -12,10 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b4b4649ba159794b8aa4331fc029403, type: 3}
   m_Name: Catfish
   m_EditorClassIdentifier: 
-  minSpeed: 200
-  maxSpeed: 329.6
+  minSpeed: 100
+  maxSpeed: 164.8
   directionChangeIntervalMin: 0.15
   directionChangeIntervalMax: 0.23
   fishingTime: 7
   weight: 8
   prefab: {fileID: 9170475284647827352, guid: 0fa7c9db552c98c48af91baaf3d4c076, type: 3}
+  sprite: {fileID: 0}
