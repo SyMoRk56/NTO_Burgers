@@ -52,7 +52,8 @@ public class DeskUI : MonoBehaviour, IInteractObject
         {
             ou.SetActive(false);
         }
-        print(PlayerMailInventory.Instance.carriedMails[0]);
+        
+        print(PlayerMailInventory.Instance.carriedMails.Count);
         if (PlayerMailInventory.Instance.carriedMails.Contains(new Task("Tutorial_2", "Tutorial_2", "Tutorial_2", true)))
         {
             ou.SetActive(true);

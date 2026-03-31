@@ -27,6 +27,12 @@ public class TaskManager : MonoBehaviour
         foreach (var n in m)
         {
             tasks.Add(new Task(n.reciever, n.adress, n.id, n.isStory));
+            print(n.reciever);
+        }
+        tasks.Reverse();
+        foreach(var n in tasks)
+        {
+            print(n.recieverName);
         }
     }
     public void UpdateDailyTasks()
@@ -37,6 +43,7 @@ public class TaskManager : MonoBehaviour
         {
             tasks.Add(new Task(n.reciever, n.adress, n.id, n.isStory));
         }
+        tasks.Reverse();
     }
     public void AddTask(string recieverName, string adress, string id)
     {
