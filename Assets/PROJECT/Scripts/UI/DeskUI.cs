@@ -243,7 +243,7 @@ public class DeskUI : MonoBehaviour, IInteractObject
         if (letterPrefab == null) return;
 
         var letter = Instantiate(letterPrefab, transform.GetChild(0).GetChild(0));
-        letter.transform.localPosition = Vector3.zero;
+        letter.transform.localPosition = Vector3.zero + new Vector3(Random.Range(-100, 100), Random.Range(-100, 100));
 
         var drag = letter.GetComponent<DeskLetterUI>();
         if (drag != null)

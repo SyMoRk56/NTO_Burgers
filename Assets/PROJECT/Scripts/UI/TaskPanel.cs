@@ -125,7 +125,7 @@ public class TaskPanel : MonoBehaviour
                 rect.localScale *= 1.5f;
 
                 var letterUI = go.GetComponent<DeskLetterUI>();
-                letterUI.SetCustomSprites(fishCountPair.Key.sprite, fishCountPair.Key.sprite, "", "");
+                letterUI.SetCustomSprites(fishCountPair.Key.spriteFront, fishCountPair.Key.spriteBack, "", "");
             }
             
         }
