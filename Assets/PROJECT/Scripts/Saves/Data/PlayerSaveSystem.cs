@@ -81,6 +81,7 @@ public class PlayerSaveSystem : MonoBehaviour
         if (TaskUI.Instance != null)
         {
             TaskUI.Instance.hasBag = data.hasBag;
+            if(data.hasBag)
             FindFirstObjectByType<WallMap>().Interact();
         }
             

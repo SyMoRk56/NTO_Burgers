@@ -91,7 +91,7 @@ public class TaskPanel : MonoBehaviour
                 Random.Range(minX, maxX),
                 Random.Range(minY, maxY)
             );
-            rect.localScale *= .8f;
+            rect.localScale *= 1.1f;
             var letterUI = go.GetComponent<DeskLetterUI>();
             if (letterUI != null)
             {
@@ -123,6 +123,8 @@ public class TaskPanel : MonoBehaviour
                     Random.Range(minX, maxX),
                     Random.Range(minY, maxY)
                 );
+                rect.localScale *= 1.5f;
+
                 var letterUI = go.GetComponent<DeskLetterUI>();
                 letterUI.SetCustomSprites(fishCountPair.Key.sprite, fishCountPair.Key.sprite, "", "");
             }
