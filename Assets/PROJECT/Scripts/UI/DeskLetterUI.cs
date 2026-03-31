@@ -146,52 +146,73 @@ public class DeskLetterUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEnd
         }
         
     }
-    private IEnumerator FlipAnimation()
+    public IEnumerator FlipAnimation()
     {
+        if (isAnimating) yield break;
+
         isAnimating = true;
 
-        float t = 0f;
-        Vector3 scale = transform.localScale;
-        while (t < flipDuration)
-        {
-            t += Time.deltaTime;
-            float scaleX = Mathf.Lerp(scale.x, 0f, t / flipDuration);
-            transform.localScale = new Vector3(scaleX, scale.y, scale.z);
-            yield return null;
-        }
-        transform.localScale = new Vector3(0f, scale.y, scale.z);
+        Vector3 originalScale = transform.localScale;
 
-        isFlipped = !isFlipped;
-        if (backSide != null)
-            backSide.SetActive(isFlipped);
+        Sequence seq = DOTween.Sequence();
 
-        if (isFlipped)
+        // 1. Сжатие + поворот + лёгкий "пульс" по Y
+        seq.Append(transform.DOScaleX(0f, flipDuration * 0.5f)
+            .SetEase(Ease.InQuad));
+
+        seq.Join(transform.DORotate(new Vector3(0, 90, 0), flipDuration * 0.5f)
+            .SetEase(Ease.InQuad));
+
+        seq.Join(transform.DOScaleY(originalScale.y * 1.05f, flipDuration * 0.25f)
+            .SetLoops(2, LoopType.Yoyo)
+            .SetEase(Ease.InOutSine));
+
+        // 2. Смена стороны
+        seq.AppendCallback(() =>
         {
-            var mail = MailManager.Instance.GetMailById(id);
-            if (mail != null)
+            isFlipped = !isFlipped;
+
+            if (backSide != null)
+                backSide.SetActive(isFlipped);
+
+            if (isFlipped)
             {
-                if (receiverText != null)
-                    receiverText.text = LocalizationManager.Instance.Get(mail.reciever);
-                if (addressText != null)
-                    addressText.text = LocalizationManager.Instance.Get(mail.adress);
+                var mail = MailManager.Instance.GetMailById(id);
+                if (mail != null)
+                {
+                    if (receiverText != null)
+                        receiverText.text = LocalizationManager.Instance.Get(mail.reciever);
+
+                    if (addressText != null)
+                        addressText.text = LocalizationManager.Instance.Get(mail.adress);
+                }
+
+                if (actionButton != null)
+                    actionButton.gameObject.SetActive(false);
             }
 
-            if (actionButton != null)
-                actionButton.gameObject.SetActive(false);
-        }
-        GetComponent<Image>().sprite = isFlipped ? backImage : baseImage;
+            GetComponent<Image>().sprite = isFlipped ? backImage : baseImage;
+        });
 
-        t = 0f;
-        while (t < flipDuration)
+        // 3. Раскрытие + возврат поворота + лёгкий "отскок"
+        seq.Append(transform.DOScaleX(originalScale.x, flipDuration * 0.5f)
+            .SetEase(Ease.OutBack));
+
+        seq.Join(transform.DORotate(Vector3.zero, flipDuration * 0.5f)
+            .SetEase(Ease.OutBack));
+
+        seq.Join(transform.DOScaleY(originalScale.y * 1.05f, flipDuration * 0.25f)
+            .SetLoops(2, LoopType.Yoyo)
+            .SetEase(Ease.InOutSine));
+
+        // 4. Завершение
+        seq.OnComplete(() =>
         {
-            t += Time.deltaTime;
-            float scaleX = Mathf.Lerp(0f, scale.x, t / flipDuration);
-            transform.localScale = new Vector3(scaleX, scale.y, scale.z);
-            yield return null;
-        }
-        transform.localScale = scale;
-
-        isAnimating = false;
+            transform.localScale = originalScale;
+            transform.rotation = Quaternion.identity;
+            isAnimating = false;
+        });
+        yield return null;
     }
 
     private void OnActionButtonClick()
