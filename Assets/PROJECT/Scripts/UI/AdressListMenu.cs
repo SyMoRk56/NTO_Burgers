@@ -50,7 +50,7 @@ public class AdressListMenu : MonoBehaviour
 
             var text = go.GetComponentInChildren<TMP_Text>();
             if (text != null)
-                text.text = LocalizationManager.Instance.Get(task.adress) +(task.recieverName.Contains("Fish_") ? (": " + LocalizationManager.Instance.Get(task.recieverName.Replace("Fish_", ""))) : "");
+                text.text = LocalizationManager.Instance.Get(task.adress) +(task.recieverName.Contains("Fish_") ? (": " + LocalizationManager.Instance.Get(task.recieverName.Replace("Fish_", "")+" <voffset=10><sprite=0>")) : "");
 
             var star = go.transform.Find("star");
             if (star != null)
