@@ -419,7 +419,7 @@ return true; //ДЕБАГ DEBUG
 
             if (MailManager.Instance != null && MailManager.Instance.catalog != null)
             {
-                foreach (var mail in MailManager.Instance.catalog.mails)
+                foreach (var mail in MailManager.Instance.catalog.mails[PlayerManager.instance.Day])
                     MailManager.Instance.SetDelivered(mail.id, false);
                 Debug.Log("Все письма сброшены (hasBag = false)");
             }
@@ -448,6 +448,7 @@ return true; //ДЕБАГ DEBUG
         if (player != null && floatArray != null && floatArray.Length == 3)
             player.GetComponent<Rigidbody>().MovePosition(new Vector3(floatArray[0], floatArray[1], floatArray[2]));
         PlayerManager.instance.Money = data.playerData.money;
+        PlayerManager.instance.Day = data.playerData.day;
         DayNightCycle cycle = FindObjectOfType<DayNightCycle>();
         if (cycle != null) { Debug.Log($"Загружено время суток: {data.timeOfDayIndex}"); }
         else Debug.LogWarning("DayNightCycle не найден при загрузке!");

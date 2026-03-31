@@ -27,7 +27,7 @@ public class MailManager : MonoBehaviour
 
         if (catalog != null)
         {
-            foreach (var mail in catalog.mails)
+            foreach (var mail in catalog.mails[PlayerManager.instance.Day])
                 state[mail.id] = false;
         }
         else
@@ -38,7 +38,7 @@ public class MailManager : MonoBehaviour
 
     public MailItem GetNextUndelivered()
     {
-        foreach (var mail in catalog.mails)
+        foreach (var mail in catalog.mails[PlayerManager.instance.Day])
         {
             if (!state[mail.id])
                 return mail;
@@ -49,7 +49,7 @@ public class MailManager : MonoBehaviour
     public List<MailItem> GetNextXUndelivered(int count)
     {
         var l = new List<MailItem>();
-        foreach (var mail in catalog.mails)
+        foreach (var mail in catalog.mails[PlayerManager.instance.Day])
         {
             if (!state[mail.id]) l.Add(mail);
         }
@@ -60,7 +60,7 @@ public class MailManager : MonoBehaviour
     public List<MailItem> GetAllUndeliveredMails()
     {
         List<MailItem> undelivered = new List<MailItem>();
-        foreach (var mail in catalog.mails)
+        foreach (var mail in catalog.mails[PlayerManager.instance.Day])
         {
             if (!state[mail.id])
                 undelivered.Add(mail);
@@ -71,7 +71,7 @@ public class MailManager : MonoBehaviour
     // НОВЫЙ МЕТОД: Получить письмо по ID
     public MailItem GetMailById(string id)
     {
-        foreach (var mail in catalog.mails)
+        foreach (var mail in catalog.mails[PlayerManager.instance.Day])
         {
             if (mail.id == id)
                 return mail;
@@ -94,7 +94,7 @@ public class MailManager : MonoBehaviour
     {
         var save = new MailSaveData();
 
-        foreach (var mail in catalog.mails)
+        foreach (var mail in catalog.mails[PlayerManager.instance.Day])
         {
             save.mailStates.Add(new MailState
             {

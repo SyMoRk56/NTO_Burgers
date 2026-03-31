@@ -23,13 +23,21 @@ public class TaskManager : MonoBehaviour
         }
 
         tasks = new();
-        var m = mailCatalog.mails;
+        var m = mailCatalog.mails[PlayerManager.instance.Day];
         foreach (var n in m)
         {
             tasks.Add(new Task(n.reciever, n.adress, n.id, n.isStory));
         }
     }
-
+    public void UpdateDailyTasks()
+    {
+        tasks = new();
+        var m = mailCatalog.mails[PlayerManager.instance.Day];
+        foreach (var n in m)
+        {
+            tasks.Add(new Task(n.reciever, n.adress, n.id, n.isStory));
+        }
+    }
     public void AddTask(string recieverName, string adress, string id)
     {
         if (!tasks.Exists(task => task.id == id))

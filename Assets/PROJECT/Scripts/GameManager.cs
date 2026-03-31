@@ -101,6 +101,7 @@ public class GameManager : MonoBehaviour
     {
         if (PlayerMailInventory.Instance.GetSaveData().carriedMails.Count == 0&& !PlayerSaveSystem.Instance.GetData().hasBag)
         {
+            print(TaskManager.Instance.tasks.Count);
             var len = TaskManager.Instance.tasks.Count - 1;
             for (int i = 0; i <= 2; i++)
             {

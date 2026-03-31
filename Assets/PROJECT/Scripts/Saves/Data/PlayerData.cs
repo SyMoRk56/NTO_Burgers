@@ -8,4 +8,5 @@ public class PlayerData
     public bool hasBag; // ДОБАВЛЕНО: наличие сумки у игрока
     public bool collectedAdditionalLetters;
     public bool complitedMainIslandMainTasks;
+    public int day;
 }

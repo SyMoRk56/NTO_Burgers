@@ -17,7 +17,7 @@ public class AdditionalLetters : MonoBehaviour, IInteractObject
 
     public void Interact()
     {
-        foreach (var task in mails.mails)
+        foreach (var task in mails.mails[PlayerManager.instance.Day])
         {
             PlayerMailInventory.Instance.AddMailToInventory(new (task.reciever, task.adress, task.id));
             hasMails = false;

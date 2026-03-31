@@ -192,7 +192,7 @@ public class TaskPanel : MonoBehaviour
                         break;
                     }
                 }
-                if (broke){ adressDot.anchoredPosition = new Vector2(1000, 1000); break; }
+                if (!broke){ adressDot.anchoredPosition = new Vector2(1000, 1000); break; }
             }
         }
     }
