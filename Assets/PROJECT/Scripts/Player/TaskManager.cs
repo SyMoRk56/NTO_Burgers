@@ -23,16 +23,23 @@ public class TaskManager : MonoBehaviour
         }
 
         tasks = new();
-        var m = mailCatalog.mails[PlayerManager.instance.Day];
-        foreach (var n in m)
+        try
         {
-            tasks.Add(new Task(n.reciever, n.adress, n.id, n.isStory));
-            print(n.reciever);
+            var m = mailCatalog.mails[PlayerManager.instance.Day];
+            foreach (var n in m)
+            {
+                tasks.Add(new Task(n.reciever, n.adress, n.id, n.isStory));
+                print(n.reciever);
+            }
+            tasks.Reverse();
+            foreach (var n in tasks)
+            {
+                print(n.recieverName);
+            }
         }
-        tasks.Reverse();
-        foreach(var n in tasks)
+        catch
         {
-            print(n.recieverName);
+
         }
     }
     public void UpdateDailyTasks()
@@ -45,11 +52,11 @@ public class TaskManager : MonoBehaviour
         }
         tasks.Reverse();
     }
-    public void AddTask(string recieverName, string adress, string id)
+    public void AddTask(string recieverName, string adress, string id, bool isStory)
     {
         if (!tasks.Exists(task => task.id == id))
         {
-            tasks.Add(new Task(recieverName, adress, id));
+            tasks.Add(new Task(recieverName, adress, id, isStory));
             Debug.Log($"✓ Добавлено задание: {recieverName} -> {adress} (ID: {id})");
             Debug.Log($"  Всего заданий: {tasks.Count}");
         }
@@ -61,15 +68,28 @@ public class TaskManager : MonoBehaviour
 
     public void RemoveTask(string taskId)
     {
+        string tutorialName = "Tutorial_4";
+
         int removed = tasks.RemoveAll(task => task.id == taskId);
+        print("RemoveTask");
         if (removed > 0)
         {
             Debug.Log($"✓ Задание с ID {taskId} удалено");
             Debug.Log($"  Осталось заданий: {tasks.Count}");
+            if (tasks.Count == 0)
+            {
+                AddTask(tutorialName, tutorialName, tutorialName, true); PlayerMailInventory.Instance.AddMailToInventory(new Task(tutorialName, tutorialName, tutorialName, true));
+
+            }
         }
         else
         {
             Debug.LogWarning($"Задание с ID {taskId} не найдено для удаления!");
+            if (tasks.Count == 0)
+            {
+                AddTask(tutorialName, tutorialName, tutorialName, true); PlayerMailInventory.Instance.AddMailToInventory(new Task(tutorialName, tutorialName, tutorialName, true));
+
+            }
         }
     }
 

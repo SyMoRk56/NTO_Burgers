@@ -99,7 +99,13 @@ public class GameManager : MonoBehaviour
 
     void AddTutorial()
     {
-        if (PlayerMailInventory.Instance.GetSaveData().carriedMails.Count == 0&& !PlayerSaveSystem.Instance.GetData().hasBag)
+        StartCoroutine(AddTut());
+    }
+    IEnumerator AddTut()
+    {
+        while (TaskManager.Instance == null) yield return null;
+        while (TaskManager.Instance.tasks.Count == 0) yield return null;
+        if (PlayerMailInventory.Instance.GetSaveData().carriedMails.Count == 0 && !PlayerSaveSystem.Instance.GetData().hasBag)
         {
             print(TaskManager.Instance.tasks.Count);
             var len = TaskManager.Instance.tasks.Count - 1;

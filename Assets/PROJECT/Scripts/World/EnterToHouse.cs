@@ -34,9 +34,12 @@ public class EnterToHouse : MonoBehaviour, IInteractObject
 
         if (!tran)
             t = StartCoroutine(TeleportCoroutine());
-
+        if(PlayerMailInventory.Instance.carriedMails.Count > 0)
         if (PlayerMailInventory.Instance.carriedMails[0].id == "Tutorial_3")
+        {
             PlayerMailInventory.Instance.RemoveFirstMail();
+            TaskManager.Instance.RemoveTask("Tutorial_3");
+        }
     }
 
     private void PlayDoorSound()

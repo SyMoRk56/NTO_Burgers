@@ -135,6 +135,7 @@ public class DeskUI : MonoBehaviour, IInteractObject
         if (PlayerMailInventory.Instance.carriedMails[0].id == "Tutorial_2")
         {
             PlayerMailInventory.Instance.RemoveFirstMail();
+            TaskManager.Instance.RemoveTask("Tutorial_2");
         }
     }
 

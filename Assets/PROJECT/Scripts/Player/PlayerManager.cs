@@ -3,6 +3,7 @@ using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
 
+[DefaultExecutionOrder(-1000)]
 public class PlayerManager : MonoBehaviour
 {
     public GameObject cinemachineCamera;
@@ -10,7 +11,7 @@ public class PlayerManager : MonoBehaviour
     public static PlayerManager instance;
     public Transform hand;
     int money, day;
-    public int Day { get { return day; } set { if (day < value) { SaveGameManager.Instance.SaveAuto(true); TaskManager.Instance.UpdateDailyTasks(); };  day = value; } }
+    public int Day { get { return day; } set { if (day < value) { day = value; SaveGameManager.Instance.SaveAuto(true); TaskManager.Instance.UpdateDailyTasks(); }; } }
     public int Money { get { return money; } set { money = value; } }
     public bool CanMove { get { return canMove; } set { print("Set can move: " + value); if (cinemachineCamera != null) cinemachineCamera.GetComponent<CinemachineInputAxisController>().enabled = value; canMove = value; var cc = GetComponentInChildren<CameraController>(); if (cc != null) cc.enabled = value; } }
 

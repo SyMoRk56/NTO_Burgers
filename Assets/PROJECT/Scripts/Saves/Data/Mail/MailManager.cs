@@ -27,8 +27,15 @@ public class MailManager : MonoBehaviour
 
         if (catalog != null)
         {
-            foreach (var mail in catalog.mails[PlayerManager.instance.Day])
-                state[mail.id] = false;
+            try
+            {
+                foreach (var mail in catalog.mails[PlayerManager.instance.Day])
+                    state[mail.id] = false;
+            }
+            catch
+            {
+
+            }
         }
         else
         {

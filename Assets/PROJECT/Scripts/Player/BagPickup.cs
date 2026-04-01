@@ -96,6 +96,7 @@ public class BagPickup : MonoBehaviour, IInteractObject
             if (PlayerMailInventory.Instance.carriedMails[0].id == "Tutorial_1")
             {
                 PlayerMailInventory.Instance.RemoveFirstMail();
+                TaskManager.Instance.RemoveTask("Tutorial_1");
             }
             GameObject.Find("Table").transform.parent.GetChild(2).gameObject.SetActive(true);
             // Разблокируем Tab

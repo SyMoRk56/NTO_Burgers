@@ -118,6 +118,7 @@ public class PlayerMovement : MonoBehaviour
                 PlayerMailInventory.Instance.carriedMails.Count > 0 &&
                 PlayerMailInventory.Instance.carriedMails[0].id == "Tutorial_0")
             {
+                TaskManager.Instance.RemoveTask("Tutorial_0");
                 PlayerMailInventory.Instance.RemoveFirstMail();
                 tutorialWalkCompleted = true;
             }
