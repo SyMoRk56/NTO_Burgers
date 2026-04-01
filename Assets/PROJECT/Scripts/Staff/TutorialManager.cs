@@ -62,7 +62,7 @@ public class TutorialManager : MonoBehaviour
         Debug.Log("[Tutorial] Сброс туториала (загрузка Menu)");
 
         tutorialCompleted = false;
-        CurrentStep = TutorialStep.None;
+        CurrentStep = TutorialStep.WaitForNPCSpawn;
 
         if (spawnedNPC != null)
         {

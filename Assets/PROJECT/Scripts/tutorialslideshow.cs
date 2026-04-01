@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Video;
+using UnityEngine.SceneManagement;
 
 public class TutorialSlideshowUI : MonoBehaviour
 {
@@ -26,6 +27,7 @@ public class TutorialSlideshowUI : MonoBehaviour
     private bool isShowing = false;
     private bool initialized = false;
 
+    
     void Awake()
     {
         if (Instance == null)
@@ -35,10 +37,10 @@ public class TutorialSlideshowUI : MonoBehaviour
         }
         else
         {
+            initialized = false;
             Destroy(gameObject);
             return;
         }
-
         InitVideoPlayer();
         gameObject.SetActive(false);
     }

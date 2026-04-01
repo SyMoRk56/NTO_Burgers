@@ -374,8 +374,7 @@ public class SaveGameManager : MonoBehaviour
 
         try
         {
-            DayNightCycle cycle = FindObjectOfType<DayNightCycle>();
-            if (cycle != null) { /* data.timeOfDayIndex = cycle.GetTimeIndex(); */ }
+            
         }
         catch { data.timeOfDayIndex = 0; }
 
@@ -445,9 +444,6 @@ public class SaveGameManager : MonoBehaviour
             player.GetComponent<Rigidbody>().MovePosition(new Vector3(floatArray[0], floatArray[1], floatArray[2]));
         PlayerManager.instance.Money = data.playerData.money;
         PlayerManager.instance.Day = data.playerData.day;
-        DayNightCycle cycle = FindObjectOfType<DayNightCycle>();
-        if (cycle != null) { Debug.Log($"Загружено время суток: {data.timeOfDayIndex}"); }
-        else Debug.LogWarning("DayNightCycle не найден при загрузке!");
 
         // ── Туториал: восстанавливаем стадию ────────────────
         if (TutorialManager.Instance != null)
