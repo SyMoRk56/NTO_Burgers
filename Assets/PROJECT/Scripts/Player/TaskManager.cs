@@ -28,6 +28,7 @@ public class TaskManager : MonoBehaviour
             var m = mailCatalog.mails[PlayerManager.instance.Day];
             foreach (var n in m)
             {
+                if(!MailManager.Instance.IsDelivered(n.id))
                 tasks.Add(new Task(n.reciever, n.adress, n.id, n.isStory));
                 print(n.reciever);
             }
@@ -69,7 +70,7 @@ public class TaskManager : MonoBehaviour
     public void RemoveTask(string taskId)
     {
         string tutorialName = "Tutorial_4";
-
+        MailManager.Instance.SetDelivered(taskId, true);
         int removed = tasks.RemoveAll(task => task.id == taskId);
         print("RemoveTask");
         if (removed > 0)

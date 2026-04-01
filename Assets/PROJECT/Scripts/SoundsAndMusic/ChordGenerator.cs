@@ -27,8 +27,7 @@ public class ChordGenerator : MonoBehaviour
         for (int bar = 0; bar < bars; bar++)
         {
             int degree = progression.degrees[bar % progression.degrees.Count];
-            print(scale.Length);
-            print(degree);
+            
             int chordRootMidi = rootNote + scale[degree];
 
             // Генерация аккорда

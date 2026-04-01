@@ -82,7 +82,11 @@ public class EnterToHouse : MonoBehaviour, IInteractObject
         print("Dip from black");
         blackScreen.DOFade(0, 4);
     }
-
+    public void Transition()
+    {
+        blackScreen.DOFade(1, 1);
+        blackScreen.DOFade(0, 2).SetDelay(2);
+    }
     public int InteractPriority() => 0;
 
     public bool CheckInteract()

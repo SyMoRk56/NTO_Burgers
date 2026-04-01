@@ -31,6 +31,7 @@ public class Bed : MonoBehaviour, IInteractObject
         PlayerManager.instance.Day += 1;
         PlayerMailInventory.Instance.RemoveMailFromInventory("Tutorial_4") ;
         TaskManager.Instance.RemoveTask("Tutorial_4");
+        FindFirstObjectByType<EnterToHouse>().Transition();
     }
 
     public int InteractPriority()
