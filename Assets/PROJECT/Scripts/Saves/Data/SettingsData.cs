@@ -8,6 +8,6 @@ public class SettingsData
     public float masterVolume = .5f;
     public float musicVolume = .5f;
     public float dialoguesVolume = .5f;
-    public float sensitivity = .7f;
+    public float sensitivity = .2f;
     public float shakeScale = .5f;
 }
