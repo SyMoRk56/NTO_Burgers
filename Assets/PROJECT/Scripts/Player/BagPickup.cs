@@ -98,7 +98,14 @@ public class BagPickup : MonoBehaviour, IInteractObject
                 PlayerMailInventory.Instance.RemoveFirstMail();
                 TaskManager.Instance.RemoveTask("Tutorial_1");
             }
-            GameObject.Find("Table").transform.parent.GetChild(2).gameObject.SetActive(true);
+            try
+            {
+                GameObject.Find("Table").transform.parent.GetChild(2).gameObject.SetActive(true);
+            }
+            catch
+            {
+
+            }
             // Разблокируем Tab
             FindFirstObjectByType<WallMap>().canPickup = true;
             TaskUI.Instance.SetHasBagUI(true);

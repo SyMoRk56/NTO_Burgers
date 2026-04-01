@@ -5063,13 +5063,16 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 4499008367779765521, guid: 0910cd8d95f59a742a5e020e2f8b9ddb, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1481808122}
+    - targetCorrespondingSourceObject: {fileID: 2896797769121204100, guid: 0910cd8d95f59a742a5e020e2f8b9ddb, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 643271609}
   m_SourcePrefab: {fileID: 100100000, guid: 0910cd8d95f59a742a5e020e2f8b9ddb, type: 3}
 --- !u!114 &581461771 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 8701878094454363263, guid: 0910cd8d95f59a742a5e020e2f8b9ddb, type: 3}
   m_PrefabInstance: {fileID: 581461770}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 643271607}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f9dfa5b682dcd46bda6128250e975f58, type: 3}
@@ -5440,6 +5443,35 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 642626633}
   m_CullTransparentMesh: 1
+--- !u!1 &643271607 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2896797769121204100, guid: 0910cd8d95f59a742a5e020e2f8b9ddb, type: 3}
+  m_PrefabInstance: {fileID: 581461770}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &643271608 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5360984353265539779, guid: 0910cd8d95f59a742a5e020e2f8b9ddb, type: 3}
+  m_PrefabInstance: {fileID: 581461770}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 643271607}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 89875cdc57c54474a8a74efd9b2a3b5d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Cinemachine::Unity.Cinemachine.CinemachineInputAxisController
+--- !u!114 &643271609
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 643271607}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2624ac6d5bf677d46b13c396bdf3e3fd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CameraSensitivity
+  freeLookCamera: {fileID: 643271608}
 --- !u!1001 &645931730
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -1,9 +1,9 @@
 using UnityEditor;
 using UnityEngine;
+#if UNITY_EDITOR
 
-namespace MTE
-{
-    [CustomEditor(typeof(RuntimeTextureArrayLoader))]
+
+namespace MTE {     [CustomEditor(typeof(RuntimeTextureArrayLoader))]
     public class RuntimeTextureArrayLoaderEditor : Editor
     {
         public override void OnInspectorGUI()
@@ -23,4 +23,6 @@ namespace MTE
             }
         }
     }
+
 }
+#endif

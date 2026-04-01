@@ -20,7 +20,7 @@ public class MainMenu : MonoBehaviour
         {
 
             autosaveButton.GetComponent<Button>().interactable = false;
-            FindFirstObjectByType<MainMenuSaves>().warningPanel.SetActive(true);
+            FindFirstObjectByType<MainMenuSaves>(FindObjectsInactive.Include).warningPanel.SetActive(true);
             return;
         }
         autosaveButton.GetComponent<Button>().interactable = SaveGameManager.Instance.HasAutosave();

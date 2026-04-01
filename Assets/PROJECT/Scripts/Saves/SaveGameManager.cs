@@ -161,11 +161,7 @@ public class SaveGameManager : MonoBehaviour
     // ======================= CHECK =======================
     public bool CheckSave(string saveName)
     {
-#if UNITY_EDITOR
-if(true){
-return true; //ДЕБАГ DEBUG
-}
-#endif
+
         string folder = Path.Combine(saveFolder, "manual");
         string jsonPath = Path.Combine(folder, saveName + ".json");
         string hashPath = Path.Combine(folder, saveName + ".hash");

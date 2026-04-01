@@ -53,10 +53,6 @@ public class PlayerManager : MonoBehaviour
 
     private void Update()
     {
-#if UNITY_EDITOR
-        if (Input.GetKeyDown(KeyCode.I)) SetThunder(true);
-        if (Input.GetKeyDown(KeyCode.O)) SetThunder(false);
-#endif
     }
 
     [SerializeField] FullScreenPassRendererFeature feature;

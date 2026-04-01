@@ -15,6 +15,8 @@ public class CameraController : MonoBehaviour
 sensX *=2;
 sensY *=2;
 #endif
+        sensX *= SettingsSaveSystem.Instance.GetData().sensitivity;
+        sensY *= SettingsSaveSystem.Instance.GetData().sensitivity;
     }
 
     private void Update()
