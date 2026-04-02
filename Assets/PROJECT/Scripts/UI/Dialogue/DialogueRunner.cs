@@ -377,7 +377,7 @@ public class DialogueRunner : MonoBehaviour, IInteractObject
         if (TryGetComponent(out MailBox box))
             return box.CheckInteract();
         else
-            return defaultDialogues.Length != 0;
+            return defaultDialogues.Length != 0 && !isRunning;
     }
 
     public void Interact()

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
@@ -49,12 +50,16 @@ public class AdressListMenu : MonoBehaviour
             go.SetActive(true);
 
             var text = go.GetComponentInChildren<TMP_Text>();
+            
             if (text != null)
-                text.text = LocalizationManager.Instance.Get(task.adress) +(task.recieverName.Contains("Fish_") ? (": " + LocalizationManager.Instance.Get(task.recieverName.Replace("Fish_", "")+" <voffset=10><sprite=0>")) : "");
+                text.text = AdressConverter.Convert(task.adress) +(task.recieverName.Contains("Fish_") ? (": \n" + LocalizationManager.Instance.Get(task.recieverName.Replace("Fish_", "").Split(" ")[0])+" " + task.recieverName.Replace("Fish_", "").Split(" ")[1] +" " + LocalizationManager.Instance.Get("Count")) : "");
 
             var star = go.transform.Find("star");
             if (star != null)
                 star.gameObject.SetActive(task.isStory);
+            var fishIcon = go.transform.Find("FishIcon");
+            if (fishIcon != null) fishIcon.gameObject.SetActive(task.recieverName.Contains("Fish"));
+            
         }
 
         if (label != null)
@@ -68,5 +73,36 @@ public class AdressListMenu : MonoBehaviour
     {
         if (tasksParent != null)
             tasksParent.gameObject.SetActive(visible);
+    }
+}
+public static class AdressConverter
+{
+    public static string Convert(string rawAdress)
+    {
+        
+        if (rawAdress.Contains("NPC") || rawAdress.Contains("Tutorial")) return LocalizationManager.Instance.Get(rawAdress);
+        string p1 = rawAdress.Split("_")[1]; //Post_A3 -> //A3
+        var p2 = p1.ToList();
+        var p3 = new List<char>();
+        string streatNum = "";
+        foreach(var c in p2)
+        {
+            if ("1234567890".Contains(c))
+            {
+                
+                streatNum += c;
+            }
+            else
+            {
+                p3.Add(c);
+            }
+        }
+        string rawStreatName = "";
+        foreach(var c in p3)
+        {
+            rawStreatName += c;
+        }
+        string streatName = LocalizationManager.Instance.Get(rawStreatName);//
+        return streatName + " " + streatNum;
     }
 }

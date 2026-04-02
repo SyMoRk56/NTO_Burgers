@@ -42,6 +42,10 @@ MonoBehaviour:
       reciever: Post_K5
       adress: Post_K5
       isStory: 0
+    - id: Post_V10
+      reciever: Fish_Carp 3
+      adress: Post_V10
+      isStory: 0
   - mails:
     - id: NPC_enot
       reciever: NPC_enot
@@ -63,6 +67,10 @@ MonoBehaviour:
       reciever: Post_V9
       adress: Post_V9
       isStory: 0
+    - id: post_V11
+      reciever: Fish_Salmon 1
+      adress: post_V11
+      isStory: 0
   - mails:
     - id: NPC_koala
       reciever: NPC_koala
@@ -79,4 +87,8 @@ MonoBehaviour:
     - id: Post_V4
       reciever: Post_V4
       adress: Post_V4
+      isStory: 0
+    - id: Post_T2
+      reciever: Fish_Catfish 2
+      adress: Post_T2
       isStory: 0
