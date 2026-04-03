@@ -12,7 +12,7 @@ public class FinalScene : MonoBehaviour
         print(timer);
         if(timer > 3f)
         {
-            anyKeyText.SetActive(true);   
+            anyKeyText.SetActive(true);    
         }
         if (Input.anyKeyDown && timer > 3f)
         {
