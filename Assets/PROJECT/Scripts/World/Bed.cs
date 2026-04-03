@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Bed : MonoBehaviour, IInteractObject
 {
@@ -32,8 +33,15 @@ public class Bed : MonoBehaviour, IInteractObject
         PlayerMailInventory.Instance.RemoveMailFromInventory("Tutorial_4") ;
         TaskManager.Instance.RemoveTask("Tutorial_4");
         FindFirstObjectByType<EnterToHouse>().Transition();
+        if(PlayerManager.instance.Day == 4)
+        {
+            Invoke(nameof(LoadFinalScene), 1f);
+        }
     }
-
+    void LoadFinalScene()
+    {
+        SceneManager.LoadScene("Final");
+    }
     public int InteractPriority()
     {
         return 0;
