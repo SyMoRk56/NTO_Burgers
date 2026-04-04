@@ -35,6 +35,9 @@ public class FishingMinigame : MonoBehaviour
 
     public Image progressBar;
 
+    float noMoveTimer;
+
+    public GameObject tutorPanel;
     void OnEnable()
     {
         float halfZoneHeight = playerZone.rect.height / 2f;
@@ -66,7 +69,18 @@ public class FishingMinigame : MonoBehaviour
             MovePlayerZone(zoneSpeed * delta);
         else if (Input.GetKey(KeyCode.S))
             MovePlayerZone(-zoneSpeed * delta);
-
+        else
+        {
+            noMoveTimer += Time.deltaTime;
+        }
+        if(noMoveTimer > 5)
+        {
+            tutorPanel.SetActive(true);
+        }
+        else
+        {
+            tutorPanel.SetActive(false);
+        }
         // Движение рыбы
         MoveFish(delta);
 
@@ -205,6 +219,7 @@ public class FishingMinigame : MonoBehaviour
 
     void MovePlayerZone(float deltaY)
     {
+        noMoveTimer = 0;
         float newY = playerZone.anchoredPosition.y + deltaY;
 
         float minY = barMinY + playerZone.rect.height / 2f;
