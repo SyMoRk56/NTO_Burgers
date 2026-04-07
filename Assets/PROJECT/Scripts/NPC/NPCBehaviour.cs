@@ -20,23 +20,18 @@ public class NPCBehaviour : MonoBehaviour
 
     [HideInInspector] public bool dialogueActive = false;
 
-    // ДЛЯ СИСТЕМЫ СОХРАНЕНИЙ
     public int CurrentActionIndex { get; private set; } = 0;
     public string CurrentTargetName { get; private set; } = "";
 
     private bool isNight = false;
     private Coroutine actionCoroutine;
 
-    // ======================================================
-    // UNITY
-    // ======================================================
-    
-
     private void Start()
     {
         animator = GetComponentInChildren<Animator>();
         if (agent == null) agent = GetComponent<NavMeshAgent>();
 
+        // отключаем авторотацию агента — крутим NPC сами через velocity, иначе будут дёрганья
         agent.updateRotation = false;
 
         actionCoroutine = StartCoroutine(ActionRoutine());
@@ -44,31 +39,22 @@ public class NPCBehaviour : MonoBehaviour
 
     private void Update()
     {
+        // во время диалога и ночью NPC стоит — крутить его не нужно
         if (!dialogueActive && !isNight)
             RotateTowardsMovementDirection();
     }
 
-    // ======================================================
-    // DAY / NIGHT REACTION
-    // ======================================================
     private void OnTimeOfDayChanged(int timeIndex)
     {
         if (!reactsToDayNight) return;
 
+        // индексы времени суток: 0 - рассвет, 1 - день, 2 - закат, 3 - ночь
         switch (timeIndex)
         {
-            case 2: // 🌇 закат - идём домой
-                GoHomeAtSunset();
-                break;
-
-            case 3: // 🌙 ночь - ждём
-                EnterNight();
-                break;
-
-            case 0: // 🌅 рассвет - продолжаем маршрут
-            case 1: // ☀️ день - продолжаем маршрут
-                ExitNight();
-                break;
+            case 2: GoHomeAtSunset(); break;
+            case 3: EnterNight(); break;
+            case 0:
+            case 1: ExitNight(); break;
         }
     }
 
@@ -76,6 +62,7 @@ public class NPCBehaviour : MonoBehaviour
     {
         if (homePoint == null || isNight) return;
 
+        // прерываем текущий маршрут и гоним NPC домой
         StopAllCoroutines();
         Stop();
 
@@ -91,11 +78,9 @@ public class NPCBehaviour : MonoBehaviour
     private IEnumerator CheckArrivalAtHome()
     {
         while (Vector3.Distance(transform.position, homePoint.position) > agent.stoppingDistance + 0.1f)
-        {
             yield return null;
-        }
 
-        // NPC достиг дома — делаем невидимым и неактивным
+        // дошли до дома — прячем NPC до утра
         agent.isStopped = true;
         SetInvisibleAndDisable();
     }
@@ -105,9 +90,9 @@ public class NPCBehaviour : MonoBehaviour
         if (isNight) return;
         isNight = true;
 
+        // если NPC не успел дойти домой — просто скрываем его на месте
         StopAllCoroutines();
         Stop();
-
         SetInvisibleAndDisable();
     }
 
@@ -119,18 +104,16 @@ public class NPCBehaviour : MonoBehaviour
         SetVisibleAndEnable();
         agent.isStopped = false;
 
+        // продолжаем с того действия, на котором остановились перед ночью
         actionCoroutine = StartCoroutine(ActionRoutineFromIndex());
     }
 
-    // ======================================================
-    // CONTROL
-    // ======================================================
     public void Stop()
     {
         if (agent != null)
         {
             agent.isStopped = true;
-            agent.velocity = Vector3.zero;
+            agent.velocity = Vector3.zero; // без этого агент ещё немного едет по инерции
         }
 
         animator.SetBool(moveAnimParameter, false);
@@ -143,18 +126,17 @@ public class NPCBehaviour : MonoBehaviour
             agent.isStopped = false;
     }
 
-    // ======================================================
-    // MAIN ROUTINE
-    // ======================================================
     private IEnumerator ActionRoutine()
     {
         while (true)
         {
+            // ждём пока игрок не закроет диалог прежде чем начать маршрут
             while (dialogueActive)
                 yield return null;
 
             for (CurrentActionIndex = 0; CurrentActionIndex < actions.Length; CurrentActionIndex++)
             {
+                // диалог мог начаться пока мы переходили к следующему действию
                 while (dialogueActive) yield return null;
 
                 NPCAction act = actions[CurrentActionIndex];
@@ -170,9 +152,12 @@ public class NPCBehaviour : MonoBehaviour
                         break;
                 }
             }
+            // actions кончились — цикл while(true) начнёт их заново с нуля
         }
     }
 
+    // та же рутина что ActionRoutine, но стартует не с нуля —
+    // используется после загрузки сохранения или выхода из ночного режима
     private IEnumerator ActionRoutineFromIndex()
     {
         while (true)
@@ -192,13 +177,10 @@ public class NPCBehaviour : MonoBehaviour
 
             CurrentActionIndex++;
             if (CurrentActionIndex >= actions.Length)
-                CurrentActionIndex = 0;
+                CurrentActionIndex = 0; // зацикливаем маршрут
         }
     }
 
-    // ======================================================
-    // WALK
-    // ======================================================
     private IEnumerator WalkToTarget(Transform target, Vector2 waitRange)
     {
         if (target == null) yield break;
@@ -207,42 +189,33 @@ public class NPCBehaviour : MonoBehaviour
 
         agent.isStopped = false;
         agent.SetDestination(target.position);
-
         animator.SetBool(moveAnimParameter, true);
-        print("IS BUNNY? " +( gameObject.name == "NPC - BUNNY"));
+
         while (agent.pathPending ||
                agent.remainingDistance > agent.stoppingDistance ||
                agent.velocity.sqrMagnitude > 0.01f)
         {
+            // прибиваем Y таргета к высоте NPC — без этого на неровном рельефе
+            // агент думает что не добрался до точки из-за разницы высот
             target.position = new Vector3(target.position.x, transform.position.y, target.position.z);
-            if (gameObject.name == "NPC - BUNNY")
-            {
-                print("BUNNY: WALK " + (agent.remainingDistance > agent.stoppingDistance));
-            }
+
             if (dialogueActive || isNight)
             {
                 Stop();
-                
-                yield break;
+                yield break; // выходим, не дожидаясь точки назначения
             }
 
             yield return null;
         }
 
-        if(gameObject.name == "NPC - BUNNY")
-        {
-            print("BUNNY: IDLE");
-        }
         animator.SetBool(moveAnimParameter, false);
         animator.SetTrigger("isIdle");
 
+        // случайная пауза перед следующим действием, чтобы NPC не выглядел как робот
         float r = Random.Range(waitRange.x, waitRange.y);
         yield return new WaitForSeconds(r);
     }
 
-    // ======================================================
-    // INTERACT
-    // ======================================================
     private IEnumerator InteractWithObject(NPCAction act)
     {
         if (act.interactObject == null) yield break;
@@ -251,10 +224,9 @@ public class NPCBehaviour : MonoBehaviour
 
         agent.isStopped = false;
         agent.SetDestination(act.interactObject.position);
-
-        
         animator.SetBool(moveAnimParameter, true);
 
+        // идём пока не войдём в радиус взаимодействия (Y игнорируем — объект может быть выше/ниже)
         while (Vector3.Distance(
             new Vector3(transform.position.x, 0, transform.position.z),
             new Vector3(act.interactObject.position.x, 0, act.interactObject.position.z)
@@ -269,9 +241,9 @@ public class NPCBehaviour : MonoBehaviour
             yield return null;
         }
 
+        // остановились — запускаем анимацию взаимодействия
         agent.isStopped = true;
         animator.SetBool(moveAnimParameter, false);
-
         animator.SetTrigger(act.interactionTrigger);
 
         yield return new WaitForSeconds(act.interactionDuration);
@@ -279,9 +251,6 @@ public class NPCBehaviour : MonoBehaviour
         agent.isStopped = false;
     }
 
-    // ======================================================
-    // SAVE / RESTORE
-    // ======================================================
     public void RestoreStateFromSave(NPCSaveData d)
     {
         StopAllCoroutines();
@@ -289,8 +258,9 @@ public class NPCBehaviour : MonoBehaviour
         CurrentActionIndex = d.currentActionIndex;
         CurrentTargetName = d.currentTargetName;
 
+        // ищем трансформ по имени среди всех actions чтобы сразу отправить агента туда,
+        // иначе NPC будет стоять на месте пока не начнётся следующее действие
         Transform target = null;
-
         foreach (var a in actions)
         {
             if (a.walkTarget != null && a.walkTarget.name == d.currentTargetName)
@@ -309,15 +279,13 @@ public class NPCBehaviour : MonoBehaviour
         actionCoroutine = StartCoroutine(ActionRoutineFromIndex());
     }
 
-    // ======================================================
-    // ROTATION & VISIBILITY
-    // ======================================================
     private void RotateTowardsMovementDirection()
     {
+        // если агент почти не движется — не трогаем rotation, иначе NPC дёргается на месте
         if (agent.velocity.sqrMagnitude < 0.01f) return;
 
         Vector3 dir = agent.velocity.normalized;
-        dir.y = 0;
+        dir.y = 0; // убираем вертикальную составляющую — NPC не должен наклоняться
 
         Quaternion targetRot = Quaternion.LookRotation(dir);
 
@@ -336,6 +304,7 @@ public class NPCBehaviour : MonoBehaviour
         foreach (var c in GetComponentsInChildren<Collider>())
             c.enabled = false;
 
+        // отключаем агента полностью, иначе он продолжает считать пути в фоне и тратит CPU
         if (agent != null)
         {
             agent.isStopped = true;
