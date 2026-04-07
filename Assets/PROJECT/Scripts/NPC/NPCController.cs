@@ -6,41 +6,41 @@ using System.Collections.Generic;
 public class NPCController : MonoBehaviour
 {
     [Header("Настройки рыбалки")]
-    [SerializeField] private MonoBehaviour componentToDisable;
-    [SerializeField] private string bridgeTag = "bridge";
-    [SerializeField] private string fishTag = "fish";
+    [SerializeField] private MonoBehaviour componentToDisable; 
+    [SerializeField] private string bridgeTag = "bridge";      
+    [SerializeField] private string fishTag = "fish";        
 
     [Header("Настройки движения")]
-    [SerializeField] private float stoppingDistance = 1.0f;
-    [SerializeField] private float updateTargetInterval = 1.0f;
-    [SerializeField] private float attachFishDistance = 2.0f;
-    [SerializeField] private float collisionCheckRadius = 2.0f;
+    [SerializeField] private float stoppingDistance = 1.0f;   
+    [SerializeField] private float updateTargetInterval = 1.0f;// Интервал обновления пути к рыбе (чтобы не делать это каждый кадр)
+    [SerializeField] private float attachFishDistance = 2.0f;  
+    [SerializeField] private float collisionCheckRadius = 2.0f;// Радиус сферы для проверки коллизий с мостом
 
     [Header("Настройки рыбы")]
-    [SerializeField] private Vector3 fishCarryOffset = new Vector3(0f, 1.5f, 1.5f);
-    [SerializeField] private Vector3 fishRotationOffset = new Vector3(0f, 90f, 0f);
-    [SerializeField] private float fishFollowSpeed = 5f;
+    [SerializeField] private Vector3 fishCarryOffset = new Vector3(0f, 1.5f, 1.5f);  
+    [SerializeField] private Vector3 fishRotationOffset = new Vector3(0f, 90f, 0f);  // Дополнительный поворот рыбы при переноске
+    [SerializeField] private float fishFollowSpeed = 5f;      
 
     [Header("Настройки анимации")]
-    [SerializeField] private Animator npcAnimator;
-    [SerializeField] private string carringWalkParam = "carringwalk";
+    [SerializeField] private Animator npcAnimator;             // Ссылка на Animator-компонент для управления анимациями
+    [SerializeField] private string carringWalkParam = "carringwalk"; // Имя параметра в Animator, управляющего состоянием ходьбы с рыбой
 
     [Header("VFX эффекты - ПРОСТОЙ ВАРИАНТ")]
-    [SerializeField] private bool enableVFX = true;
-    [SerializeField] private string vfxTag = "PickupVFX"; // Тег для поиска VFX
-    [SerializeField] private float vfxDuration = 3f;
+    [SerializeField] private bool enableVFX = true;            // Переключатель: включать ли визуальные эффекты при подборе рыбы
+    [SerializeField] private string vfxTag = "PickupVFX";     
+    [SerializeField] private float vfxDuration = 3f;           // Длительность проигрывания VFX-эффекта в секундах
 
-    public bool isGoingForFish = false;
+    public bool isGoingForFish = false; 
 
-    private FishingSpot fishingManager;
-    private NavMeshAgent navMeshAgent;
-    private GameObject targetFish;
-    private bool isMovingToFish = false;
-    private Coroutine movementCoroutine;
-    private bool hasFishAttached = false;
-    private GameObject attachedFish;
+    private FishingSpot fishingManager;  // Ссылка на менеджер рыбалки (контролирует состояние сессии)
+    private NavMeshAgent navMeshAgent;  
+    private GameObject targetFish;       // Текущая цель — рыба, к которой движется НПЦ
+    private bool isMovingToFish = false; 
+    private Coroutine movementCoroutine; // Ссылка на корутину движения (чтобы можно было остановить)
+    private bool hasFishAttached = false
+    private GameObject attachedFish;     
     private bool isCarryingFish = false;
-    private List<GameObject> foundVFX = new List<GameObject>(); // Найденные VFX
+    private List<GameObject> foundVFX = new List<GameObject>(); // Кэш: список найденных VFX-объектов при старте
 
     void Start()
     {
@@ -72,16 +72,16 @@ public class NPCController : MonoBehaviour
             npcAnimator = GetComponent<Animator>();
         }
 
-        // Ищем VFX объекты сразу при старте
+        // Ищем VFX объекты сразу при старте — чтобы не делать поиск каждый раз при подборе
         FindVFXObjects();
 
         Debug.Log($"NPCController инициализирован. VFX включен: {enableVFX}, тег: '{vfxTag}'");
     }
 
-    // Метод для поиска VFX объектов
+    // Метод для поиска VFX объектов по тегу и их кэширования
     void FindVFXObjects()
     {
-        if (!enableVFX) return;
+        if (!enableVFX) return; // Если эффекты выключены — не тратим время на поиск
 
         GameObject[] vfxArray = GameObject.FindGameObjectsWithTag(vfxTag);
         foundVFX.Clear();
@@ -93,10 +93,10 @@ public class NPCController : MonoBehaviour
                 foundVFX.Add(vfx);
                 Debug.Log($"Найден VFX объект: {vfx.name}");
 
-                // Сначала выключаем все VFX
+                // Сразу выключаем — включим только в момент подбора рыбы
                 vfx.SetActive(false);
 
-                // Проверяем, есть ли ParticleSystem
+                // Проверяем, есть ли ParticleSystem (на самом объекте или в детях)
                 ParticleSystem ps = vfx.GetComponent<ParticleSystem>();
                 if (ps == null) ps = vfx.GetComponentInChildren<ParticleSystem>();
 
@@ -124,35 +124,43 @@ public class NPCController : MonoBehaviour
 
     void Update()
     {
+        // Если несём рыбу — обновляем её позицию и поворот относительно НПЦ
         if (isCarryingFish && attachedFish != null)
         {
             UpdateFishPosition();
         }
 
+        // Обновляем параметры аниматора в зависимости от состояния
         UpdateAnimation();
 
+        // Если рыбалка завершается — проверяем, не вошёл ли НПЦ в зону моста
         if (fishingManager != null && fishingManager.isFishingEnding)
         {
             CheckForBridgeContinuously();
         }
     }
 
+    // Плавное перемещение рыбы к позиции "руки" НПЦ (чтобы не было телепортаций и дёрганий)
     void UpdateFishPosition()
     {
         if (attachedFish == null) return;
 
+        // Вычисляем целевую позицию: вперёд + вверх + вправо от НПЦ
         Vector3 targetPosition = transform.position +
                                 transform.forward * fishCarryOffset.z +
                                 transform.up * fishCarryOffset.y +
                                 transform.right * fishCarryOffset.x;
 
+        // Плавное приближение к цели (Lerp)
         attachedFish.transform.position = Vector3.Lerp(
             attachedFish.transform.position,
             targetPosition,
             Time.deltaTime * fishFollowSpeed
         );
 
+        // Вычисляем целевой поворот: поворот НПЦ + дополнительный оффсет
         Quaternion targetRotation = transform.rotation * Quaternion.Euler(fishRotationOffset);
+        // Плавный поворот (Slerp)
         attachedFish.transform.rotation = Quaternion.Slerp(
             attachedFish.transform.rotation,
             targetRotation,
@@ -160,6 +168,7 @@ public class NPCController : MonoBehaviour
         );
     }
 
+    // Обновление параметров анимации: обычная ходьба / ходьба с рыбой / остановка
     void UpdateAnimation()
     {
         if (npcAnimator == null) return;
@@ -168,15 +177,16 @@ public class NPCController : MonoBehaviour
 
         if (isCarryingFish)
         {
-            carringWalkValue = 4;
+            carringWalkValue = 4; // Анимация с рыбой
         }
         else if (isMovingToFish)
         {
-            carringWalkValue = 1;
+            carringWalkValue = 1; // Анимация движения к цели
         }
 
         npcAnimator.SetInteger(carringWalkParam, carringWalkValue);
 
+        // Дополнительно передаём скорость движения для более плавной анимации
         if (navMeshAgent != null)
         {
             float speed = navMeshAgent.velocity.magnitude;
@@ -184,36 +194,44 @@ public class NPCController : MonoBehaviour
         }
     }
 
+    // Проверка: не вошёл ли НПЦ в радиус моста (триггер начала движения к рыбе)
     void CheckForBridgeContinuously()
     {
+        // Если уже движемся к рыбе или несём её — проверка не нужна
         if (isMovingToFish || isCarryingFish) return;
 
+        // Проверяем коллизии в радиусе вокруг НПЦ
         Collider[] colliders = Physics.OverlapSphere(transform.position, collisionCheckRadius);
 
         foreach (Collider collider in colliders)
         {
+            // Ищем объект с тегом моста, исключая самого НПЦ
             if (collider.gameObject != gameObject && collider.gameObject.tag == bridgeTag)
             {
+                // Отключаем компонент, если он был включён (например, патрулирование)
                 if (componentToDisable != null && componentToDisable.enabled)
                 {
                     componentToDisable.enabled = false;
                 }
 
+                // Запускаем движение к рыбе, если ещё не начали
                 if (!isMovingToFish)
                 {
                     StartMovingToFish();
                 }
-                break;
+                break; // Нашли мост — выходим из цикла
             }
         }
     }
 
+    // Поиск ближайшей активной рыбы и запуск движения к ней
     void StartMovingToFish()
     {
         GameObject[] fishObjects = GameObject.FindGameObjectsWithTag(fishTag);
 
         if (fishObjects.Length > 0)
         {
+            // Фильтруем только активные в иерархии объекты (не деактивированные в редакторе/коде)
             List<GameObject> activeFish = new List<GameObject>();
             foreach (GameObject fish in fishObjects)
             {
@@ -225,9 +243,11 @@ public class NPCController : MonoBehaviour
 
             if (activeFish.Count > 0)
             {
+                // Берём первую как временную цель
                 targetFish = activeFish[0];
                 float closestDistance = Vector3.Distance(transform.position, targetFish.transform.position);
 
+                // Ищем самую близкую рыбу из активных
                 foreach (GameObject fish in activeFish)
                 {
                     float distance = Vector3.Distance(transform.position, fish.transform.position);
@@ -241,6 +261,7 @@ public class NPCController : MonoBehaviour
                 isMovingToFish = true;
                 isGoingForFish = true;
 
+                // Если уже есть запущенная корутина — останавливаем её перед запуском новой
                 if (movementCoroutine != null)
                 {
                     StopCoroutine(movementCoroutine);
@@ -251,39 +272,47 @@ public class NPCController : MonoBehaviour
         }
     }
 
+    // Корутина: периодическое обновление пути к рыбе и проверка дистанции
     IEnumerator MoveToFishCoroutine()
     {
         while (isMovingToFish && targetFish != null)
         {
             if (navMeshAgent.isActiveAndEnabled && targetFish.activeInHierarchy)
             {
+                // Устанавливаем новую точку назначения для агента
                 navMeshAgent.SetDestination(targetFish.transform.position);
 
+                // Проверяем дистанцию до рыбы
                 float distanceToFish = Vector3.Distance(transform.position, targetFish.transform.position);
 
+                // Если подошли достаточно близко и ещё не несём рыбу — подбираем
                 if (distanceToFish <= attachFishDistance && !isCarryingFish)
                 {
                     PickupFish(targetFish);
                 }
 
+                // Если агент достиг цели (осталось меньше stoppingDistance и путь не пересчитывается)
                 if (navMeshAgent.remainingDistance <= navMeshAgent.stoppingDistance &&
                     !navMeshAgent.pathPending)
                 {
                     StopMovingToFish();
                     OnReachedFish();
-                    yield break;
+                    yield break; // Завершаем корутину
                 }
             }
             else if (targetFish == null || !targetFish.activeInHierarchy)
             {
+                // Если рыба исчезла или деактивировалась — отменяем движение
                 StopMovingToFish();
                 yield break;
             }
 
+            // Ждём указанный интервал перед следующим обновлением
             yield return new WaitForSeconds(updateTargetInterval);
         }
     }
 
+    // Подбор рыбы: "прикрепляем" к НПЦ, отключаем физику, включаем анимацию и VFX
     void PickupFish(GameObject fish)
     {
         if (fish == null || isCarryingFish) return;
@@ -298,6 +327,7 @@ public class NPCController : MonoBehaviour
         hasFishAttached = true;
         isCarryingFish = true;
 
+        // Отключаем физику у рыбы, чтобы она не падала и не коллайдилась
         Rigidbody rb = attachedFish.GetComponent<Rigidbody>();
         if (rb != null)
         {
@@ -305,19 +335,23 @@ public class NPCController : MonoBehaviour
             rb.useGravity = false;
         }
 
+        // Отключаем коллайдер, чтобы рыба не мешала проходу
         Collider col = attachedFish.GetComponent<Collider>();
         if (col != null)
         {
             col.enabled = false;
         }
 
+        // Включаем обратно компонент, который отключали при начале рыбалки
         if (componentToDisable != null && !componentToDisable.enabled)
         {
             componentToDisable.enabled = true;
         }
 
+        // Останавливаем движение к рыбе
         StopMovingToFish();
 
+        // Переключаем анимацию на "с рыбой"
         if (npcAnimator != null)
         {
             npcAnimator.SetInteger(carringWalkParam, 4);
@@ -325,7 +359,7 @@ public class NPCController : MonoBehaviour
 
         Debug.Log("Рыба поднята! Запускаем VFX...");
 
-        // ВКЛЮЧАЕМ VFX
+        // ВКЛЮЧАЕМ VFX, если разрешено в настройках
         if (enableVFX)
         {
             StartCoroutine(ActivateVFX());
@@ -335,20 +369,23 @@ public class NPCController : MonoBehaviour
             Debug.LogWarning("VFX отключен в настройках!");
         }
 
+        // Запускаем таймер: через 10 секунд рыба будет автоматически брошена
         StartCoroutine(CarryFishForDuration(10f));
     }
 
-    // Корутина для активации VFX
+    // Корутина для активации и проигрывания VFX-эффектов
     IEnumerator ActivateVFX()
     {
         Debug.Log($"=== АКТИВАЦИЯ VFX ===");
 
+        // Если список пуст — пробуем найти объекты ещё раз (на случай, если добавили в редакторе после старта)
         if (foundVFX.Count == 0)
         {
             Debug.LogError("Нет VFX объектов для активации! Ищем заново...");
             FindVFXObjects();
         }
 
+        // Если всё равно пусто — выходим с ошибкой
         if (foundVFX.Count == 0)
         {
             Debug.LogError($"ВСЁ РАВНО НЕТ ОБЪЕКТОВ С ТЕГОМ '{vfxTag}'!");
@@ -357,7 +394,7 @@ public class NPCController : MonoBehaviour
 
         Debug.Log($"Включаем {foundVFX.Count} VFX объектов:");
 
-        // Включаем все VFX
+        // Включаем все найденные VFX-объекты
         foreach (GameObject vfx in foundVFX)
         {
             if (vfx != null)
@@ -365,7 +402,7 @@ public class NPCController : MonoBehaviour
                 Debug.Log($"  Включаем: {vfx.name}");
                 vfx.SetActive(true);
 
-                // Запускаем ParticleSystem
+                // Запускаем ParticleSystem, если он есть
                 ParticleSystem ps = vfx.GetComponent<ParticleSystem>();
                 if (ps == null) ps = vfx.GetComponentInChildren<ParticleSystem>();
 
@@ -383,12 +420,12 @@ public class NPCController : MonoBehaviour
 
         Debug.Log($"VFX будут активны {vfxDuration} секунд");
 
-        // Ждем указанное время
+        // Ждём указанное время
         yield return new WaitForSeconds(vfxDuration);
 
         Debug.Log("Отключаем VFX...");
 
-        // Выключаем все VFX
+        // Выключаем все VFX-объекты после завершения
         foreach (GameObject vfx in foundVFX)
         {
             if (vfx != null)
@@ -400,36 +437,42 @@ public class NPCController : MonoBehaviour
         Debug.Log("=== VFX ОТКЛЮЧЕНЫ ===");
     }
 
+    // Корутина-таймер: сколько секунд НПЦ несёт рыбу перед броском
     IEnumerator CarryFishForDuration(float duration)
     {
         yield return new WaitForSeconds(duration);
         DropFish();
     }
 
+    // Бросок рыбы: возвращаем физику, добавляем импульс, выключаем эффекты
     void DropFish()
     {
         if (!isCarryingFish || attachedFish == null) return;
 
+        // Возвращаем физику
         Rigidbody rb = attachedFish.GetComponent<Rigidbody>();
         if (rb != null)
         {
             rb.isKinematic = false;
             rb.useGravity = true;
+            // Добавляем небольшой импульс вперёд и вверх для естественности
             rb.AddForce(transform.forward * 2f + Vector3.up * 1f, ForceMode.Impulse);
         }
 
+        // Включаем коллайдер обратно
         Collider col = attachedFish.GetComponent<Collider>();
         if (col != null)
         {
             col.enabled = true;
         }
 
+        // Возвращаем анимацию в состояние "без рыбы"
         if (npcAnimator != null)
         {
             npcAnimator.SetInteger(carringWalkParam, 0);
         }
 
-        // Выключаем VFX при броске
+        // Выключаем VFX при броске (на всякий случай, если ещё проигрываются)
         if (enableVFX)
         {
             Debug.Log("Выключаем VFX при броске рыбы");
@@ -442,11 +485,13 @@ public class NPCController : MonoBehaviour
             }
         }
 
+        // Сбрасываем флаги и ссылки
         isCarryingFish = false;
         hasFishAttached = false;
         attachedFish = null;
     }
 
+    // Остановка движения к рыбе: сброс флагов, корутины и пути агента
     void StopMovingToFish()
     {
         isMovingToFish = false;
@@ -464,6 +509,7 @@ public class NPCController : MonoBehaviour
         }
     }
 
+    // Если агент дошёл до точки, но рыба ещё не подобрана — подбираем
     void OnReachedFish()
     {
         if (targetFish != null && !isCarryingFish)
@@ -472,6 +518,7 @@ public class NPCController : MonoBehaviour
         }
     }
 
+    // Чистка при уничтожении объекта: останавливаем корутины и бросаем рыбу, если несём
     void OnDestroy()
     {
         if (movementCoroutine != null)
@@ -485,7 +532,8 @@ public class NPCController : MonoBehaviour
         }
     }
 
-    // Методы для отладки
+    // Методы для отладки (вызываются через контекстное меню в Инспекторе)
+
     [ContextMenu("Проверить VFX настройки")]
     public void DebugVFXSettings()
     {
@@ -503,7 +551,7 @@ public class NPCController : MonoBehaviour
             }
         }
 
-        // Перепроверяем в сцене
+        // Перепроверяем в сцене — вдруг добавили новые объекты после старта
         GameObject[] allVFX = GameObject.FindGameObjectsWithTag(vfxTag);
         Debug.Log($"Объектов с тегом '{vfxTag}' в сцене: {allVFX.Length}");
 
@@ -528,11 +576,12 @@ public class NPCController : MonoBehaviour
         }
     }
 
+    // Тестовая корутина: включает VFX на 5 секунд для быстрой проверки в редакторе
     IEnumerator TestVFXCoroutine()
     {
         Debug.Log("=== ТЕСТ VFX ===");
 
-        // Включаем
+        // Включаем все кэшированные VFX
         foreach (GameObject vfx in foundVFX)
         {
             if (vfx != null)
@@ -544,7 +593,7 @@ public class NPCController : MonoBehaviour
 
         yield return new WaitForSeconds(5f);
 
-        // Выключаем
+        // Выключаем обратно
         foreach (GameObject vfx in foundVFX)
         {
             if (vfx != null)
