@@ -3,7 +3,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class EnterToHouse : MonoBehaviour, IInteractObject
+public class Door : MonoBehaviour, IInteractObject
 {
     public bool CheckDistance()
     {
@@ -29,7 +29,7 @@ public class EnterToHouse : MonoBehaviour, IInteractObject
     public void Interact()
     {
         var tran = false;
-        foreach (var e in FindObjectsByType<EnterToHouse>(FindObjectsSortMode.None))
+        foreach (var e in FindObjectsByType<Door>(FindObjectsSortMode.None))
             tran |= e.isInTransition;
 
         if (!tran)
@@ -92,7 +92,7 @@ public class EnterToHouse : MonoBehaviour, IInteractObject
     public bool CheckInteract()
     {
         var tran = false;
-        foreach (var e in FindObjectsByType<EnterToHouse>(FindObjectsSortMode.None))
+        foreach (var e in FindObjectsByType<Door>(FindObjectsSortMode.None))
             tran |= e.isInTransition;
         return !tran && FindChildWithTag(PlayerManager.instance.transform, "Bag") != null;
     }

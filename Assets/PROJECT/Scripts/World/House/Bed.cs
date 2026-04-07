@@ -32,7 +32,7 @@ public class Bed : MonoBehaviour, IInteractObject
         PlayerManager.instance.Day += 1;
         PlayerMailInventory.Instance.RemoveMailFromInventory("Tutorial_4") ;
         TaskManager.Instance.RemoveTask("Tutorial_4");
-        FindFirstObjectByType<EnterToHouse>().Transition();
+        FindFirstObjectByType<Door>().Transition();
         if(PlayerManager.instance.Day == 4)
         {
             Invoke(nameof(LoadFinalScene), 1f);

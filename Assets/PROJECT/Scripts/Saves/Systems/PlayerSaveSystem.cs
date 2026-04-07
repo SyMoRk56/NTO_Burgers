@@ -39,8 +39,7 @@ public class PlayerSaveSystem : MonoBehaviour
             },
             money = PlayerManager.instance.Money,
             day = PlayerManager.instance.Day,
-            hasBag = HasBag(), // Сохраняем состояние сумки
-            collectedAdditionalLetters = !FindFirstObjectByType<AdditionalLetters>().hasMails,
+            hasBag = HasBag(),
             complitedMainIslandMainTasks = PlayerMailInventory.Instance.complitedMainLine,
         };
     }
@@ -70,11 +69,10 @@ public class PlayerSaveSystem : MonoBehaviour
         {
             CreateBagForPlayer();
             Destroy(FindFirstObjectByType<BagPickup>().gameObject);
-            foreach (var g in FindObjectsByType<EnterToHouse>(FindObjectsSortMode.None))
+            foreach (var g in FindObjectsByType<Door>(FindObjectsSortMode.None))
             {
                 g.enabled = true;
             }
-            FindFirstObjectByType<AdditionalLetters>().hasMails = !data.collectedAdditionalLetters;
             PlayerMailInventory.Instance.complitedMainLine = data.complitedMainIslandMainTasks;
             PlayerManager.instance.SetThunder(!data.complitedMainIslandMainTasks);
         }

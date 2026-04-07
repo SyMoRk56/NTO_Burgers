@@ -33,7 +33,7 @@ public class BagPickup : MonoBehaviour, IInteractObject
             pickupPrompt.SetActive(false);
         h.enabled = false;
     }
-    public EnterToHouse h;
+    public Door h;
     void Update()
     {
         //if (playerInRange && Input.GetKeyDown(pickupKey))

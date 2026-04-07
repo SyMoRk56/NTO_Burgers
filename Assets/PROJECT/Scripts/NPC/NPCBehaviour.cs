@@ -30,15 +30,7 @@ public class NPCBehaviour : MonoBehaviour
     // ======================================================
     // UNITY
     // ======================================================
-    private void OnEnable()
-    {
-        NPCDayNightCycle.OnTimeOfDayChanged += OnTimeOfDayChanged;
-    }
-
-    private void OnDisable()
-    {
-        NPCDayNightCycle.OnTimeOfDayChanged -= OnTimeOfDayChanged;
-    }
+    
 
     private void Start()
     {

@@ -37,7 +37,7 @@ public class DeskLetterUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEnd
     private bool isDragging = false;
     private bool isAnimating = false;
     public Sprite baseImage, backImage;
-    private Vector3 originalScale; // сохраняем исходный масштаб
+    private Vector3 originalScale;
 
     void OnEnable()
     {
@@ -74,7 +74,7 @@ public class DeskLetterUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEnd
     }
     void DelayedSetScale()
     {
-        originalScale = transform.localScale; // сохраняем исходный масштаб UI
+        originalScale = transform.localScale;
         if(Random.value > .6f)
         {
             InstaFlip();
@@ -113,7 +113,6 @@ public class DeskLetterUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEnd
         canvasGroup.alpha = 0.6f;
         canvasGroup.blocksRaycasts = false;
 
-        // Вернуть масштаб к исходному при начале drag
         rectTransform.DOKill();
         rectTransform.DOScale(originalScale, hoverDuration);
     }
@@ -181,10 +180,10 @@ public class DeskLetterUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEnd
                 if (mail != null)
                 {
                     if (receiverText != null)
-                        receiverText.text = LocalizationManager.Instance.Get(mail.reciever);
+                        receiverText.text = AdressConverter.Convert(mail.reciever);
 
                     if (addressText != null)
-                        addressText.text = LocalizationManager.Instance.Get(mail.adress);
+                        addressText.text = AdressConverter.Convert(mail.adress);
                 }
 
                 if (actionButton != null)

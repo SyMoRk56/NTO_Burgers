@@ -70,7 +70,7 @@ public class GameManager : MonoBehaviour
     public void OnStartGame()
     {
         print("ON start game");
-        FindFirstObjectByType<EnterToHouse>().DipFromBlack();
+        FindFirstObjectByType<Door>().DipFromBlack();
 
         isGameGoing = true;
         player = GetPlayer();

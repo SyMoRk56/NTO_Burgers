@@ -79,7 +79,7 @@ public static class AdressConverter
 {
     public static string Convert(string rawAdress)
     {
-        
+        Debug.Log("AdressConverter: " + rawAdress);
         if (rawAdress.Contains("NPC") || rawAdress.Contains("Tutorial")) return LocalizationManager.Instance.Get(rawAdress);
         string p1 = rawAdress.Split("_")[1]; //Post_A3 -> //A3
         var p2 = p1.ToList();
