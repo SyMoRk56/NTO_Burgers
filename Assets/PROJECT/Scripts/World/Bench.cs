@@ -243,7 +243,7 @@ public class Bench : MonoBehaviour
         sequenceActive = false;
     }
 
-    // ДОБАВЛЕНО: Метод для сброса камеры
+    // Метод для сброса камеры
     public void ResetCamera()
     {
         if (specialCamera != null)
@@ -264,7 +264,7 @@ public class Bench : MonoBehaviour
         Debug.Log("[skamia] Камера сброшена");
     }
 
-    // ДОБАВЛЕНО: Метод для полного сброса сцены
+    // Метод для полного сброса сцены
     public void ResetScene()
     {
         Debug.Log($"[skamia] Полный сброс сцены");
@@ -289,7 +289,7 @@ public class Bench : MonoBehaviour
         sequenceActive = false;
     }
 
-    // ДОБАВЛЕНО: Метод для остановки сцены без сброса объектов
+    // Метод для остановки сцены без сброса объектов
     public void StopScene()
     {
         Debug.Log($"[skamia] Остановка сцены (без сброса объектов)");
