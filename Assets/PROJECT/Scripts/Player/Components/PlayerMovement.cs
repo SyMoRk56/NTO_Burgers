@@ -24,7 +24,7 @@ public class PlayerMovement : MonoBehaviour
     public ParticleSystem idleVFX;
     public Transform vfxSpawnPoint;
 
-    private Rigidbody rb;
+    public Rigidbody rb;
     private CapsuleCollider col;
     public Vector2 moveInput;
     private Vector2 lookInput;
