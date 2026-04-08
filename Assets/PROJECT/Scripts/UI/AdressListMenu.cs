@@ -32,17 +32,18 @@ public class AdressListMenu : MonoBehaviour
 
         var allMails = PlayerMailInventory.Instance.carriedMails;
 
-        // Сначала сюжетные
-        var storyMails = allMails.Where(t => t.isStory);
+        // Берем только ОДНО первое сюжетное задание
+        var storyMails = allMails.Where(t => t.isStory).Take(1);
 
-        // Потом обычные
+        // Берем обычные задания
         var regularMails = allMails.Where(t => !t.isStory);
 
-        // Объединяем и только потом ограничиваем
+        // Объединяем (1 сюжетное + остальные обычные) и ограничиваем общим лимитом
         var mails = storyMails
             .Concat(regularMails)
             .Take(MAX_TASKS)
             .ToList();
+
 
         foreach (var task in mails)
         {

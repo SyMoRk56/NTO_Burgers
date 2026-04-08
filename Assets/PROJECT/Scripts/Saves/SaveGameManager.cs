@@ -4,6 +4,7 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
+using DG.Tweening;
 
 [System.Serializable]
 public class AutoSaveSlot
@@ -459,12 +460,18 @@ public class SaveGameManager : MonoBehaviour
         if (autosaveIndicator == null) { Debug.LogWarning("Autosave indicator is not assigned!"); return; }
         Debug.Log("Showing save indicator");
         autosaveIndicator.SetActive(true);
-        Invoke(nameof(DisableIndicator), 2.5f);
+        var ind = autosaveIndicator.GetComponent<RectTransform>();
+        
+        ind.DOMoveY(ind.position.y - 200, .5f).SetUpdate(true).SetEase(Ease.InOutSine).onComplete += DisableIndicator;
+        
+        
     }
 
     private void DisableIndicator()
     {
-        if (autosaveIndicator != null) { autosaveIndicator.SetActive(false); Debug.Log("Save indicator hidden"); }
+        var ind = autosaveIndicator.GetComponent<RectTransform>();
+        ind.DOMoveY(ind.position.y + 200, .5f).SetEase(Ease.InOutSine).SetDelay(2f).SetUpdate(true).onComplete += () => { autosaveIndicator.SetActive(false); };
+        
     }
 
     // ======================= DELETE SAVE =======================

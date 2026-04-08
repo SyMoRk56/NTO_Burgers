@@ -1,3 +1,4 @@
+using DG.Tweening;
 using System.Collections;
 using TMPro;
 using UnityEngine;
@@ -8,6 +9,7 @@ public class LetterPanel : MonoBehaviour
     public void ShowPanel(bool isFish)
     {
         transform.GetChild(0).gameObject.SetActive(true);
+        transform.GetChild(0).DOMoveY(transform.GetChild(0).position.y - 400, .5f).SetEase(Ease.InOutSine);
         StartCoroutine(ShowPanelC(isFish));
         Invoke(nameof(HidePanel), 3f);
     }
@@ -19,7 +21,8 @@ public class LetterPanel : MonoBehaviour
     }
     public void HidePanel()
     {
-        transform.GetChild(0).gameObject.SetActive(false);
+        transform.GetChild(0).DOMoveY(transform.GetChild(0).position.y + 400, .5f).SetEase(Ease.InOutSine).OnComplete(()=> transform.GetChild(0).gameObject.SetActive(false));
+        
 
     }
 }
