@@ -6,18 +6,22 @@ public class MailBox : MonoBehaviour, IInteractObject
 {
     public bool CheckDistance()
     {
+        // Проверка дистанции до почтового ящика
         return GetComponentInChildren<InteractionUI>().CheckDistance();
     }
+
     [Header("Mailbox Settings")]
-    public string mailboxAddress;
+    public string mailboxAddress; // Адрес этого ящика
 
     [Header("Dialogue Settings")]
-    public DialogueRunner dialogueRunner;
-    public bool triggerDialogueAfterDelivery = true;
-    public float dialogueDelay = 0.3f; // Задержка перед запуском диалога
-    public AudioSource mailSource;
+    public DialogueRunner dialogueRunner; // Система диалогов
+    public bool triggerDialogueAfterDelivery = true; // Запускать диалог после доставки
+    public float dialogueDelay = 0.3f; // Задержка перед диалогом
+    public AudioSource mailSource; // Звук получения письма
+
     public void Interact()
     {
+        // Проверка наличия инвентаря писем
         if (PlayerMailInventory.Instance == null)
         {
             Debug.LogError("PlayerMailInventory not found!");
@@ -27,27 +31,41 @@ public class MailBox : MonoBehaviour, IInteractObject
         Debug.Log($"=== ПРОВЕРКА ПОЧТОВОГО ЯЩИКА ===");
         Debug.Log($"Адрес ящика: '{mailboxAddress}'");
 
+        // Есть ли письмо для этого адреса
         if (PlayerMailInventory.Instance.HasMailForAddress(mailboxAddress))
         {
             var mail = PlayerMailInventory.Instance.GetMailForAddress(mailboxAddress);
+
+            // Если это задание на рыбу
             if (mail.recieverName.Contains("Fish_"))
             {
                 print("Fish task");
+
+                // Парсим название рыбы и количество
                 string fishNameCount = mail.recieverName.Replace("Fish_", "");
                 string fishName = fishNameCount.Split(" ")[0];
+
                 int count = 1;
                 try { count = int.Parse(fishNameCount.Split(" ")[1]); }
                 catch { count = 1; }
+
+                // Загружаем все рыбы
                 FishScriptableObject[] fishesScr = Resources.LoadAll<FishScriptableObject>("");
+
                 FishScriptableObject fish = null;
-                foreach(var f in fishesScr)
+
+                // Ищем нужную рыбу
+                foreach (var f in fishesScr)
                 {
-                    if(fishName == f.name)
+                    if (fishName == f.name)
                     {
-                        fish = f;   
+                        fish = f;
                     }
                 }
+
                 if (fish == null) return;
+
+                // Проверяем, хватает ли рыбы у игрока
                 if (FishInventory.instance.carriedFishes[fish] >= count)
                 {
                     print("Remove fish");
@@ -55,41 +73,51 @@ public class MailBox : MonoBehaviour, IInteractObject
                 }
                 else
                 {
+                    // Не хватает рыбы — выходим
                     return;
                 }
             }
+
+            // Доставляем письмо
             DeliverMail(mail);
-            
+
             Debug.Log($"✓ Найдено подходящее письмо: {mail.recieverName} {mail.recieverName.Contains("Fish_")}");
-            
+
+            // Показываем UI письма
             FindFirstObjectByType<LetterPanel>().ShowPanel(mail.recieverName.Contains("Fish_"));
+
+            // Даём награду
             PlayerManager.instance.Money += 1;
-            // Запускаем диалог после доставки С ЗАДЕРЖКОЙ
+
+            // Запускаем диалог после доставки
             if (triggerDialogueAfterDelivery && dialogueRunner != null)
             {
-                StartCoroutine(StartDialogueWithDelay(true)); // true для диалога с письмом
-                if(GetComponent<NPCBehaviour>() == null)
-                mailSource.Play();
+                StartCoroutine(StartDialogueWithDelay(true)); // диалог с письмом
 
+                // Проигрываем звук (если это не NPC)
+                if (GetComponent<NPCBehaviour>() == null)
+                    mailSource.Play();
             }
         }
         else
         {
             Debug.Log($"✗ Нет писем для адреса: '{mailboxAddress}'");
 
-            // Можно запустить обычный диалог, если нет письма
+            // Если писем нет — обычный диалог
             if (dialogueRunner != null)
             {
                 dialogueRunner.StartDialogue(false);
             }
         }
+
+        // Автосохранение
         SaveGameManager.Instance.SaveAuto(true);
     }
 
-    // Новый метод для запуска диалога с задержкой
+    // Запуск диалога с небольшой задержкой
     private IEnumerator StartDialogueWithDelay(bool isLetterDialogue)
     {
-        // Даем время закрыться предыдущему диалогу, если он был
+        // Даём время закрыться предыдущему диалогу
         yield return new WaitForSeconds(dialogueDelay);
 
         if (dialogueRunner != null)
@@ -104,6 +132,7 @@ public class MailBox : MonoBehaviour, IInteractObject
         Debug.Log($"Получатель: {mail.recieverName}");
         Debug.Log($"Адрес: {mail.adress}");
 
+        // Удаляем письмо из инвентаря
         PlayerMailInventory.Instance.RemoveMailFromInventory(mail.id);
 
         if (TaskManager.Instance != null)
@@ -123,11 +152,12 @@ public class MailBox : MonoBehaviour, IInteractObject
 
     public int InteractPriority()
     {
-        return 10;
+        return 10; // приоритет взаимодействия (выше обычного)
     }
 
     public bool CheckInteract()
     {
+        // Можно взаимодействовать если есть письмо или диалог
         return PlayerMailInventory.Instance.HasMailForAddress(mailboxAddress) || dialogueRunner != null;
     }
 

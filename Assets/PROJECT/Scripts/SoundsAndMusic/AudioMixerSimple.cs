@@ -5,49 +5,58 @@ using UnityEngine.Audio;
 
 public class MusicMixer : MonoBehaviour
 {
-    [Header("Generators")]
-    public MusicGenerator melodyGenerator;
-    public BassGenerator bassGenerator;
-    public RhythmGenerator rhythmGenerator;
-    public ChordGenerator chordGenerator;
+    [Header("Генераторы")]
+    public MusicGenerator melodyGenerator;   // генератор мелодии и пэдов
+    public BassGenerator bassGenerator;      // генератор баса
+    public RhythmGenerator rhythmGenerator;  // генератор ритма/барабанов
+    public ChordGenerator chordGenerator;    // генератор аккордов
 
-    [Header("Volumes")]
+    [Header("Громкость")]
     [Range(0f, 1f)] public float melodyVolume = 1f;
     [Range(0f, 1f)] public float bassVolume = 1f;
     [Range(0f, 1f)] public float chordsVolume = 1f;
     [Range(0f, 1f)] public float drumsVolume = 1f;
-    public AudioMixerGroup group;
+    public AudioMixerGroup group; // микшерная группа для всех аудиоисточников
 
-    private List<AudioSource> sources = new List<AudioSource>();
+    private List<AudioSource> sources = new List<AudioSource>(); // активные источники звука
     public bool playonstart = false;
+
     private void Start()
     {
-        if(playonstart) Play();
+        if (playonstart) Play(); // если включено, стартуем автоматически
     }
+
+    // Останавливает всю музыку
     public void Stop()
     {
         print("STOP");
-        StopAllCoroutines();
-        StopAll();
+        StopAllCoroutines(); // останавливаем все корутины
+        StopAll();           // удаляем все источники
     }
+
+    // Основной метод запуска музыки
     public void Play()
     {
-        StopAll(); // защитное
-        var pads = melodyGenerator.GeneratePads(); // ★ добавить
-        StartCoroutine(PlayPads(pads));            // ★ добавить
+        StopAll(); // защита от наложения старых источников
 
-        // --- Генерация ---
+        // --- Генерация пэдов ---
+        var pads = melodyGenerator.GeneratePads();
+        StartCoroutine(PlayPads(pads));
+
+        // --- Генерация основной музыки ---
         var melody = melodyGenerator.GenerateMelody();
         var bass = bassGenerator.GenerateBass();
         var drums = rhythmGenerator.GenerateRhythm();
         var chords = chordGenerator.GenerateChords();
 
-        // --- Создание аудиоисточников ---
+        // --- Проигрывание каждого слоя ---
         StartCoroutine(PlayMelody(melody));
         StartCoroutine(PlayBass(bass));
         StartCoroutine(PlayChords(chords));
         StartCoroutine(PlayDrums(drums));
     }
+
+    // Корутина для проигрывания пэдов
     private IEnumerator PlayPads(List<PadNote> pads)
     {
         foreach (var p in pads)
@@ -56,8 +65,7 @@ public class MusicMixer : MonoBehaviour
 
             GameObject go = new GameObject("PadNote");
             AudioSource src = go.AddComponent<AudioSource>();
-            //AudioReverbFilter f = go.AddComponent<AudioReverbFilter>();
-            //f.reverbPreset = AudioReverbPreset.StoneCorridor;
+
             src.playOnAwake = false;
             src.volume = melodyGenerator.padVolume;
             src.pitch = p.pitch;
@@ -70,11 +78,12 @@ public class MusicMixer : MonoBehaviour
                 src.clip = p.clip;
                 src.loop = false;
                 src.Play();
-                Destroy(go, p.length + 0.5f); // мягкое удаление
+                Destroy(go, p.length + 0.5f); // удаляем объект после завершения ноты
             }
         }
     }
 
+    // Удаление всех активных аудиоисточников
     public void StopAll()
     {
         foreach (var s in sources)
@@ -84,24 +93,22 @@ public class MusicMixer : MonoBehaviour
         sources.Clear();
     }
 
+    // Корутина для проигрывания мелодии
     private IEnumerator PlayMelody(List<Note> notes)
     {
         float startTime = Time.time;
 
         foreach (var n in notes)
         {
-            // Ждём, пока не придёт время этой ноты
             float targetTime = startTime + n.startTime;
 
             while (Time.time < targetTime)
                 yield return null;
 
-            // Создаём источник
             GameObject go = new GameObject("MelodyNote");
             go.transform.parent = transform;
             AudioSource src = go.AddComponent<AudioSource>();
-            //AudioReverbFilter f = go.AddComponent<AudioReverbFilter>();
-            //f.reverbPreset = AudioReverbPreset.StoneCorridor;
+
             src.outputAudioMixerGroup = group;
             src.playOnAwake = false;
             src.volume = melodyVolume;
@@ -117,10 +124,11 @@ public class MusicMixer : MonoBehaviour
         }
     }
 
-
+    // Корутина для проигрывания баса
     private IEnumerator PlayBass(List<BassNote> notes)
     {
-        yield break;
+        yield break; // временно отключено
+
         foreach (var n in notes)
         {
             GameObject go = new GameObject("BassNote");
@@ -142,9 +150,11 @@ public class MusicMixer : MonoBehaviour
         }
     }
 
+    // Корутина для проигрывания аккордов
     private IEnumerator PlayChords(List<ChordNote> notes)
     {
-        yield break;
+        yield break; // временно отключено
+
         foreach (var n in notes)
         {
             GameObject go = new GameObject("ChordNote");
@@ -166,9 +176,11 @@ public class MusicMixer : MonoBehaviour
         }
     }
 
+    // Корутина для проигрывания ударных
     private IEnumerator PlayDrums(List<DrumHit> hits)
     {
-        yield break;
+        yield break; // временно отключено
+
         foreach (var h in hits)
         {
             GameObject go = new GameObject("DrumHit");

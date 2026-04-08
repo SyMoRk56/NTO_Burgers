@@ -3,13 +3,16 @@ using System.IO;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+/// <summary>
+/// Основной менеджер игры: загрузка, автосейв, старт игры, возврат в меню
+/// </summary>
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
 
     private GameObject player;
-
     public bool isGameGoing = false;
+
     private Coroutine autosaveRoutine;
 
     public string pendingManualLoad = null;
@@ -18,12 +21,12 @@ public class GameManager : MonoBehaviour
 
     private void Awake()
     {
+        // Singleton
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
             return;
         }
-
         Instance = this;
         DontDestroyOnLoad(gameObject);
 
@@ -32,6 +35,7 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
+        // Загружаем настройки игры
         SettingsSaveManager.Instance.LoadSettings();
     }
 
@@ -40,26 +44,25 @@ public class GameManager : MonoBehaviour
         SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
+    /// <summary>
+    /// Срабатывает при загрузке любой сцены
+    /// </summary>
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         if (scene.name == "Game")
             StartCoroutine(DelayedGameStart());
     }
 
-    IEnumerator DelayedGameStart()
+    /// <summary>
+    /// Ждём инициализации игрока и данных
+    /// </summary>
+    private IEnumerator DelayedGameStart()
     {
-        print("GAME MANGER 1");
         yield return null;
-        while (GetPlayer() == null)
-            yield return null;
-        print("GAME MANGER 1");
 
-        while (PlayerSaveSystem.Instance == null)
-            yield return null;
-        print("GAME MANGER 1");
-
+        while (GetPlayer() == null) yield return null;
+        while (PlayerSaveSystem.Instance == null) yield return null;
         while (PlayerSaveSystem.Instance.GetData().position[1] == 0) yield return null;
-        print("GAME MANGER 1");
 
         yield return new WaitForEndOfFrame();
         yield return null;
@@ -67,15 +70,19 @@ public class GameManager : MonoBehaviour
         OnStartGame();
     }
 
+    /// <summary>
+    /// Старт игры после загрузки сцены
+    /// </summary>
     public void OnStartGame()
     {
-        print("ON start game");
-        FindFirstObjectByType<Door>().DipFromBlack();
+        // Закрываем черный экран двери
+        FindFirstObjectByType<Door>()?.DipFromBlack();
 
         isGameGoing = true;
         player = GetPlayer();
 
-        if (pendingManualLoad != null)
+        // Загрузка слота
+        if (!string.IsNullOrEmpty(pendingManualLoad))
         {
             SaveGameManager.Instance.LoadManual(pendingManualLoad);
             currentManualSlot = pendingManualLoad;
@@ -87,43 +94,57 @@ public class GameManager : MonoBehaviour
             currentManualSlot = null;
         }
 
+        // Запуск автосейва
         if (autosaveRoutine != null)
             StopCoroutine(autosaveRoutine);
-
         autosaveRoutine = StartCoroutine(Autosave());
-        FindFirstObjectByType<CheckForInHouse>().OnStartGame();
+
+        FindFirstObjectByType<CheckForInHouse>()?.OnStartGame();
+
         Time.timeScale = 1;
 
+        // Добавление стартового туториала
         Invoke(nameof(AddTutorial), 1f);
     }
 
-    void AddTutorial()
+    /// <summary>
+    /// Добавление писем и туториала на старте
+    /// </summary>
+    private void AddTutorial()
     {
         StartCoroutine(AddTut());
     }
-    IEnumerator AddTut()
+
+    private IEnumerator AddTut()
     {
         while (TaskManager.Instance == null) yield return null;
         while (TaskManager.Instance.tasks.Count == 0) yield return null;
-        if (PlayerMailInventory.Instance.GetSaveData().carriedMails.Count == 0 && !PlayerSaveSystem.Instance.GetData().hasBag)
+
+        if (PlayerMailInventory.Instance.GetSaveData().carriedMails.Count == 0 &&
+            !PlayerSaveSystem.Instance.GetData().hasBag)
         {
-            print(TaskManager.Instance.tasks.Count);
-            var len = TaskManager.Instance.tasks.Count - 1;
+            int len = TaskManager.Instance.tasks.Count - 1;
+
             for (int i = 0; i <= 2; i++)
             {
                 var task = TaskManager.Instance.tasks[len - i];
                 var mailItem = MailManager.Instance.GetMailById(task.id);
+
                 var enriched = new Task(
                     task.recieverName,
                     task.adress,
                     task.id,
                     mailItem != null && mailItem.isStory
                 );
+
                 PlayerMailInventory.Instance.AddMailToInventory(enriched);
             }
         }
     }
 
+    /// <summary>
+    /// Получение игрока
+    /// </summary>
     public GameObject GetPlayer()
     {
         if (player != null) return player;
@@ -131,6 +152,9 @@ public class GameManager : MonoBehaviour
         return player;
     }
 
+    /// <summary>
+    /// Автосейв каждые 30 секунд
+    /// </summary>
     private IEnumerator Autosave()
     {
         while (isGameGoing)
@@ -140,6 +164,9 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Выход в меню с сохранением
+    /// </summary>
     public void ExitToMenu()
     {
         SaveAndGoToMenu();
@@ -147,17 +174,17 @@ public class GameManager : MonoBehaviour
 
     public void SaveAndGoToMenu()
     {
-        string slot = currentManualSlot;
-
-        if (string.IsNullOrEmpty(slot))
+        if (string.IsNullOrEmpty(currentManualSlot))
         {
             Debug.LogWarning("Cannot exit to menu — no manual slot selected!");
             return;
         }
 
-        SaveGameManager.Instance.SaveManual(slot, false);
+        // Сохраняем выбранный слот
+        SaveGameManager.Instance.SaveManual(currentManualSlot, false);
 
-        AutoSaveSlot auto = new AutoSaveSlot { slotName = slot };
+        // Создаём файл автосейва
+        AutoSaveSlot auto = new AutoSaveSlot { slotName = currentManualSlot };
         string autosavePath = Path.Combine(
             Application.persistentDataPath,
             "Saves",
@@ -167,6 +194,7 @@ public class GameManager : MonoBehaviour
 
         Debug.Log("Saved slot + autosave. Returning to menu...");
 
+        // Останавливаем игру и автосейв
         isGameGoing = false;
         if (autosaveRoutine != null)
         {
@@ -177,6 +205,7 @@ public class GameManager : MonoBehaviour
         pendingManualLoad = null;
         loadAutoOnStart = true;
 
+        // Загружаем сцену меню
         SceneManager.LoadScene(0);
     }
 }
