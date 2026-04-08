@@ -4,8 +4,9 @@ public class BagPickup : MonoBehaviour, IInteractObject
 {
     public bool CheckDistance()
     {
-        return GetComponentInChildren<InteractionUI>().CheckDistance();
+        return GetComponentInChildren<InteractionUI>().CheckDistance(); // Проверка дистанции
     }
+
     [Header("Bag Settings")]
     public GameObject bagPrefab;
     public KeyCode pickupKey = KeyCode.E;
@@ -21,21 +22,26 @@ public class BagPickup : MonoBehaviour, IInteractObject
     private bool playerInRange = false;
     private GameObject player;
 
+    public Door h;
+
     void Start()
     {
-        player = GameObject.FindGameObjectWithTag("Player");
+        player = GameObject.FindGameObjectWithTag("Player"); // Ищем игрока
+
         if (player == null)
         {
             Debug.LogError("Player not found! Make sure player has 'Player' tag.");
         }
 
         if (pickupPrompt != null)
-            pickupPrompt.SetActive(false);
-        h.enabled = false;
+            pickupPrompt.SetActive(false); // Скрываем UI
+
+        h.enabled = false; // Отключаем дверь
     }
-    public Door h;
+
     void Update()
     {
+        // старый способ через кнопку (не используется)
         //if (playerInRange && Input.GetKeyDown(pickupKey))
         //{
         //    PickUpBag();
@@ -49,7 +55,7 @@ public class BagPickup : MonoBehaviour, IInteractObject
             playerInRange = true;
 
             if (pickupPrompt != null)
-                pickupPrompt.SetActive(true);
+                pickupPrompt.SetActive(true); // Показываем подсказку
         }
     }
 
@@ -60,7 +66,7 @@ public class BagPickup : MonoBehaviour, IInteractObject
             playerInRange = false;
 
             if (pickupPrompt != null)
-                pickupPrompt.SetActive(false);
+                pickupPrompt.SetActive(false); // Скрываем подсказку
         }
     }
 
@@ -68,6 +74,7 @@ public class BagPickup : MonoBehaviour, IInteractObject
     {
         if (player == null) return;
 
+        // Проверка: есть ли уже сумка
         if (HasBagAlready())
         {
             Debug.Log("You already have a bag!");
@@ -78,6 +85,7 @@ public class BagPickup : MonoBehaviour, IInteractObject
         {
             Transform parentTransform = player.transform;
 
+            // Поиск точки крепления
             if (!string.IsNullOrEmpty(attachToChildName))
             {
                 Transform childTransform = FindChildRecursive(player.transform, attachToChildName);
@@ -87,40 +95,48 @@ public class BagPickup : MonoBehaviour, IInteractObject
                 }
             }
 
+            // Создаём сумку
             GameObject bagInstance = Instantiate(bagPrefab, parentTransform);
             bagInstance.transform.localPosition = localPosition;
             bagInstance.transform.localEulerAngles = localRotation;
 
             Debug.Log("Bag picked up!");
+
             print("SetH Enabled " + PlayerMailInventory.Instance.carriedMails[0].id);
+
+            // Туториал логика
             if (PlayerMailInventory.Instance.carriedMails[0].id == "Tutorial_1")
             {
                 PlayerMailInventory.Instance.RemoveFirstMail();
                 TaskManager.Instance.RemoveTask("Tutorial_1");
             }
+
             try
             {
+                // Активация объекта на сцене
                 GameObject.Find("Table").transform.parent.GetChild(2).gameObject.SetActive(true);
             }
             catch
             {
-
             }
-            // Разблокируем Tab
+
+            // Разблокируем карту
             FindFirstObjectByType<WallMap>().canPickup = true;
-            TaskUI.Instance.SetHasBagUI(true);
+
+            TaskUI.Instance.SetHasBagUI(true); // Обновляем UI
 
             if (SaveGameManager.Instance != null)
-                SaveGameManager.Instance.SaveAuto(true);
+                SaveGameManager.Instance.SaveAuto(true); // Автосохранение
 
-            h.enabled = true;
+            h.enabled = true; // Включаем дверь
         }
 
-        Destroy(gameObject);
+        Destroy(gameObject); // Удаляем объект подбора
     }
 
     private Transform FindChildRecursive(Transform parent, string childName)
     {
+        // Рекурсивный поиск дочернего объекта
         foreach (Transform child in parent)
         {
             if (child.name == childName)
@@ -137,6 +153,7 @@ public class BagPickup : MonoBehaviour, IInteractObject
     {
         if (player == null) return false;
 
+        // Проверка наличия сумки у игрока
         foreach (Transform child in player.transform)
         {
             if (child.CompareTag("Bag"))
@@ -149,26 +166,24 @@ public class BagPickup : MonoBehaviour, IInteractObject
 
     public int InteractPriority()
     {
-        return 0;
+        return 0; // Приоритет взаимодействия
     }
 
     public bool CheckInteract()
     {
-        return !HasBagAlready();
+        return !HasBagAlready(); // Можно взаимодействовать если нет сумки
     }
 
     public void Interact()
     {
-        PickUpBag();
+        PickUpBag(); // Основное действие
     }
 
     public void OnBeginInteract()
     {
-
     }
 
     public void OnEndInteract(bool success)
     {
-
     }
 }

@@ -5,33 +5,39 @@ using UnityEngine.SceneManagement;
 
 public class PauseMenu : MonoBehaviour
 {
-    public bool PauseGame;
-    public GameObject pauseGameMenu;
+    public bool PauseGame; // Флаг паузы
+    public GameObject pauseGameMenu; // Главное меню паузы
+
+    public GameObject settings; // Панель настроек
+    public GameObject saveMenu; // Панель сохранений
+    public SavePanel[] saves; // Панели слотов сохранений
 
     private void Start()
     {
-        Setup();
+        Setup(); // Настройка меню сохранений при старте
     }
 
     void Update()
     {
+        // Если нажата Escape и игрок может двигаться
         if (Input.GetKeyDown(KeyCode.Escape) && PlayerManager.instance.CanMove)
         {
-            // ������� ��������� �������� �������
+            // Проверка активных диалогов
             if (IsAnyDialogueActive())
             {
-                return; // �� ��������� ����� �� ����� �������
+                return; // Если диалог активен — не открываем паузу
             }
 
-            // ����� ��������� UI �����
+            // Проверка UI стола
             if (IsInTableUI()) return;
 
+            // Переключение паузы
             if (PauseGame) Resume();
             else Pause();
         }
     }
 
-    // ����� ��� �������� �������� ��������
+    // Проверка активного диалога в сцене
     private bool IsAnyDialogueActive()
     {
         DialogueRunner[] dialogueRunners = FindObjectsOfType<DialogueRunner>();
@@ -45,7 +51,7 @@ public class PauseMenu : MonoBehaviour
         return false;
     }
 
-    // ����� ��� ��������, ��������� �� ����� � UI �����
+    // Проверка, открыт ли UI стола
     private bool IsInTableUI()
     {
         DeskUI[] desks = FindObjectsOfType<DeskUI>();
@@ -59,31 +65,35 @@ public class PauseMenu : MonoBehaviour
         return false;
     }
 
+    // Возврат из паузы
     public void Resume()
     {
-        pauseGameMenu.SetActive(false);
-        Cursor.lockState = CursorLockMode.Locked;
+        pauseGameMenu.SetActive(false); // Скрываем меню паузы
+        Cursor.lockState = CursorLockMode.Locked; // Блокируем курсор
         Cursor.visible = false;
-        Time.timeScale = 1f;
-        PauseGame = false;
-    }
-    public GameObject settings;
-    public void Pause()
-    {
-        pauseGameMenu.SetActive(true);
-        saves[0].transform.parent.parent.gameObject.SetActive(false);
-        settings.SetActive(false);
-        Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
-        Time.timeScale = 0f;
-        PauseGame = true;
+        Time.timeScale = 1f; // Возобновляем время
+        PauseGame = false; // Сбрасываем флаг
     }
 
+    // Включение паузы
+    public void Pause()
+    {
+        pauseGameMenu.SetActive(true); // Показываем меню паузы
+        saves[0].transform.parent.parent.gameObject.SetActive(false); // Скрываем слоты сохранений
+        settings.SetActive(false); // Скрываем настройки
+        Cursor.lockState = CursorLockMode.None; // Освобождаем курсор
+        Cursor.visible = true;
+        Time.timeScale = 0f; // Останавливаем время
+        PauseGame = true; // Устанавливаем флаг
+    }
+
+    // Возврат в главное меню
     public void ReturnToMainMenu()
     {
         GameManager.Instance.ExitToMenu();
     }
 
+    // Сохранение в указанный слот
     public void SaveToSlot(string slotName)
     {
         if (string.IsNullOrEmpty(slotName))
@@ -99,20 +109,19 @@ public class PauseMenu : MonoBehaviour
             Debug.Log("SaveToSlot: Slot does not exist, creating -> " + slotName);
         }
 
-        GameManager.Instance.currentManualSlot = slotName;
-        SaveGameManager.Instance.SaveAuto(true);
+        GameManager.Instance.currentManualSlot = slotName; // Устанавливаем текущий слот
+        SaveGameManager.Instance.SaveAuto(true); // Сохраняем игру
         Debug.Log("PauseMenu: Saved to slot -> " + slotName);
-        Setup();
+        Setup(); // Обновляем панели сохранений
     }
 
-    public GameObject saveMenu;
+    // Переключение видимости меню сохранений
     public void ToggleSaveMenu()
     {
         saveMenu.SetActive(!saveMenu.activeSelf);
     }
 
-    public SavePanel[] saves;
-
+    // Настройка меню сохранений (загрузка данных и скриншотов)
     void Setup()
     {
         var manualFolder = Path.Combine(Application.persistentDataPath, "Saves/manual");
@@ -123,9 +132,11 @@ public class PauseMenu : MonoBehaviour
             return;
         }
 
+        // Получаем все JSON файлы сохранений
         string[] jsonFiles = Directory.GetFiles(manualFolder, "*.json")
             .OrderBy(f => f)
             .ToArray();
+
         for (int i = 0; i < saves.Length; i++)
         {
             SavePanel panel = saves[i];
@@ -136,31 +147,32 @@ public class PauseMenu : MonoBehaviour
                 string nameNoExt = Path.GetFileNameWithoutExtension(jsonPath);
                 string screenshotPath = Path.Combine(manualFolder, nameNoExt + ".png");
 
-                panel.savePath = jsonPath;
-                panel.screenshotPath = screenshotPath;
+                panel.savePath = jsonPath; // Путь к json
+                panel.screenshotPath = screenshotPath; // Путь к скриншоту
 
-                FillPanel(panel);
+                FillPanel(panel); // Заполняем панель данными
             }
         }
     }
 
+    // Заполнение панели конкретного сохранения
     private void FillPanel(SavePanel panel)
     {
         string json = File.ReadAllText(panel.savePath);
         GameSaveData data = JsonUtility.FromJson<GameSaveData>(json);
 
-        panel.dateText.text = data.saveDate;
+        panel.dateText.text = data.saveDate; // Устанавливаем дату сохранения
 
-        LoadScreenshot(panel);
+        LoadScreenshot(panel); // Загружаем скриншот
     }
 
+    // Загрузка скриншота на панель
     private void LoadScreenshot(SavePanel panel)
     {
         if (!File.Exists(panel.screenshotPath))
         {
-            panel.screenshot.texture = null;
+            panel.screenshot.texture = null; // Если нет скриншота — скрываем
             panel.screenshot.CrossFadeAlpha(0, 0, false);
-
             return;
         }
 
@@ -168,7 +180,7 @@ public class PauseMenu : MonoBehaviour
 
         Texture2D tex = new Texture2D(2, 2);
         tex.LoadImage(bytes);
-        panel.screenshot.CrossFadeAlpha(1, 0, false);
+        panel.screenshot.CrossFadeAlpha(1, 0, false); // Показываем изображение
 
         panel.screenshot.texture = tex;
     }

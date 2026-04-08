@@ -69,7 +69,7 @@ public class InteractionUI : MonoBehaviour
 
     private void Update()
     {
-        if(needToLockRotation)transform.rotation = Quaternion.identity;
+        if (needToLockRotation) transform.rotation = Quaternion.identity;
         if (!playerInRange || player == null)
         {
             HideAllPopups();
@@ -97,7 +97,7 @@ public class InteractionUI : MonoBehaviour
             print("Inner" + innerRadius);
             ShowInnerPopup();
         }
-        else if(distance <= outerRadius || (distance <= innerRadius && !io.CheckInteract()))
+        else if (distance <= outerRadius || (distance <= innerRadius && !io.CheckInteract()))
         {
             print("Outer " + outerRadius);
             ShowOuterPopup();
@@ -137,8 +137,6 @@ public class InteractionUI : MonoBehaviour
         outerPopup.SetActive(false);
         innerPopup.SetActive(false);
     }
-
-    // ===== ÒÂÎÈ ÌÅÒÎÄÛ (ÑÎÕÐÀÍÅÍÛ) =====
 
     public void HidePopup()
     {
