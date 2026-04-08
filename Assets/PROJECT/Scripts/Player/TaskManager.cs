@@ -4,13 +4,16 @@ using UnityEngine;
 public class TaskManager : MonoBehaviour
 {
     public static TaskManager Instance;
-    public List<Task> tasks = new();
-    public MailCatalog mailCatalog;
+
+    public List<Task> tasks = new(); // Список текущих заданий
+    public MailCatalog mailCatalog; // Каталог писем по дням
 
     private void Awake()
     {
+        // Singleton
         if (Instance == this)
             Destroy(gameObject);
+
         if (Instance == null)
         {
             Instance = this;
@@ -23,16 +26,21 @@ public class TaskManager : MonoBehaviour
         }
 
         tasks = new();
+
         try
         {
+            // Загружаем задания на текущий день
             var m = mailCatalog.mails[PlayerManager.instance.Day];
             foreach (var n in m)
             {
-                if(!MailManager.Instance.IsDelivered(n.id))
-                tasks.Add(new Task(n.reciever, n.adress, n.id, n.isStory));
+                if (!MailManager.Instance.IsDelivered(n.id))
+                    tasks.Add(new Task(n.reciever, n.adress, n.id, n.isStory));
                 print(n.reciever);
             }
+
+            // Ставим последние задания в начало
             tasks.Reverse();
+
             foreach (var n in tasks)
             {
                 print(n.recieverName);
@@ -40,9 +48,10 @@ public class TaskManager : MonoBehaviour
         }
         catch
         {
-
+            // Игнорируем ошибки при загрузке
         }
     }
+
     public void UpdateDailyTasks()
     {
         tasks = new();
@@ -53,6 +62,7 @@ public class TaskManager : MonoBehaviour
         }
         tasks.Reverse();
     }
+
     public void AddTask(string recieverName, string adress, string id, bool isStory)
     {
         if (!tasks.Exists(task => task.id == id))
@@ -70,17 +80,22 @@ public class TaskManager : MonoBehaviour
     public void RemoveTask(string taskId)
     {
         string tutorialName = "Tutorial_4";
+
+        // Помечаем письмо как доставленное
         MailManager.Instance.SetDelivered(taskId, true);
+
         int removed = tasks.RemoveAll(task => task.id == taskId);
         print("RemoveTask");
+
         if (removed > 0)
         {
             Debug.Log($"✓ Задание с ID {taskId} удалено");
             Debug.Log($"  Осталось заданий: {tasks.Count}");
+
             if (tasks.Count == 0)
             {
-                AddTask(tutorialName, tutorialName, tutorialName, true); PlayerMailInventory.Instance.AddMailToInventory(new Task(tutorialName, tutorialName, tutorialName, true));
-
+                AddTask(tutorialName, tutorialName, tutorialName, true);
+                PlayerMailInventory.Instance.AddMailToInventory(new Task(tutorialName, tutorialName, tutorialName, true));
             }
         }
         else
@@ -88,8 +103,8 @@ public class TaskManager : MonoBehaviour
             Debug.LogWarning($"Задание с ID {taskId} не найдено для удаления!");
             if (tasks.Count == 0)
             {
-                AddTask(tutorialName, tutorialName, tutorialName, true); PlayerMailInventory.Instance.AddMailToInventory(new Task(tutorialName, tutorialName, tutorialName, true));
-
+                AddTask(tutorialName, tutorialName, tutorialName, true);
+                PlayerMailInventory.Instance.AddMailToInventory(new Task(tutorialName, tutorialName, tutorialName, true));
             }
         }
     }
