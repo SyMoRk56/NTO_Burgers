@@ -37,7 +37,7 @@ public class NPCController : MonoBehaviour
     private GameObject targetFish;       // Текущая цель — рыба, к которой движется НПЦ
     private bool isMovingToFish = false; 
     private Coroutine movementCoroutine; // Ссылка на корутину движения (чтобы можно было остановить)
-    private bool hasFishAttached = false
+    private bool hasFishAttached = false;
     private GameObject attachedFish;     
     private bool isCarryingFish = false;
     private List<GameObject> foundVFX = new List<GameObject>(); // Кэш: список найденных VFX-объектов при старте

@@ -6,7 +6,7 @@ public class CameraController : MonoBehaviour
     public Transform orientation;
     float xRotation, yRotation;
 
-
+    
     private void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;

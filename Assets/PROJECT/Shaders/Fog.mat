@@ -19,7 +19,7 @@ Material:
   m_CustomRenderQueue: -1
   stringTagMap: {}
   disabledShaderPasses: []
-  m_LockedProperties: 
+  m_LockedProperties: _FogColor
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
@@ -37,7 +37,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _FogDensity: 1
+    - _FogDensity: 0
     - _FogEnd: 470.8
     - _FogStart: 208
     - _Fullscreen_AlphaBlendOperation: 0

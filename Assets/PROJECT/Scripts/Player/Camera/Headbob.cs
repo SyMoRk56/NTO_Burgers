@@ -5,13 +5,13 @@ public class Headbob : MonoBehaviour
 {
     [SerializeField] private CinemachineCamera virtualCamera;
 
-    [SerializeField] private float amplitude = 0.15f;
-    [SerializeField] private float frequency = 1.0f;
-    [SerializeField] private float smoothTime = 0.1f;
+    [SerializeField] private float amplitude = 0.15f;   // Сила тряски
+    [SerializeField] private float frequency = 1.0f;    // Частота тряски
+    [SerializeField] private float smoothTime = 0.1f;   // Сглаживание
 
     [SerializeField] private Rigidbody characterController;
     [SerializeField] PlayerMovement movement;
-    [SerializeField] private float velocityThreshold = 0.1f;
+    [SerializeField] private float velocityThreshold = 0.1f; // Порог движения
 
     private CinemachineBasicMultiChannelPerlin noise;
     private float currentAmplitude;
@@ -22,7 +22,7 @@ public class Headbob : MonoBehaviour
 
     private void Start()
     {
-        
+        // Получаем компонент шума камеры
         if (virtualCamera != null)
         {
             noise = virtualCamera.GetComponent<CinemachineBasicMultiChannelPerlin>();
@@ -34,14 +34,28 @@ public class Headbob : MonoBehaviour
     {
         if (noise == null || characterController == null) return;
 
+        // Проверка движения и земли
         bool isMoving = characterController.linearVelocity.magnitude > velocityThreshold && movement.isGrounded;
 
         float targetAmplitude = isMoving ? amplitude * SettingsSaveSystem.Instance.GetData().shakeScale * 2 : 0f;
         float targetFrequency = isMoving ? frequency : 0f;
 
-        currentAmplitude = Mathf.SmoothDamp(currentAmplitude, targetAmplitude * (movement.isRunning ? movement.walkSpeed / movement.runSpeed : 1), ref currentVelocity, smoothTime);
-        currentFrequency = Mathf.SmoothDamp(currentFrequency, targetFrequency * (movement.isRunning ? movement.runSpeed/movement.walkSpeed : 1), ref currentVelocity, smoothTime);
+        // Сглаженное изменение тряски
+        currentAmplitude = Mathf.SmoothDamp(
+            currentAmplitude,
+            targetAmplitude * (movement.isRunning ? movement.walkSpeed / movement.runSpeed : 1),
+            ref currentVelocity,
+            smoothTime
+        );
 
+        currentFrequency = Mathf.SmoothDamp(
+            currentFrequency,
+            targetFrequency * (movement.isRunning ? movement.runSpeed / movement.walkSpeed : 1),
+            ref currentVelocity,
+            smoothTime
+        );
+
+        // Применяем к камере
         noise.AmplitudeGain = currentAmplitude;
         noise.FrequencyGain = currentFrequency;
     }

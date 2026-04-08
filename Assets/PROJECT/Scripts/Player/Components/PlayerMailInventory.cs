@@ -3,36 +3,40 @@ using System.Collections.Generic;
 
 public class PlayerMailInventory : MonoBehaviour
 {
-    public static PlayerMailInventory Instance;
+    public static PlayerMailInventory Instance; // Синглтон
 
-    public List<Task> carriedMails = new List<Task>();
+    public List<Task> carriedMails = new List<Task>(); // Список писем
 
-    public bool complitedMainLine;
+    public bool complitedMainLine; // Завершена ли основная линия
+
     private void Awake()
     {
+        // Инициализация синглтона
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject);
+            DontDestroyOnLoad(gameObject); // Не уничтожается между сценами
         }
         else
         {
-            Destroy(Instance.gameObject);
+            Destroy(Instance.gameObject); // Удаляем старый объект
             Instance = this;
         }
     }
 
     public bool LastMail(string id)
     {
-        return carriedMails[0].id == id;
+        return carriedMails[0].id == id; // Проверка первого письма
     }
 
     public void AddMailToInventory(Task task)
     {
+        // Добавляем, если такого нет
         if (!ContainsTask(task.id))
         {
             carriedMails.Add(task);
-            UpdateTaskUI();
+            UpdateTaskUI(); // Обновляем UI
+
             Debug.Log($"✓ Письмо добавлено в инвентарь: {task.recieverName} (ID: {task.id}) + {task.isStory}");
             Debug.Log($"  Всего писем в инвентаре: {carriedMails.Count}");
         }
@@ -44,7 +48,9 @@ public class PlayerMailInventory : MonoBehaviour
 
     public void RemoveMailFromInventory(string taskId)
     {
+        // Удаляем по ID
         int removed = carriedMails.RemoveAll(task => task.id == taskId);
+
         if (removed > 0)
         {
             UpdateTaskUI();
@@ -59,6 +65,7 @@ public class PlayerMailInventory : MonoBehaviour
 
     public bool HasMailForAddress(string address)
     {
+        // Проверка наличия письма по адресу
         bool hasMail = carriedMails.Exists(task =>
             NormalizeAddress(task.adress) == NormalizeAddress(address));
 
@@ -68,6 +75,7 @@ public class PlayerMailInventory : MonoBehaviour
 
     public Task GetMailForAddress(string address)
     {
+        // Поиск письма по адресу
         var mail = carriedMails.Find(task =>
             NormalizeAddress(task.adress) == NormalizeAddress(address));
 
@@ -83,11 +91,11 @@ public class PlayerMailInventory : MonoBehaviour
         return mail;
     }
 
-    public List<Task> GetAllMails() => new List<Task>(carriedMails);
+    public List<Task> GetAllMails() => new List<Task>(carriedMails); // Копия списка
 
     public bool ContainsTask(string taskId)
     {
-        return carriedMails.Exists(task => task.id == taskId);
+        return carriedMails.Exists(task => task.id == taskId); // Проверка по ID
     }
 
     private void UpdateTaskUI()
@@ -96,21 +104,25 @@ public class PlayerMailInventory : MonoBehaviour
         Debug.Log($"[UpdateTaskUI] TaskUI.Instance: {TaskUI.Instance}");
         Debug.Log($"[UpdateTaskUI] AdressListMenu.Instance: {AdressListMenu.Instance}");
 
+        // Обновление текущего задания
         if (carriedMails.Count > 0 && TaskUI.Instance != null)
         {
             var remain = 0;
+
             foreach (var task in carriedMails)
             {
                 if (!task.adress.Contains("Tutorial"))
-                    remain++;
+                    remain++; // Считаем обычные задания
             }
+
             TaskUI.Instance.SetTask(carriedMails[0], remain);
         }
         else if (TaskUI.Instance != null)
         {
-            TaskUI.Instance.HideTask();
+            TaskUI.Instance.HideTask(); // Скрываем UI
         }
 
+        // Обновление списка адресов
         if (AdressListMenu.Instance != null)
         {
             Debug.Log("[UpdateTaskUI] вызываем AdressListMenu.UpdateTasks()");
@@ -128,16 +140,18 @@ public class PlayerMailInventory : MonoBehaviour
         if (string.IsNullOrEmpty(address))
             return "";
 
+        // Убираем пробелы, точки, запятые и приводим к нижнему регистру
         return address.Trim().ToLower().Replace(" ", "").Replace(".", "").Replace(",", "");
     }
 
     public Task GetNextMailForDelivery()
     {
-        return carriedMails.Count > 0 ? carriedMails[0] : default(Task);
+        return carriedMails.Count > 0 ? carriedMails[0] : default(Task); // Первое письмо
     }
 
     public bool TryGetNextMailForDelivery(out Task nextMail)
     {
+        // Безопасное получение первого письма
         if (carriedMails.Count > 0)
         {
             nextMail = carriedMails[0];
@@ -154,14 +168,15 @@ public class PlayerMailInventory : MonoBehaviour
     {
         if (carriedMails.Count > 0)
         {
+            // Проверка на сюжетное письмо
             if (carriedMails[0].recieverName == "NPC_koala")
             {
                 complitedMainLine = true;
                 PlayerManager.instance.SetThunder(false);
             }
-            carriedMails.RemoveAt(0);
+
+            carriedMails.RemoveAt(0); // Удаляем первое письмо
             UpdateTaskUI();
-            
         }
     }
 
@@ -169,7 +184,7 @@ public class PlayerMailInventory : MonoBehaviour
     public InventorySaveData GetSaveData()
     {
         var saveData = new InventorySaveData();
-        saveData.carriedMails = new List<Task>(carriedMails);
+        saveData.carriedMails = new List<Task>(carriedMails); // Копируем список
         return saveData;
     }
 
@@ -186,7 +201,7 @@ public class PlayerMailInventory : MonoBehaviour
     // ДОБАВЛЕНО: Метод для очистки инвентаря
     public void ClearInventory()
     {
-        carriedMails.Clear();
+        carriedMails.Clear(); // Очищаем список
         Debug.Log("Инвентарь писем очищен");
 
         // Обновляем UI
@@ -201,6 +216,7 @@ public class PlayerMailInventory : MonoBehaviour
     {
         Debug.Log($"=== ИНВЕНТАРЬ ИГРОКА ===");
         Debug.Log($"Всего писем в инвентаре: {carriedMails.Count}");
+
         foreach (var mail in carriedMails)
         {
             Debug.Log($" - {mail.recieverName} -> {mail.adress} (ID: {mail.id})");
