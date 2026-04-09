@@ -13,12 +13,12 @@ MonoBehaviour:
   m_Name: just_dio_2
   m_EditorClassIdentifier: Assembly-CSharp::DialogueScriptableObject
   phrases:
-  - dia_weather_squirrel_phr_1
+  - dia_weather_hamster_phr_1
   voiceOver:
   - {fileID: 8300000, guid: 3e3b17d533bc73140a30c3a28defc1db, type: 3}
   choices:
-  - text: dia_weather_ans_enthusiastic
+  - text: dia_weather_raccoon_phr_1
     nextDialogueIndex: 1
-  - text: dia_weather_ans_not_noticed
+  - text: dia_weather_raccoon_phr_2
     nextDialogueIndex: 4
   emotions: 

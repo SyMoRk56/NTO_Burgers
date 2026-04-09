@@ -13,10 +13,12 @@ MonoBehaviour:
   m_Name: coala0 1
   m_EditorClassIdentifier: Assembly-CSharp::DialogueScriptableObject
   phrases:
-  - short_dia_2_teach_others
+  - short_dia_2_how_share
   voiceOver:
   - {fileID: 8300000, guid: 3e3b17d533bc73140a30c3a28defc1db, type: 3}
   choices:
-  - text: short_dia_2_cooking_classes
+  - text: short_dia_2_celebration
+    nextDialogueIndex: 2
+  - text: short_dia_2_daily_treat
     nextDialogueIndex: 3
   emotions: 
