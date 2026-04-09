@@ -3,9 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-/// <summary>
-/// Все шаги туториала
-/// </summary>
 public enum TutorialStep
 {
     None = 0,
@@ -17,9 +14,6 @@ public enum TutorialStep
     Completed = 99
 }
 
-/// <summary>
-/// Менеджер туториала
-/// </summary>
 public class TutorialManager : MonoBehaviour
 {
     public static TutorialManager Instance { get; private set; }
@@ -35,45 +29,37 @@ public class TutorialManager : MonoBehaviour
     public string tutorialMailId = "tutorial_letter_01";
     public string tutorialRecipientNpcId = "npc_grandma";
 
-    [Header("Диалог")]
-    public DialogueRunner dialogueRunner; // Runner для запуска диалогов
-
     public TutorialStep CurrentStep { get; private set; } = TutorialStep.None;
 
     private bool tutorialCompleted = false;
     private TutorialNPC spawnedNPC;
 
-    private void Awake()
+    void Awake()
     {
-        // Singleton
         if (Instance == null) Instance = this;
         else { Destroy(gameObject); return; }
 
         SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
-    private void OnDestroy()
+    void OnDestroy()
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
-    /// <summary>
-    /// Сбрасываем туториал при загрузке главного меню
-    /// </summary>
+    // ✅ Ловим загрузку сцен
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        if (scene.name == "menu")
+        if (scene.name == "menu") // ⚠️ Укажи точное имя сцены
         {
             ResetTutorial();
         }
     }
 
-    /// <summary>
-    /// Полный сброс прогресса
-    /// </summary>
+    // ✅ Полный сброс
     private void ResetTutorial()
     {
-        Debug.Log("[Tutorial] Сброс туториала");
+        Debug.Log("[Tutorial] Сброс туториала (загрузка Menu)");
 
         tutorialCompleted = false;
         CurrentStep = TutorialStep.WaitForNPCSpawn;
@@ -87,16 +73,14 @@ public class TutorialManager : MonoBehaviour
         hintUI?.HideAll();
     }
 
-    /// <summary>
-    /// Запуск туториала для нового слота
-    /// </summary>
     public void StartTutorialForNewSlot()
     {
         tutorialCompleted = false;
 
+        Debug.Log("[Tutorial] Новый слот — запускаем слайдшоу");
+
         SetStep(TutorialStep.WaitForNPCSpawn);
 
-        // Показываем слайдшоу туториала
         if (TutorialSlideshowUI.Instance != null)
             TutorialSlideshowUI.Instance.ShowSlideshow();
         else
@@ -105,28 +89,22 @@ public class TutorialManager : MonoBehaviour
 
     public void OnSlideshowFinished()
     {
-        Debug.Log("[Tutorial] Слайдшоу завершено");
+        Debug.Log("[Tutorial] Слайдшоу завершено — ждём выхода из дома");
     }
 
-    /// <summary>
-    /// Игрок вышел из дома — спавним NPC
-    /// </summary>
     public void OnPlayerExitedHouse()
     {
         if (CurrentStep != TutorialStep.WaitForNPCSpawn) return;
 
         Debug.Log("[Tutorial] Игрок вышел из дома — спавним NPC");
 
-        spawnedNPC = SpawnNPC();
-        spawnedNPC?.OnPlayerExitedHouse();
+        var npc = FindFirstObjectByType<TutorialNPC>();
+        npc?.OnPlayerExitedHouse();
 
         SetStep(TutorialStep.WaitForNPCApproach);
         SaveProgress();
     }
 
-    /// <summary>
-    /// NPC подошёл к игроку — показываем подсказку об инвентаре
-    /// </summary>
     public void OnNPCReachedPlayer()
     {
         if (CurrentStep != TutorialStep.WaitForNPCApproach) return;
@@ -137,9 +115,6 @@ public class TutorialManager : MonoBehaviour
         SaveProgress();
     }
 
-    /// <summary>
-    /// Игрок открыл инвентарь
-    /// </summary>
     public void OnInventoryOpened()
     {
         if (CurrentStep != TutorialStep.WaitForInventoryOpen) return;
@@ -152,9 +127,6 @@ public class TutorialManager : MonoBehaviour
         SaveProgress();
     }
 
-    /// <summary>
-    /// Игрок прочитал письмо — запускаем диалог
-    /// </summary>
     public void OnTutorialLetterRead()
     {
         if (CurrentStep != TutorialStep.WaitForLetterRead) return;
@@ -164,36 +136,15 @@ public class TutorialManager : MonoBehaviour
         SetStep(TutorialStep.WaitForDelivery);
         hintUI?.ShowDeliveryHint(tutorialRecipientNpcId);
 
-        // Запуск диалога с письмом
-        if (dialogueRunner != null)
-            StartCoroutine(StartDialogueWithDelay(true));
-
         SaveProgress();
     }
 
-    /// <summary>
-    /// Игрок доставил письмо — завершение туториала
-    /// </summary>
     public void OnTutorialLetterDelivered()
     {
         if (CurrentStep != TutorialStep.WaitForDelivery) return;
 
         Debug.Log("[Tutorial] Письмо доставлено — туториал завершён!");
         CompleteTutorial();
-
-        // Запуск финального диалога
-        if (dialogueRunner != null)
-            StartCoroutine(StartDialogueWithDelay(false));
-    }
-
-    /// <summary>
-    /// Отложенный запуск диалога
-    /// </summary>
-    private IEnumerator StartDialogueWithDelay(bool isLetterDialogue)
-    {
-        yield return new WaitForSeconds(0.3f);
-
-        dialogueRunner?.StartDialogue(isLetterDialogue);
     }
 
     private void CompleteTutorial()
@@ -206,9 +157,6 @@ public class TutorialManager : MonoBehaviour
         SaveProgress();
     }
 
-    /// <summary>
-    /// Загружаем прогресс туториала
-    /// </summary>
     public void LoadTutorialState(TutorialSaveData saveData)
     {
         if (saveData == null) return;
@@ -242,23 +190,42 @@ public class TutorialManager : MonoBehaviour
         switch (step)
         {
             case TutorialStep.WaitForNPCSpawn:
+                break;
+
             case TutorialStep.WaitForNPCApproach:
+                break;
+
             case TutorialStep.WaitForInventoryOpen:
+                break;
+
             case TutorialStep.WaitForLetterRead:
+                break;
+
             case TutorialStep.WaitForDelivery:
                 break;
         }
     }
 
-    /// <summary>
-    /// Спавн NPC туториала
-    /// </summary>
     private TutorialNPC SpawnNPC()
     {
-        if (tutorialNPCPrefab == null || npcSpawnPoint == null) return null;
+        if (tutorialNPCPrefab == null)
+        {
+            Debug.LogError("[Tutorial] tutorialNPCPrefab не назначен!");
+            return null;
+        }
+
+        if (npcSpawnPoint == null)
+        {
+            Debug.LogError("[Tutorial] npcSpawnPoint не назначен!");
+            return null;
+        }
 
         GameObject obj = Instantiate(tutorialNPCPrefab, npcSpawnPoint.position, Quaternion.identity);
         spawnedNPC = obj.GetComponent<TutorialNPC>();
+
+        if (spawnedNPC == null)
+            Debug.LogError("[Tutorial] На NPC нет TutorialNPC!");
+
         return spawnedNPC;
     }
 
