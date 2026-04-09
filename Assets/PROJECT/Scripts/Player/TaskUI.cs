@@ -151,8 +151,23 @@ public class TaskUI : MonoBehaviour
 
         PlayerManager.instance.CanMove = true; // возвращаем управление
         isOpen = false;
-        GameObject.Find("Almanach").SetActive(false);
-        GameObject.Find("Manual").SetActive(false);
+        try
+        {
+            GameObject.Find("Almanach").SetActive(false);
+
+        }
+        catch
+        {
+
+        }
+        try
+        {
+            GameObject.Find("Manual").SetActive(false);
+        }
+        catch
+        {
+
+        }
         if (AdressListMenu.Instance != null)
             AdressListMenu.Instance.SetVisible(true);
 

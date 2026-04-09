@@ -19,17 +19,24 @@ public class OnButtonClickSound : MonoBehaviour
         instance = this;
         DontDestroyOnLoad(gameObject);
         SceneManager.sceneLoaded += OnSceneLoaded;
+        foreach (var buttin in FindObjectsByType<Button>(FindObjectsSortMode.None))
+        {
+            print("ADD LISTENER");
+            buttin.onClick.AddListener(() => PlaySound());
+        }
     }
-
+   
     private void OnSceneLoaded(Scene arg0, LoadSceneMode arg1)
     {
         foreach(var buttin in FindObjectsByType<Button>(FindObjectsSortMode.None))
         {
+            print("ADD LISTENER");
             buttin.onClick.AddListener(()=>PlaySound());
         }
     }
     void PlaySound()
     {
+        Debug.Log("Button sound");
         source.PlayOneShot(clip);
     }
 }

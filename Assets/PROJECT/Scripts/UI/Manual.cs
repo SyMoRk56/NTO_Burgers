@@ -1,6 +1,7 @@
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
+using static Unity.VisualScripting.Member;
 
 public class Manual : MonoBehaviour
 {
@@ -21,6 +22,7 @@ public class Manual : MonoBehaviour
     private int currentSpread = 0;
     private bool isAnimating = false;
     public float duration = 0.5f;
+    public AudioSource source;
 
     // ¬спомогательное свойство дл€ получени€ текущего активного массива
     private Sprite[] CurrentPageSet
@@ -47,6 +49,10 @@ public class Manual : MonoBehaviour
             pageIndex = 1;
         }
         if (PlayerManager.instance.Day > 0) pageIndex = 2;
+        leftPageImage.GetComponent<Button>().onClick.RemoveAllListeners();
+        leftPageImage.GetComponent<Button>().onClick.AddListener(() => NextSpread());
+        rightPageImage.GetComponent<Button>().onClick.RemoveAllListeners();
+        rightPageImage.GetComponent<Button>().onClick.AddListener(() => PreviousSpread());
     }
     void Start()
     {
@@ -69,6 +75,7 @@ public class Manual : MonoBehaviour
         var pages = CurrentPageSet; // Ѕерем нужный массив
         if (isAnimating || currentSpread + 2 >= pages.Length) return;
         isAnimating = true;
+        source.Play();
 
         flipPageImageR.sprite = pages[currentSpread + 1];
         flipPageImageR.rectTransform.localScale = Vector3.one;
@@ -115,6 +122,7 @@ public class Manual : MonoBehaviour
             leftPageImage.sprite = pages[currentSpread - 2];
             leftPageImage.gameObject.SetActive(true);
         }
+        source.Play();
 
         Sequence seq = DOTween.Sequence();
         seq.Append(flipPageImageL.rectTransform.DOScaleX(0, duration / 2).SetEase(Ease.InQuad));

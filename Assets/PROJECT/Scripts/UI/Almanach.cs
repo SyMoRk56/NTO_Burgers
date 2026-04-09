@@ -16,19 +16,22 @@ public class Almanach : MonoBehaviour
     private int currentSpread = 0;
     private bool isAnimating = false;
     public float duration = 0.5f;
-
+    public AudioSource source;
     void Start()
     {
         flipPageImageR.gameObject.SetActive(false);
         flipPageImageL.gameObject.SetActive(false);
         UpdateSpread();
+        leftPageImage.GetComponent<Button>().onClick.RemoveAllListeners();
+        leftPageImage.GetComponent<Button>().onClick.AddListener(() => NextSpread());
+        rightPageImage.GetComponent<Button>().onClick.RemoveAllListeners();
+        rightPageImage.GetComponent<Button>().onClick.AddListener(() => PreviousSpread());
     }
 
     public void NextSpread()
     {
         if (isAnimating || currentSpread + 2 >= pages.Length) return;
         isAnimating = true;
-
         // 1. Подготовка: ставим на правую анимированную страницу текущий правый спрайт
         flipPageImageR.sprite = pages[currentSpread + 1];
         flipPageImageR.rectTransform.localScale = Vector3.one;
@@ -51,6 +54,7 @@ public class Almanach : MonoBehaviour
         seq.Append(flipPageImageR.rectTransform.DOScaleX(0, duration / 2).SetEase(Ease.InQuad));
         // Разворачиваем левую
         seq.Append(flipPageImageL.rectTransform.DOScaleX(1, duration / 2).SetEase(Ease.OutQuad));
+        source.Play();
 
         seq.OnComplete(() => {
             currentSpread += 2;
@@ -65,7 +69,7 @@ public class Almanach : MonoBehaviour
     {
         if (isAnimating || currentSpread - 2 < 0) return;
         isAnimating = true;
-
+        
         // 1. ПОДГОТОВКА СТРАНИЦ
         // Анимированная ЛЕВАЯ (та, что сейчас видна)
         flipPageImageL.sprite = pages[currentSpread];
@@ -90,6 +94,7 @@ public class Almanach : MonoBehaviour
 
         // Схлопываем текущую левую к центру
         seq.Append(flipPageImageL.rectTransform.DOScaleX(0, duration / 2).SetEase(Ease.InQuad));
+        source.Play();
 
         // Разворачиваем новую правую из центра
         seq.Append(flipPageImageR.rectTransform.DOScaleX(1, duration / 2).SetEase(Ease.OutQuad));
