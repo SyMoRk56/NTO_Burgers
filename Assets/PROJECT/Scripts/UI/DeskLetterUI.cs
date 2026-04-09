@@ -84,8 +84,8 @@ public class DeskLetterUI : MonoBehaviour,
     {
         baseImage = frontSide;
         backImage = backSide;
-        this.receiverText.text = recieverText;
-        this.addressText.text = addressText;
+        this.receiverText.text = AdressConverter.Convert(recieverText);
+        this.addressText.text = AdressConverter.Convert(addressText);
         GetComponent<Image>().sprite = isFlipped ? backImage : baseImage;
     }
 
@@ -173,9 +173,9 @@ public class DeskLetterUI : MonoBehaviour,
         if (mail != null)
         {
             if (receiverText != null)
-                receiverText.text = LocalizationManager.Instance.Get(mail.reciever);
+                receiverText.text = AdressConverter.Convert(mail.reciever);
             if (addressText != null)
-                addressText.text = LocalizationManager.Instance.Get(mail.adress);
+                addressText.text = AdressConverter.Convert(mail.adress);
         }
     }
 
@@ -247,7 +247,7 @@ public class DeskLetterUI : MonoBehaviour,
     {
         if (PlayerMailInventory.Instance != null)
         {
-            Task newTask = new Task(recipient, address, id);
+            Task newTask = new Task(recipient, address, id, isStory);
             PlayerMailInventory.Instance.AddMailToInventory(newTask);
             Destroy(gameObject);
         }

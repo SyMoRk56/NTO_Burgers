@@ -192,8 +192,7 @@ public class NPCBehaviour : MonoBehaviour
         animator.SetBool(moveAnimParameter, true);
 
         while (agent.pathPending ||
-               agent.remainingDistance > agent.stoppingDistance ||
-               agent.velocity.sqrMagnitude > 0.01f)
+               agent.pathPending || agent.remainingDistance > agent.stoppingDistance)
         {
             // прибиваем Y таргета к высоте NPC — без этого на неровном рельефе
             // агент думает что не добрался до точки из-за разницы высот
@@ -202,6 +201,9 @@ public class NPCBehaviour : MonoBehaviour
             if (dialogueActive || isNight)
             {
                 Stop();
+                animator.SetBool(moveAnimParameter, false);
+
+                animator.SetTrigger("isIdle");
                 yield break; // выходим, не дожидаясь точки назначения
             }
 
@@ -210,7 +212,7 @@ public class NPCBehaviour : MonoBehaviour
 
         animator.SetBool(moveAnimParameter, false);
         animator.SetTrigger("isIdle");
-
+        print("Set isIdle" + name);
         // случайная пауза перед следующим действием, чтобы NPC не выглядел как робот
         float r = Random.Range(waitRange.x, waitRange.y);
         yield return new WaitForSeconds(r);
