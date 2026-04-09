@@ -174,6 +174,12 @@ public class PlayerMovement : MonoBehaviour
             }
         }
 
+        Vector3 horizontalVelocity = rb.linearVelocity;
+        horizontalVelocity.y = 0; // только по земле
+        if (horizontalVelocity.sqrMagnitude > 0.01f) // если игрок реально движется
+        {
+            PlayerMetrics.Instance?.RegisterStep();
+        }
         jumpRequested = false;
     }
 
@@ -349,6 +355,7 @@ public class PlayerMovement : MonoBehaviour
                 if (clip != null)
                 {
                     step.PlayOneShot(clip, 1f);
+                    PlayerMetrics.Instance?.RegisterStep();
                     return;
                 }
             }
@@ -356,6 +363,7 @@ public class PlayerMovement : MonoBehaviour
 
         if (defaultStepSound != null)
             step.PlayOneShot(defaultStepSound, 1f);
+        PlayerMetrics.Instance?.RegisterStep();
     }
 
     private bool TryGetGroundCollider(out Collider col)

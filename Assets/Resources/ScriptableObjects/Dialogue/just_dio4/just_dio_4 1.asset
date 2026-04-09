@@ -13,10 +13,12 @@ MonoBehaviour:
   m_Name: just_dio_4 1
   m_EditorClassIdentifier: Assembly-CSharp::DialogueScriptableObject
   phrases:
-  - dia_day_squirrel_phr_2_invite
+  - dia_peace_hamster_1_1
   voiceOver:
   - {fileID: 8300000, guid: 3e3b17d533bc73140a30c3a28defc1db, type: 3}
   choices:
-  - text: dia_day_ans_cant
+  - text: dia_peace_squirrel_1_1_1
     nextDialogueIndex: 2
+  - text: dia_peace_squirrel_1_1_2
+    nextDialogueIndex: 3
   emotions: 

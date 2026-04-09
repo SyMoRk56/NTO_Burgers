@@ -119,8 +119,7 @@ public class TaskUI : MonoBehaviour
     {
         if (bagButton != null)
             bagButton.gameObject.SetActive(value);
-    }
-
+    }   
     public void OpenPanel()
     {
         if (PlayerManager.instance == null) return;
@@ -130,16 +129,18 @@ public class TaskUI : MonoBehaviour
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
 
-        PlayerManager.instance.CanMove = false; // блокируем движение
+        PlayerManager.instance.CanMove = false;
         isOpen = true;
+
+        // ── Логика метрики ─────────────
+        PlayerMetrics.Instance?.RegisterTabOpen();
 
         if (AdressListMenu.Instance != null)
             AdressListMenu.Instance.SetVisible(false);
 
         if (TaskPanel.Instance != null)
-            TaskPanel.Instance.Populate(); // заполняем список
+            TaskPanel.Instance.Populate();
     }
-
     public void ClosePanel()
     {
         if (PlayerManager.instance == null) return;
@@ -151,8 +152,17 @@ public class TaskUI : MonoBehaviour
 
         PlayerManager.instance.CanMove = true; // возвращаем управление
         isOpen = false;
-        GameObject.Find("Almanach").SetActive(false);
-        GameObject.Find("Manual").SetActive(false);
+        try
+        {
+            GameObject.Find("Almanach").SetActive(false);
+
+        }
+        catch { }
+        try
+        {
+            GameObject.Find("Manual").SetActive(false);
+        }
+        catch { }
         if (AdressListMenu.Instance != null)
             AdressListMenu.Instance.SetVisible(true);
 

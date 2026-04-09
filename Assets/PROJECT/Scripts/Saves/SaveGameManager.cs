@@ -388,6 +388,16 @@ public class SaveGameManager : MonoBehaviour
         catch { data.tutorialData = new TutorialSaveData(); }
         // ────────────────────────────────────────────────────
 
+        try
+        {
+            if (PlayerMetrics.Instance != null)
+                data.metricsData = PlayerMetrics.Instance.GetSaveData();
+        }
+        catch
+        {
+            data.metricsData = new MetricsData();
+        }
+
         data.saveDate = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
         data.timestamp = System.DateTimeOffset.Now.ToUnixTimeSeconds();
         data.playtime = Time.time;
@@ -452,6 +462,12 @@ public class SaveGameManager : MonoBehaviour
         else
             Debug.LogWarning("[SaveGame] LoadFromJson: TutorialManager.Instance == NULL");
         // ────────────────────────────────────────────────────
+
+        if (PlayerMetrics.Instance != null)
+            PlayerMetrics.Instance.LoadData(data.metricsData);
+
+        if (PlayerMetrics.Instance != null)
+            PlayerMetrics.Instance.LoadData(data.metricsData);
     }
 
     // ======================= UI =======================

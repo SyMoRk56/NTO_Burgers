@@ -22,7 +22,7 @@ public class GameManager : MonoBehaviour
     private void Awake()
     {
         // Singleton
-        if (Instance != null && Instance != this)
+        if (Instance != null && Instance != this) // не в класическом понимании
         {
             Destroy(gameObject);
             return;

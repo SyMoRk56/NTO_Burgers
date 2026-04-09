@@ -209,7 +209,7 @@ public class DialogueRunner : MonoBehaviour, IInteractObject
                 StartCoroutine(DelayedTreeSequence());
         }
 
-        if (phrase.Contains("Скамейка") || phrase.Contains("скамейка") || phrase.Contains("bench"))
+        if (phrase.Contains("Скамейка") || phrase.Contains("скамейку") || phrase.Contains("bench"))
         {
             Debug.Log($"DialogueRunner: Найдена фраза про скамейку: '{phrase}'");
             if (benchScene != null)
