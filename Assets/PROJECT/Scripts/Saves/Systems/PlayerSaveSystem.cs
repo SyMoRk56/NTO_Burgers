@@ -39,6 +39,8 @@ public class PlayerSaveSystem : MonoBehaviour
             },
             money = PlayerManager.instance.Money,
             day = PlayerManager.instance.Day,
+            dist = PlayerManager.instance.dist,
+            tabOpenCount = PlayerManager.instance.tabOpenCount,
             hasBag = HasBag(),
             complitedMainIslandMainTasks = PlayerMailInventory.Instance.complitedMainLine,
         };
@@ -65,6 +67,8 @@ public class PlayerSaveSystem : MonoBehaviour
         }
         PlayerManager.instance.Money = data.money;
         PlayerManager.instance.Day = data.day;
+        PlayerManager.instance.tabOpenCount = data.tabOpenCount;
+        PlayerManager.instance.dist = data.dist;
         if (data.hasBag && !HasBag())
         {
             CreateBagForPlayer();

@@ -31,7 +31,7 @@ public class TaskPanel : MonoBehaviour
         // Singleton
         Instance = this;
     }
-
+    
     private void Update()
     {
         if (!gameObject.activeSelf) return;
@@ -69,6 +69,7 @@ public class TaskPanel : MonoBehaviour
         // Скрываем первый элемент списка адресов и кнопку сумки
         FindFirstObjectByType<AdressListMenu>().transform.GetChild(0).gameObject.SetActive(false);
         TaskUI.Instance.bagButton.gameObject.SetActive(false);
+        PlayerManager.instance.tabOpenCount++;
     }
 
     private void OnDisable()

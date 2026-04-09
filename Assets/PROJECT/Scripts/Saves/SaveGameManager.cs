@@ -445,7 +445,8 @@ public class SaveGameManager : MonoBehaviour
             player.GetComponent<Rigidbody>().MovePosition(new Vector3(floatArray[0], floatArray[1], floatArray[2]));
         PlayerManager.instance.Money = data.playerData.money;
         PlayerManager.instance.Day = data.playerData.day;
-
+        PlayerManager.instance.dist = data.playerData.dist;
+        PlayerManager.instance.dist = data.playerData.dist;
         // ── Туториал: восстанавливаем стадию ────────────────
         if (TutorialManager.Instance != null)
             TutorialManager.Instance.LoadTutorialState(data.tutorialData);

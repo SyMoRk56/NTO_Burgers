@@ -8,14 +8,17 @@ public class PlayerManager : MonoBehaviour
 {
     public GameObject cinemachineCamera;
 
-    bool canMove = true; // Флаг движения
-    public static PlayerManager instance; // Синглтон
+    bool canMove = true;
+    public static PlayerManager instance;
 
-    public Transform hand; // Точка для предметов в руке
+    public Transform hand;
 
     int money, day;
 
-    // День с автосохранением и обновлением задач
+    // Переменные для дистанции
+    public float dist;
+    private Vector3 lastPosition; // Позиция в прошлом кадре
+    public int tabOpenCount;
     public int Day
     {
         get { return day; }
@@ -27,7 +30,6 @@ public class PlayerManager : MonoBehaviour
                 SaveGameManager.Instance.SaveAuto(true);
                 TaskManager.Instance.UpdateDailyTasks();
             }
-            ;
         }
     }
 
@@ -37,7 +39,6 @@ public class PlayerManager : MonoBehaviour
         set { money = value; }
     }
 
-    // Управление возможностью движения
     public bool CanMove
     {
         get { return canMove; }
@@ -57,17 +58,18 @@ public class PlayerManager : MonoBehaviour
 
     private void Awake()
     {
-        instance = this; // Инициализация синглтона
+        instance = this;
     }
 
     private void Start()
     {
-        SetupComponents(); // Поиск компонентов
+        SetupComponents();
+        // Инициализируем стартовую позицию, чтобы не было скачка при старте
+        lastPosition = transform.position;
     }
 
     public void ShowCursor(bool show)
     {
-        // Управление курсором
         Cursor.lockState = show ? CursorLockMode.None : CursorLockMode.Locked;
         Cursor.visible = show;
     }
@@ -82,7 +84,6 @@ public class PlayerManager : MonoBehaviour
 
     void SetupComponents()
     {
-        // Получаем ссылки на компоненты
         cameraSwitcher = FindFirstObjectByType<CameraSwitcher>();
         playerFace = GetComponentInChildren<Face>();
         playerAnimations = GetComponentInChildren<PlayerAnimations>();
@@ -96,6 +97,19 @@ public class PlayerManager : MonoBehaviour
 
     private void Update()
     {
+        CalculateDistance();
+    }
+
+    void CalculateDistance()
+    {
+        // Вычисляем расстояние между текущей и прошлой позицией
+        float moveStep = Vector3.Distance(transform.position, lastPosition);
+
+        // Добавляем к общему счетчику
+        dist += moveStep;
+
+        // Обновляем "прошлую" позицию для следующего кадра
+        lastPosition = transform.position;
     }
 
     [SerializeField] FullScreenPassRendererFeature feature;
@@ -103,31 +117,24 @@ public class PlayerManager : MonoBehaviour
     public void SetThunder(bool set)
     {
         print("Set Thunder");
-        StartCoroutine(ThunderMaterialInOut(set)); // Запуск эффекта
+        StartCoroutine(ThunderMaterialInOut(set));
     }
 
     IEnumerator ThunderMaterialInOut(bool IN)
     {
         var mat = feature.passMaterial;
-
         float start = mat.GetFloat("_FogDensity");
         float target = IN ? 1 : 0f;
-
         float t = 0f;
 
-        // Плавное изменение параметра
         while (t < 3)
         {
             t += Time.deltaTime;
-
             float value = Mathf.Lerp(start, target, t / 3);
             mat.SetFloat("_FogDensity", value);
-
-            print("SET " + value);
-
             yield return null;
         }
 
-        mat.SetFloat("_FogDensity", target); // Финальное значение
+        mat.SetFloat("_FogDensity", target);
     }
 }
