@@ -10,7 +10,7 @@ public class MailManager : MonoBehaviour
     [Header("Mail Order (ScriptableObject)")]
     public MailCatalog catalog;
 
-    private Dictionary<string, bool> state = new();
+    public Dictionary<string, bool> state = new();
 
     private void Awake()
     {

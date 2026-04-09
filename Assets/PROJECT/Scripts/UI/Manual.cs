@@ -69,7 +69,21 @@ public class Manual : MonoBehaviour
         currentSpread = 0;
         UpdateSpread();
     }
-
+    private void FixedUpdate()
+    {
+        int mailcount = 0;
+        foreach (var m in MailManager.Instance.state)
+        {
+            if (m.Value)
+            {
+                mailcount += 1;
+            }
+        }
+        if (mailcount > 0)
+        {
+            pageIndex = 1;
+        }
+    }
     public void NextSpread()
     {
         var pages = CurrentPageSet; // Берем нужный массив
